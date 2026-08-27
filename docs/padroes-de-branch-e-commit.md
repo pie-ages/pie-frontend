@@ -33,15 +33,15 @@ docs/atualizar-readme
 Use Conventional Commits:
 
 ```text
-<tipo>(<escopo>): <descricao no imperativo> [LINEAR-ID]
+<tipo>: <descricao no imperativo>
 ```
 
 Exemplos:
 
 ```text
-feat/adiciona tela de perfil
-fix/corrige validação do login
-refactor/centraliza tratamento de erros
+feat: adiciona tela de perfil
+fix: corrige validação do login
+refactor: centraliza tratamento de erros
 ```
 
 - Escreva a descrição em letras minúsculas, no imperativo e sem ponto final.
