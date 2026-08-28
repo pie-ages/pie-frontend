@@ -51,5 +51,5 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
           BRANCH=${GITHUB_REF#refs/heads/}
-          git remote add gitlab https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@tools.ages.pucrs.br/<GITLAB_PATH>.git
+          git remote add gitlab https://${GITLAB_USERNAME}:${GITLAB_TOKEN}@tools.ages.pucrs.br/2026-2/2lm-4lm/pi-consultoria-de-imagem/frontend.git
           git push --force gitlab ${BRANCH}:${BRANCH}
