@@ -25,12 +25,12 @@ export function AuthButton({
   return (
     <Pressable
       disabled={isDisabled}
-      style={({ pressed }) => [
+      style={(state) => [
         styles.button,
         variant === 'primary' ? styles.primary : styles.secondary,
-        pressed && !isDisabled && styles.pressed,
+        state.pressed && !isDisabled && styles.pressed,
         isDisabled && styles.disabled,
-        typeof style === 'function' ? style({ pressed }) : style,
+        typeof style === 'function' ? style(state) : style,
       ]}
       {...props}
     >
