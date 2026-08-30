@@ -1,12 +1,80 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
+import { useState } from 'react';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { Keyframe, Easing } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import classes from './animated-icon.module.css';
 const DURATION = 300;
+const SPLASH_DURATION = 600;
+
+// Keep close to app.json's splash `imageWidth` (220) on phone-sized screens so the
+// handoff from the native splash to this overlay doesn't visibly jump, while still
+// shrinking on very small screens and capping out on tablets/desktop.
+const MIN_SPLASH_IMAGE_SIZE = 150;
+const MAX_SPLASH_IMAGE_SIZE = 280;
+
+function getSplashImageSize(windowWidth: number) {
+  return Math.min(Math.max(windowWidth * 0.55, MIN_SPLASH_IMAGE_SIZE), MAX_SPLASH_IMAGE_SIZE);
+}
 
 export function AnimatedSplashOverlay() {
-  return null;
+  const [animate, setAnimate] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const { width } = useWindowDimensions();
+  const imageSize = getSplashImageSize(width);
+
+  if (!visible) return null;
+
+  const splashKeyframe = new Keyframe({
+    0: {
+      transform: [{ scale: 1 }],
+      opacity: 1,
+    },
+    20: {
+      opacity: 1,
+    },
+    70: {
+      opacity: 0,
+      easing: Easing.elastic(0.7),
+    },
+    100: {
+      opacity: 0,
+      transform: [{ scale: 1 }],
+      easing: Easing.elastic(0.7),
+    },
+  });
+
+  const image = (
+    <Image
+      style={{ width: imageSize, height: imageSize }}
+      source={require('@/assets/images/logo_pie.png')}
+    />
+  );
+
+  return animate ? (
+    <Animated.View
+      entering={splashKeyframe.duration(SPLASH_DURATION).withCallback((finished) => {
+        'worklet';
+        if (finished) {
+          scheduleOnRN(setVisible, false);
+        }
+      })}
+      style={styles.splashOverlay}>
+      {image}
+    </Animated.View>
+  ) : (
+    <View
+      onLayout={() => {
+        SplashScreen.hideAsync().finally(() => {
+          setAnimate(true);
+        });
+      }}
+      style={styles.splashOverlay}>
+      {image}
+    </View>
+  );
 }
 
 const keyframe = new Keyframe({
@@ -104,5 +172,12 @@ const styles = StyleSheet.create({
     width: 128,
     height: 128,
     position: 'absolute',
+  },
+  splashOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
   },
 });
