@@ -134,8 +134,11 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
+    width: '100%',
+    maxWidth: 430,
+    alignSelf: 'center',
     paddingHorizontal: 16,
-    paddingTop: 32,
+    paddingTop: 24,
     paddingBottom: 20,
   },
 
@@ -147,18 +150,19 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: '500',
     color: '#1F1F1F',
-    marginBottom: 28,
+    marginBottom: 20,
   },
 
   logo: {
-    width: 210,
-    height: 210,
+    width: '55%',
+    maxWidth: 210,
+    aspectRatio: 1,
   },
 
   bottomContent: {
     flex: 1,
     justifyContent: 'flex-end',
-    marginTop: 32,
+    marginTop: 24,
   },
 
   form: {
@@ -178,7 +182,7 @@ const styles = StyleSheet.create({
   },
 
   actions: {
-    marginTop: 48,
+    marginTop: 32,
     gap: 12,
   },
 });

@@ -33,10 +33,22 @@ export function useLoginForm() {
       console.log('Login payload:', payload);
 
       await new Promise((resolve) => setTimeout(resolve, 700));
-    } finally {
+    }  catch {
+      setError('Não foi possível entrar. Tente novamente.');
+    }  finally {
       setIsLoading(false);
     }
   }
 
-  return { email, password, isPasswordVisible, isLoading, error, setEmail, setPassword, togglePasswordVisibility, handleLogin, };
+  return { 
+    email, 
+    password, 
+    isPasswordVisible, 
+    isLoading, 
+    error, 
+    setEmail, 
+    setPassword, 
+    togglePasswordVisibility, 
+    handleLogin, 
+  };
 }
