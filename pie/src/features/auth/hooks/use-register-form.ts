@@ -1,22 +1,32 @@
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
+
+import type { RegisterPayload } from '@/features/auth/types/register';
+
+// simua temporariamente a chamada que futuramente será realizada pela API
+async function simulateRegisterRequest(_payload: RegisterPayload) {
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+}
 
 export function useRegisterForm() {
-  const router = useRouter();
-
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const togglePasswordVisibility = () => setIsPasswordVisible((prev) => !prev);
-  const toggleConfirmPasswordVisibility = () => setIsConfirmPasswordVisible((prev) => !prev);
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible((previousValue) => !previousValue);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setIsConfirmPasswordVisible((previousValue) => !previousValue);
+  };
 
   const validateForm = () => {
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
@@ -25,7 +35,8 @@ export function useRegisterForm() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+
+    if (!emailRegex.test(email.trim())) {
       setError('Por favor, insira um e-mail válido.');
       return false;
     }
@@ -44,21 +55,28 @@ export function useRegisterForm() {
     return true;
   };
 
-  const handleRegister = async () => {
-    if (!validateForm()) return;
+  const handleRegister = async (): Promise<boolean> => {
+    if (!validateForm()) {
+      return false;
+    }
 
     setIsLoading(true);
 
     try {
-      // Futura integração com a API:
-      // await api.post('/users', { name, email, password });
+      const payload: RegisterPayload = {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      };
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Futuramente:
+      // await api.post('/users', payload);
+      await simulateRegisterRequest(payload);
 
-      // Redireciona para o login após criar a conta
-      router.replace('/login');
-    } catch (err) {
+      return true;
+    } catch {
       setError('Ocorreu um erro ao criar a conta. Tente novamente.');
+      return false;
     } finally {
       setIsLoading(false);
     }

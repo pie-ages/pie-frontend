@@ -1,9 +1,7 @@
-import React from 'react';
-import { SymbolView } from 'expo-symbols';
+import { useRouter } from 'expo-router';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,9 +11,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/features/auth/components/auth-button';
 import { AuthInput } from '@/features/auth/components/auth-input';
+import { AuthPasswordInput } from '@/features/auth/components/auth-password-input';
 import { useRegisterForm } from '@/features/auth/hooks/use-register-form';
 
-export function SignUpScreen() {
+export function RegisterScreen() {
+  const router = useRouter();
+
   const {
     name,
     email,
@@ -33,6 +34,14 @@ export function SignUpScreen() {
     toggleConfirmPasswordVisibility,
     handleRegister,
   } = useRegisterForm();
+
+  async function handleCreateAccount() {
+    const success = await handleRegister();
+
+    if (success) {
+      router.replace('/login');
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -67,60 +76,22 @@ export function SignUpScreen() {
                 onChangeText={setEmail}
               />
 
-              <AuthInput
+              <AuthPasswordInput
                 label="Senha"
                 placeholder="**********"
-                secureTextEntry={!isPasswordVisible}
                 value={password}
                 onChangeText={setPassword}
-                rightElement={
-                  <Pressable
-                    onPress={togglePasswordVisibility}
-                    style={styles.passwordVisibilityButton}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'
-                    }
-                  >
-                    <SymbolView
-                      name={{
-                        ios: isPasswordVisible ? 'eye.slash' : 'eye',
-                        android: isPasswordVisible ? 'visibility_off' : 'visibility',
-                        web: isPasswordVisible ? 'visibility_off' : 'visibility',
-                      }}
-                      size={22}
-                      tintColor="#777777"
-                    />
-                  </Pressable>
-                }
+                isVisible={isPasswordVisible}
+                onToggleVisibility={togglePasswordVisibility}
               />
 
-              <AuthInput
+              <AuthPasswordInput
                 label="Confirmar Senha"
                 placeholder="**********"
-                secureTextEntry={!isConfirmPasswordVisible}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                rightElement={
-                  <Pressable
-                    onPress={toggleConfirmPasswordVisibility}
-                    style={styles.passwordVisibilityButton}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      isConfirmPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'
-                    }
-                  >
-                    <SymbolView
-                      name={{
-                        ios: isConfirmPasswordVisible ? 'eye.slash' : 'eye',
-                        android: isConfirmPasswordVisible ? 'visibility_off' : 'visibility',
-                        web: isConfirmPasswordVisible ? 'visibility_off' : 'visibility',
-                      }}
-                      size={22}
-                      tintColor="#777777"
-                    />
-                  </Pressable>
-                }
+                isVisible={isConfirmPasswordVisible}
+                onToggleVisibility={toggleConfirmPasswordVisibility}
               />
 
               {error && <Text style={styles.errorText}>{error}</Text>}
@@ -129,7 +100,7 @@ export function SignUpScreen() {
             <View style={styles.actions}>
               <AuthButton
                 title="Criar conta"
-                onPress={handleRegister}
+                onPress={handleCreateAccount}
                 isLoading={isLoading}
               />
             </View>
@@ -171,13 +142,6 @@ const styles = StyleSheet.create({
 
   form: {
     gap: 18,
-  },
-
-  passwordVisibilityButton: {
-    height: '100%',
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   errorText: {
