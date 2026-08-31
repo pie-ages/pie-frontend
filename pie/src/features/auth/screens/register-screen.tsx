@@ -1,3 +1,4 @@
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router';
 import {
   KeyboardAvoidingView,
@@ -45,6 +46,11 @@ export function RegisterScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <Image
+        source={require('@/assets/images/background-register.png')}
+        style={styles.backgroundLogo}
+        contentFit="contain"
+      />
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -115,6 +121,13 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#FFFFFF',
+  },
+
+  backgroundLogo: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    opacity: 0.08,
   },
 
   keyboardView: {
