@@ -1,3 +1,4 @@
+import Feather from '@expo/vector-icons/Feather';
 import { Image } from 'expo-image';
 import { SymbolView } from 'expo-symbols';
 import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
@@ -50,8 +51,9 @@ export default function TabTwoScreen() {
                 <ThemedText type="link">Expo documentation</ThemedText>
                 <SymbolView
                   tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
+                  name="arrow.up.right.square"
                   size={12}
+                  fallback={<Feather name="external-link" size={12} color={theme.text} />}
                 />
               </ThemedView>
             </Pressable>
