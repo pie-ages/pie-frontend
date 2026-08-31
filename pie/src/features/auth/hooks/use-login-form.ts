@@ -40,5 +40,15 @@ export function useLoginForm() {
     }
   }
 
-  return { email, password, isPasswordVisible, isLoading, error, setEmail, setPassword, togglePasswordVisibility, handleLogin, };
+  return { 
+    email, 
+    password, 
+    isPasswordVisible, 
+    isLoading, 
+    error, 
+    setEmail, 
+    setPassword, 
+    togglePasswordVisibility, 
+    handleLogin, 
+  };
 }
