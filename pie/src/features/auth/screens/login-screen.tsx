@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     maxWidth: 430,
     alignSelf: 'center',
     paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingTop: 32,
     paddingBottom: 20,
   },
 
@@ -133,18 +133,16 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: '500',
     color: '#1F1F1F',
-    marginBottom: 20,
+    marginBottom: 38,
   },
 
   logo: {
-    width: '55%',
-    maxWidth: 210,
+    width: '71%',
+    maxWidth: 280,
     aspectRatio: 1,
   },
 
   bottomContent: {
-    flex: 1,
-    justifyContent: 'flex-end',
     marginTop: 24,
   },
 
