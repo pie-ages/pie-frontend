@@ -1,3 +1,4 @@
+import Feather from '@expo/vector-icons/Feather';
 import { SymbolView } from 'expo-symbols';
 import {
     Pressable,
@@ -32,13 +33,12 @@ export function AuthPasswordInput({
           accessibilityLabel={isVisible ? 'Ocultar senha' : 'Mostrar senha'}
         >
           <SymbolView
-            name={{
-              ios: isVisible ? 'eye.slash' : 'eye',
-              android: isVisible ? 'visibility_off' : 'visibility',
-              web: isVisible ? 'visibility_off' : 'visibility',
-            }}
+            name={isVisible ? 'eye.slash' : 'eye'}
             size={22}
             tintColor="#777777"
+            fallback={
+              <Feather name={isVisible ? 'eye-off' : 'eye'} size={22} color="#777777" />
+            }
           />
         </Pressable>
       }
