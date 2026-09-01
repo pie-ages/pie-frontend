@@ -1,9 +1,8 @@
 import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
+import { useRouter } from 'expo-router';
 import {
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,9 +12,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/features/auth/components/auth-button';
 import { AuthInput } from '@/features/auth/components/auth-input';
+import { AuthPasswordInput } from '@/features/auth/components/auth-password-input';
 import { useLoginForm } from '@/features/auth/hooks/use-login-form';
 
 export function LoginScreen() {
+  const router = useRouter();
+
   const {
     email,
     password,
@@ -27,6 +29,10 @@ export function LoginScreen() {
     togglePasswordVisibility,
     handleLogin,
   } = useLoginForm();
+
+  function handleCreateAccount() {
+    router.push('/register');
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -62,36 +68,13 @@ export function LoginScreen() {
                   onChangeText={setEmail}
                 />
 
-                <AuthInput
+                <AuthPasswordInput
                   label="Senha"
                   placeholder="**********"
-                  secureTextEntry={!isPasswordVisible}
                   value={password}
                   onChangeText={setPassword}
-                  rightElement={
-                    <Pressable
-                      onPress={togglePasswordVisibility}
-                      style={styles.passwordVisibilityButton}
-                      accessibilityRole="button"
-                      accessibilityLabel={
-                        isPasswordVisible ? 'Ocultar senha' : 'Mostrar senha'
-                      }
-                    >
-                      <SymbolView
-                        name={{
-                          ios: isPasswordVisible ? 'eye.slash' : 'eye',
-                          android: isPasswordVisible
-                            ? 'visibility_off'
-                            : 'visibility',
-                          web: isPasswordVisible
-                            ? 'visibility_off'
-                            : 'visibility',
-                        }}
-                        size={22}
-                        tintColor="#777777"
-                      />
-                    </Pressable>
-                  }
+                  isVisible={isPasswordVisible}
+                  onToggleVisibility={togglePasswordVisibility}
                 />
 
                 {error && <Text style={styles.errorText}>{error}</Text>}
@@ -104,10 +87,10 @@ export function LoginScreen() {
                   isLoading={isLoading}
                 />
 
-                {/* Navegação para /register será habilitada após integração da tela de cadastro. */}
                 <AuthButton
                   title="Criar Conta"
                   variant="secondary"
+                  onPress={handleCreateAccount}
                 />
               </View>
             </View>
@@ -167,13 +150,6 @@ const styles = StyleSheet.create({
 
   form: {
     gap: 14,
-  },
-
-  passwordVisibilityButton: {
-    height: '100%',
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   errorText: {
