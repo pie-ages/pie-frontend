@@ -8,6 +8,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import classes from './animated-icon.module.css';
 const DURATION = 300;
 const SPLASH_DURATION = 600;
+const HOLD_DURATION = 3000;
 
 // Keep close to app.json's splash `imageWidth` (220) on phone-sized screens so the
 // handoff from the native splash to this overlay doesn't visibly jump, while still
@@ -49,7 +50,7 @@ export function AnimatedSplashOverlay() {
   const image = (
     <Image
       style={{ width: imageSize, height: imageSize }}
-      source={require('@/assets/images/logo_pie.png')}
+      source={require('@/assets/images/pie-logo.png')}
     />
   );
 
@@ -68,7 +69,7 @@ export function AnimatedSplashOverlay() {
     <View
       onLayout={() => {
         SplashScreen.hideAsync().finally(() => {
-          setAnimate(true);
+          setTimeout(() => setAnimate(true), HOLD_DURATION);
         });
       }}
       style={styles.splashOverlay}>

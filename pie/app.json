@@ -29,7 +29,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#FFFFFF",
-          "image": "./assets/images/logo_pie.png",
+          "image": "./assets/images/pie-logo.png",
           "imageWidth": 220
         }
       ]
