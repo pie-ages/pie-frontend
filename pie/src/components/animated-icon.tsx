@@ -1,16 +1,29 @@
 import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
 import { useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { Easing, Keyframe } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
+const HOLD_DURATION = 3000;
+
+// Keep close to app.json's splash `imageWidth` (220) on phone-sized screens so the
+// handoff from the native splash to this overlay doesn't visibly jump, while still
+// shrinking on very small screens and capping out on tablets/web.
+const MIN_SPLASH_IMAGE_SIZE = 150;
+const MAX_SPLASH_IMAGE_SIZE = 280;
+
+function getSplashImageSize(windowWidth: number) {
+  return Math.min(Math.max(windowWidth * 0.55, MIN_SPLASH_IMAGE_SIZE), MAX_SPLASH_IMAGE_SIZE);
+}
 
 export function AnimatedSplashOverlay() {
   const [animate, setAnimate] = useState(false);
   const [visible, setVisible] = useState(true);
+  const { width } = useWindowDimensions();
+  const imageSize = getSplashImageSize(width);
 
   if (!visible) return null;
 
@@ -33,7 +46,12 @@ export function AnimatedSplashOverlay() {
     },
   });
 
-  const image = <Image style={styles.image} source={require('@/assets/images/expo-logo.png')} />;
+  const image = (
+    <Image
+      style={{ width: imageSize, height: imageSize }}
+      source={require('@/assets/images/pie-logo.png')}
+    />
+  );
 
   return animate ? (
     <Animated.View
@@ -50,7 +68,7 @@ export function AnimatedSplashOverlay() {
     <View
       onLayout={() => {
         SplashScreen.hideAsync().finally(() => {
-          setAnimate(true);
+          setTimeout(() => setAnimate(true), HOLD_DURATION);
         });
       }}
       style={styles.splashOverlay}>
@@ -140,7 +158,7 @@ const styles = StyleSheet.create({
   },
   splashOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#208AEF',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
