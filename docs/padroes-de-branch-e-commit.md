@@ -18,15 +18,15 @@ bugfix/PIE-456-corrigir-validacao-de-login
 docs/atualizar-readme
 ```
 
-| Tipo | Quando usar |
-| --- | --- |
-| `feature` | Nova funcionalidade. |
-| `bugfix` | Correção de defeito. |
+| Tipo       | Quando usar                                            |
+| ---------- | ------------------------------------------------------ |
+| `feature`  | Nova funcionalidade.                                   |
+| `bugfix`   | Correção de defeito.                                   |
 | `refactor` | Melhoria interna sem alterar o comportamento esperado. |
-| `docs` | Criação ou atualização de documentação. |
-| `chore` | Manutenção, dependências ou configuração. |
-| `deploy` | Preparação ou ajuste de publicação. |
-| `infra` | Infraestrutura, CI/CD ou serviços de suporte. |
+| `docs`     | Criação ou atualização de documentação.                |
+| `chore`    | Manutenção, dependências ou configuração.              |
+| `deploy`   | Preparação ou ajuste de publicação.                    |
+| `infra`    | Infraestrutura, CI/CD ou serviços de suporte.          |
 
 ## Commits
 
