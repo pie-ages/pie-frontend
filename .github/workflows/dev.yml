@@ -14,9 +14,6 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    defaults:
-      run:
-        working-directory: pie
 
     steps:
       - name: Checkout
@@ -27,7 +24,6 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: pie/package-lock.json
 
       - name: Install dependencies
         run: npm install
