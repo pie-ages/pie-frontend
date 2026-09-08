@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
-import { MOCK_FILTERS } from '@/features/vitrine/mocks/products';
+import { MOCK_FILTERS } from '@/features/storefront/mocks/products';
 
-type VitrineFilterChipsProps = {
+type StorefrontFilterChipsProps = {
   onSelect?: (filterId: string) => void;
 };
 
-export function VitrineFilterChips({ onSelect }: VitrineFilterChipsProps) {
+export function StorefrontFilterChips({ onSelect }: StorefrontFilterChipsProps) {
   const [selectedId, setSelectedId] = useState(MOCK_FILTERS[0].id);
 
   function handleSelect(filterId: string) {

@@ -5,7 +5,7 @@ import { StyleSheet, TextInput, View } from 'react-native';
 const PLACEHOLDER_COLOR = '#8C8C8C';
 const ICON_COLOR = '#6B6B6B';
 
-export function VitrineSearchBar() {
+export function StorefrontSearchBar() {
   const [value, setValue] = useState('');
 
   return (

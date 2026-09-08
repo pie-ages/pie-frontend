@@ -17,8 +17,8 @@ export default function AppTabs() {
         <Icon src={require('@/assets/images/tabIcons/home.png')} />
       </NativeTabs.Trigger>
 
-            <NativeTabs.Trigger name="vitrine">
-        <NativeTabs.Trigger.Label>Vitrine</NativeTabs.Trigger.Label>
+            <NativeTabs.Trigger name="storefront">
+        <NativeTabs.Trigger.Label>storefront</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           src={require('@/assets/images/tabIcons/home.png')}
           renderingMode="template"

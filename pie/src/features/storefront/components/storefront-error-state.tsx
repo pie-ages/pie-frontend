@@ -1,16 +1,16 @@
 import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-type VitrineErrorStateProps = {
+type StorefrontErrorStateProps = {
   onRetry: () => void;
 };
 
-export function VitrineErrorState({ onRetry }: VitrineErrorStateProps) {
+export function StorefrontErrorState({ onRetry }: StorefrontErrorStateProps) {
   return (
     <View style={styles.container}>
       <Feather name="alert-circle" size={32} color="#B3261E" />
-      <Text style={styles.title}>Não foi possível carregar a vitrine</Text>
-      <Text style={styles.subtitle}>Verifique sua conexão e tente novamente.</Text>
+      <Text style={styles.title}>NÃ£o foi possÃ­vel carregar a storefront</Text>
+      <Text style={styles.subtitle}>Verifique sua conexÃ£o e tente novamente.</Text>
 
       <Pressable
         onPress={onRetry}

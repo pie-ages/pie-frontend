@@ -1,10 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
-export function VitrineHeader() {
+export function StorefrontHeader() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Vitrine</Text>
+      <Text style={styles.title}>storefront</Text>
 
       <View style={styles.actions}>
         <View style={styles.iconButton}>

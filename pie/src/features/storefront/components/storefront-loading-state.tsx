@@ -1,6 +1,6 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-export function VitrineLoadingState() {
+export function StorefrontLoadingState() {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#6E263D" />

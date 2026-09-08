@@ -1,14 +1,14 @@
 import { FlatList, StyleSheet } from 'react-native';
 
-import { VitrineProductCard } from '@/features/vitrine/components/vitrine-product-card';
-import type { Product } from '@/features/vitrine/types/product';
+import { StorefrontProductCard } from '@/features/storefront/components/storefront-product-card';
+import type { Product } from '@/features/storefront/types/product';
 
-type VitrineProductGridProps = {
+type StorefrontProductGridProps = {
   products: Product[];
   contentBottomInset: number;
 };
 
-export function VitrineProductGrid({ products, contentBottomInset }: VitrineProductGridProps) {
+export function StorefrontProductGrid({ products, contentBottomInset }: StorefrontProductGridProps) {
   return (
     <FlatList
       data={products}
@@ -17,7 +17,7 @@ export function VitrineProductGrid({ products, contentBottomInset }: VitrineProd
       columnWrapperStyle={styles.row}
       contentContainerStyle={[styles.content, { paddingBottom: contentBottomInset }]}
       showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => <VitrineProductCard product={item} />}
+      renderItem={({ item }) => <StorefrontProductCard product={item} />}
     />
   );
 }

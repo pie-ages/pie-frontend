@@ -1,22 +1,22 @@
-import type { FilterOption, Product } from '@/features/vitrine/types/product';
+import type { FilterOption, Product } from '@/features/storefront/types/product';
 
 /**
- * Dados mockados usados para montar o layout da vitrine sem depender do
- * backend. A integração real com a API de listagem acontece na task
- * PIE-45 (Integrar vitrine com a API de listagem e scroll infinito).
+ * Dados mockados usados para montar o layout da storefront sem depender do
+ * backend. A integraÃ§Ã£o real com a API de listagem acontece na task
+ * PIE-45 (Integrar storefront com a API de listagem e scroll infinito).
  */
 export const MOCK_FILTERS: FilterOption[] = [
   { id: 'todos', label: 'Todos' },
-  { id: 'romantico', label: 'Romântico' },
+  { id: 'romantico', label: 'RomÃ¢ntico' },
   { id: 'criativo', label: 'Criativo' },
   { id: 'casual', label: 'Casual' },
-  { id: 'classico', label: 'Clássico' },
+  { id: 'classico', label: 'ClÃ¡ssico' },
   { id: 'minimalista', label: 'Minimalista' },
   { id: 'elegante', label: 'Elegante' },
 ];
 
 const LOJA_PIE: Product['store'] = {
-  name: 'Loja Piê',
+  name: 'Loja PiÃª',
   logoUrl: 'https://placehold.co/64x64/6E263D/FFFFFF.png?text=P',
 };
 
@@ -60,7 +60,7 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: '5',
-    name: 'Conjunto alfaiataria blazer e calça off-white para eventos',
+    name: 'Conjunto alfaiataria blazer e calÃ§a off-white para eventos',
     price: 459.5,
     imageUrl: null,
     purchaseUrl: 'https://example.com/produtos/conjunto-alfaiataria',

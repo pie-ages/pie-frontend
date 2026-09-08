@@ -2,17 +2,17 @@ import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { formatPrice } from '@/features/vitrine/utils/format-price';
-import type { Product } from '@/features/vitrine/types/product';
+import { formatPrice } from '@/features/storefront/utils/format-price';
+import type { Product } from '@/features/storefront/types/product';
 
-type VitrineProductCardProps = {
+type StorefrontProductCardProps = {
   product: Product;
 };
 
-export function VitrineProductCard({ product }: VitrineProductCardProps) {
+export function StorefrontProductCard({ product }: StorefrontProductCardProps) {
   function handlePress() {
     Linking.openURL(product.purchaseUrl).catch(() => {
-      // Falha silenciosa: sem tratamento de erro de navegação externa nesta task.
+      // Falha silenciosa: sem tratamento de erro de navegaÃ§Ã£o externa nesta task.
     });
   }
 

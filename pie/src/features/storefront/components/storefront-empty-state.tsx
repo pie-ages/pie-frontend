@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
-export function VitrineEmptyState() {
+export function StorefrontEmptyState() {
   return (
     <View style={styles.container}>
       <Feather name="shopping-bag" size={32} color="#B0B4BA" />

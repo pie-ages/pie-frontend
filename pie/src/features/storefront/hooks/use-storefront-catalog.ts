@@ -1,10 +1,10 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
-import { MOCK_PRODUCTS } from '@/features/vitrine/mocks/products';
-import type { Product } from '@/features/vitrine/types/product';
+import { MOCK_PRODUCTS } from '@/features/storefront/mocks/products';
+import type { Product } from '@/features/storefront/types/product';
 
-export type VitrineStatus = 'loading' | 'success' | 'error' | 'empty';
+export type StorefrontStatus = 'loading' | 'success' | 'error' | 'empty';
 
 const FORCEABLE_STATUSES = ['loading', 'error', 'empty'] as const;
 type ForceableStatus = (typeof FORCEABLE_STATUSES)[number];
@@ -24,7 +24,7 @@ function fetchMockProducts(forcedStatus: ForceableStatus | null): Promise<Produc
 
     setTimeout(() => {
       if (forcedStatus === 'error') {
-        reject(new Error('Não foi possível carregar a vitrine.'));
+        reject(new Error('NÃ£o foi possÃ­vel carregar a storefront.'));
         return;
       }
 
@@ -33,11 +33,11 @@ function fetchMockProducts(forcedStatus: ForceableStatus | null): Promise<Produc
   });
 }
 
-export function useVitrineCatalog() {
+export function useStorefrontCatalog() {
   const { status: statusParam } = useLocalSearchParams<{ status?: string }>();
   const forcedStatus = resolveForcedStatus(statusParam);
 
-  const [status, setStatus] = useState<VitrineStatus>('loading');
+  const [status, setStatus] = useState<StorefrontStatus>('loading');
   const [products, setProducts] = useState<Product[]>([]);
   const [attempt, setAttempt] = useState(0);
 
