@@ -5,7 +5,7 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { Keyframe, Easing } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import classes from './animated-icon.module.css';
+import classes from './AnimatedIcon.module.css';
 const DURATION = 300;
 const SPLASH_DURATION = 600;
 const HOLD_DURATION = 3000;
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   splashOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',

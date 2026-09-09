@@ -3,12 +3,12 @@ import { useRouter } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AuthButton } from '@/features/auth/components/auth-button';
-import { AuthInput } from '@/features/auth/components/auth-input';
-import { AuthPasswordInput } from '@/features/auth/components/auth-password-input';
-import { useRegisterForm } from '@/features/auth/hooks/use-register-form';
+import { AuthButton } from '@/components/AuthButton';
+import { AuthInput } from '@/components/AuthInput';
+import { AuthPasswordInput } from '@/components/AuthPasswordInput';
+import { useRegisterForm } from '@/hooks/UseRegisterForm';
 
-export function RegisterScreen() {
+export default function RegisterScreen() {
   const router = useRouter();
 
   const {
@@ -33,7 +33,7 @@ export function RegisterScreen() {
     const success = await handleRegister();
 
     if (success) {
-      router.replace('/login');
+      router.replace('/screens/Login');
     }
   }
 

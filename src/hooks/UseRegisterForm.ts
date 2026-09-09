@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { RegisterPayload } from '@/features/auth/types/register';
+import type { RegisterPayload } from '@/types/Register';
 
 // simua temporariamente a chamada que futuramente será realizada pela API
 async function simulateRegisterRequest(_payload: RegisterPayload) {
