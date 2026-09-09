@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { LoginPayload } from '@/features/auth/types/login';
+import type { LoginPayload } from '@/types/Login';
 
 export function useLoginForm() {
   const [email, setEmail] = useState('');

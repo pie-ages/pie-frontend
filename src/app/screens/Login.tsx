@@ -3,12 +3,12 @@ import { useRouter } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AuthButton } from '@/features/auth/components/auth-button';
-import { AuthInput } from '@/features/auth/components/auth-input';
-import { AuthPasswordInput } from '@/features/auth/components/auth-password-input';
-import { useLoginForm } from '@/features/auth/hooks/use-login-form';
+import { AuthButton } from '@/components/AuthButton';
+import { AuthInput } from '@/components/AuthInput';
+import { AuthPasswordInput } from '@/components/AuthPasswordInput';
+import { useLoginForm } from '@/hooks/UseLoginForm';
 
-export function LoginScreen() {
+export default function LoginScreen() {
   const router = useRouter();
 
   const {
@@ -24,7 +24,7 @@ export function LoginScreen() {
   } = useLoginForm();
 
   function handleCreateAccount() {
-    router.push('/register');
+    router.push('/screens/Register');
   }
 
   return (
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: '55%',
+    width: '80%',
     maxWidth: 210,
     aspectRatio: 1,
   },

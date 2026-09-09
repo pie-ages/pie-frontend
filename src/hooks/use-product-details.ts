@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import type { Product } from '@/features/auth/types/product';
 import { MOCK_PRODUCTS } from '@/mocks/products';
+import type { Product } from '@/types/product';
 
 export function useProductDetails(id: string | undefined) {
   const [product, setProduct] = useState<Product | null>(null);
