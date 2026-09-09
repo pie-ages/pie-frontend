@@ -1,6 +1,6 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
+import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-native';
 
-import { BrandColors } from '@/constants/theme';
+import { styles } from './styles';
 
 type ProductActionButtonProps = PressableProps & {
   title: string;
@@ -31,26 +31,3 @@ export function ProductActionButton({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    width: '100%',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: BrandColors.primary,
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});

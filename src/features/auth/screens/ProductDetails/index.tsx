@@ -1,17 +1,18 @@
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ProductActionButton } from '@/components/product-action-button';
-import { ProductHeader } from '@/components/product-header';
-import { ProductImageCarousel } from '@/components/product-image-carousel';
-import { ProductSizeSelector } from '@/components/product-size-selector';
+import { ProductActionButton } from '@/components/ProductActionButton/ProductActionButton';
+import { ProductHeader } from '@/components/ProductHeader/ProductHeader';
+import { ProductImageCarousel } from '@/components/ProductImageCarousel/ProductImageCarousel';
+import { ProductSizeSelector } from '@/components/ProductSizeSelector/ProductSizeSelector';
 import { ThemedText } from '@/components/themed-text';
-import { BrandColors, Spacing } from '@/constants/theme';
 import { useProductDetails } from '@/features/auth/hooks/use-product-details';
 import { useTheme } from '@/hooks/use-theme';
+
+import { styles } from './styles';
 
 type ProductDetailsScreenProps = {
   id?: string;
@@ -137,69 +138,3 @@ export function ProductDetailsScreen({ id }: ProductDetailsScreenProps) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    paddingTop: Spacing.three,
-    paddingBottom: Spacing.six,
-  },
-  imageWrapper: {
-    marginBottom: 48,
-  },
-  sectionsWrapper: {
-    paddingHorizontal: Spacing.three,
-    gap: Spacing.three,
-  },
-  descriptionSection: {
-    gap: Spacing.one,
-  },
-  sizeSection: {
-    gap: Spacing.two,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  sectionLabel: {
-    fontSize: 17,
-    lineHeight: 17,
-  },
-  descriptionText: {
-    fontSize: 17,
-    lineHeight: 17,
-    fontWeight: '400',
-  },
-  priceValue: {
-    fontSize: 32,
-    lineHeight: 32,
-    fontWeight: '700',
-  },
-  storeValue: {
-    color: BrandColors.primary,
-    fontSize: 17,
-    lineHeight: 17,
-    fontWeight: '700',
-  },
-  footer: {
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingBottom: Spacing.three,
-    paddingTop: Spacing.two,
-  },
-});

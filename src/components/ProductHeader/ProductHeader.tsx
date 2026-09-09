@@ -1,9 +1,11 @@
 import Feather from '@expo/vector-icons/Feather';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+
+import { styles } from './styles';
 
 type ProductHeaderProps = {
   title: string;
@@ -34,36 +36,3 @@ export function ProductHeader({ title, onClose }: ProductHeaderProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: 13,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: BrandColors.tertiary,
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-  },
-  titleText: {
-    fontSize: 17,
-    lineHeight: 17,
-  },
-});

@@ -1,15 +1,11 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import {
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { type NativeScrollEvent, type NativeSyntheticEvent, ScrollView, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+
+import { styles } from './styles';
 
 type ProductImageCarouselProps = {
   images: (string | number)[];
@@ -78,24 +74,3 @@ export function ProductImageCarousel({ images }: ProductImageCarouselProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  image: {
-    aspectRatio: 3 / 4,
-    borderRadius: Spacing.three,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: Spacing.one,
-    marginTop: Spacing.two,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-});
