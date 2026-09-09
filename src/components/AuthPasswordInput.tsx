@@ -2,7 +2,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, type TextInputProps } from 'react-native';
 
-import { AuthInput } from '@/features/auth/components/auth-input';
+import { AuthInput } from '@/components/AuthInput';
 
 type AuthPasswordInputProps = Omit<TextInputProps, 'secureTextEntry'> & {
   label: string;
