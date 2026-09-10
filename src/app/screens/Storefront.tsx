@@ -11,7 +11,7 @@ import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/Theme';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 
-export function StorefrontScreen() {
+export default function StorefrontScreen() {
   const insets = useSafeAreaInsets();
   const { status, products, retry } = useStorefrontCatalog();
 

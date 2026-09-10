@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export function StorefrontHeader() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>storefront</Text>
+      <Text style={styles.title}>Vitrine</Text>
 
       <View style={styles.actions}>
         <View style={styles.iconButton}>

@@ -29,18 +29,13 @@ export function StorefrontProductCard({ product }: StorefrontProductCardProps) {
             <Feather name="image" size={28} color="#B0B4BA" />
           </View>
         )}
-
-        <Image
-          source={{ uri: product.store.logoUrl }}
-          style={styles.storeLogo}
-          contentFit="cover"
-        />
       </View>
 
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
           {product.name}
         </Text>
+        {product.color ? <Text style={styles.color}>{product.color}</Text> : null}
         <Text style={styles.price}>{formatPrice(product.price)}</Text>
       </View>
     </Pressable>
@@ -51,7 +46,9 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F3F3F3',
+    borderWidth: 1,
+    borderColor: 'rgba(60, 60, 67, 0.18)',
     overflow: 'hidden',
   },
   cardPressed: {
@@ -61,10 +58,14 @@ const styles = StyleSheet.create({
     width: '100%',
     aspectRatio: 4 / 5,
     backgroundColor: '#F0F0F3',
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   image: {
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
   },
   imageFallback: {
     width: '100%',
@@ -83,17 +84,26 @@ const styles = StyleSheet.create({
     borderColor: '#FFFFFF',
   },
   info: {
-    paddingTop: 8,
-    gap: 2,
+    paddingTop: 10,
+    gap: 4,
+    backgroundColor: '#F3F3F3',
+    paddingBottom: 10,
   },
   name: {
+    paddingHorizontal: 8,
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F1F1F',
+    color: '#201E1D',
+  },
+  color: {
+    paddingHorizontal: 8,
+    fontSize: 12,
+    color: 'rgba(60, 60, 67, 0.6)',
   },
   price: {
+    paddingHorizontal: 8,
     fontSize: 14,
     fontWeight: '700',
-    color: '#1F1F1F',
+    color: 'rgba(60, 60, 67, 0.6)',
   },
 });

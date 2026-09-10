@@ -57,10 +57,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipDefault: {
-    backgroundColor: '#F3EBEE',
+    backgroundColor: '#FDE2D9',
   },
   chipSelected: {
-    backgroundColor: '#6E263D',
+    backgroundColor: '#661414',
   },
   chipPressed: {
     opacity: 0.8,
@@ -70,9 +70,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   labelDefault: {
-    color: '#6E263D',
+    color: '#000',
   },
   labelSelected: {
-    color: '#FFFFFF',
+    color: '#FFF',
   },
 });

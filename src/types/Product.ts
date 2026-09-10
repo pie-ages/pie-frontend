@@ -6,6 +6,7 @@ export type Store = {
 export type Product = {
   id: string;
   name: string;
+  color?: string;
   price: number;
   /** `null` representa um produto sem imagem cadastrada. */
   imageUrl: string | null;
