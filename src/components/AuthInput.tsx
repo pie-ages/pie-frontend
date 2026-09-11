@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#1F1F1F',
+    color: '#000000',
   },
   inputContainer: {
     height: 52,

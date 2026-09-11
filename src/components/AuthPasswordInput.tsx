@@ -30,9 +30,9 @@ export function AuthPasswordInput({
         >
           <SymbolView
             name={isVisible ? 'eye.slash' : 'eye'}
-            size={22}
-            tintColor="#777777"
-            fallback={<Feather name={isVisible ? 'eye-off' : 'eye'} size={22} color="#777777" />}
+            size={20}
+            tintColor="#9B9B9B"
+            fallback={<Feather name={isVisible ? 'eye-off' : 'eye'} size={20} color="#9B9B9B" />}
           />
         </Pressable>
       }
