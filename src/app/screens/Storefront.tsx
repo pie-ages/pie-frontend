@@ -4,10 +4,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StorefrontEmptyState } from '@/components/StorefrontEmptyState';
 import { StorefrontErrorState } from '@/components/StorefrontErrorState';
 import { StorefrontFilterChips } from '@/components/StorefrontFilterChips';
-import { StorefrontHeader } from '@/components/StorefrontHeader';
 import { StorefrontLoadingState } from '@/components/StorefrontLoadingState';
 import { StorefrontProductGrid } from '@/components/StorefrontProductGrid';
 import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
+import { StorefrontToolBar } from '@/components/StorefrontToolBar';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/Theme';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 
@@ -19,7 +19,7 @@ export default function StorefrontScreen() {
     <View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <StorefrontHeader />
+          <StorefrontToolBar />
           <StorefrontSearchBar />
           <StorefrontFilterChips />
         </View>

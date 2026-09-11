@@ -27,8 +27,8 @@ export function StorefrontProductGrid({
 
 const styles = StyleSheet.create({
   content: {
-    gap: 16,
-    paddingTop: 16,
+    gap: 8,
+    paddingTop: 0,
   },
   row: {
     gap: 12,

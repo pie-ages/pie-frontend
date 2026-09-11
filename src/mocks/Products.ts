@@ -7,10 +7,10 @@ import type { FilterOption, Product } from '@/types/Product';
  */
 export const MOCK_FILTERS: FilterOption[] = [
   { id: 'todos', label: 'Todos' },
-  { id: 'romantico', label: 'Romantico' },
+  { id: 'romantico', label: 'Romântico' },
   { id: 'criativo', label: 'Criativo' },
   { id: 'casual', label: 'Casual' },
-  { id: 'classico', label: 'Classico' },
+  { id: 'classico', label: 'Clássico' },
   { id: 'minimalista', label: 'Minimalista' },
   { id: 'elegante', label: 'Elegante' },
 ];

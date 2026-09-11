@@ -1,18 +1,18 @@
 import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
-export function StorefrontHeader() {
+export function StorefrontToolBar() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Vitrine</Text>
 
       <View style={styles.actions}>
         <View style={styles.iconButton}>
-          <Feather name="clipboard" size={18} color="#1F1F1F" />
+          <Feather name="shopping-bag" size={18} color="#1F1F1F" />
         </View>
 
         <View style={[styles.iconButton, styles.profileButton]}>
-          <Feather name="user" size={18} color="#6E263D" />
+          <Feather name="user" size={18} color="#1A1A1A" />
         </View>
       </View>
     </View>
@@ -43,6 +43,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F3',
   },
   profileButton: {
-    backgroundColor: '#F3EBEE',
+    backgroundColor: '#FDE2D9',
   },
 });
