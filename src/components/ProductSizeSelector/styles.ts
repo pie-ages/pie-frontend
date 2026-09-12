@@ -5,26 +5,22 @@ import { BrandColors } from '@/constants/Theme';
 export const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 18,
     alignSelf: 'center',
   },
   circle: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: BrandColors.tertiary,
+    backgroundColor: BrandColors.tertiary,
   },
   circleSelected: {
     backgroundColor: BrandColors.primary,
-    borderColor: BrandColors.primary,
   },
   circleUnavailable: {
-    backgroundColor: 'transparent',
-    borderColor: `${BrandColors.disabled}50`,
+    backgroundColor: '#E8E8EA',
   },
   label: {
     fontSize: 17,
@@ -52,6 +48,6 @@ export const styles = StyleSheet.create({
     height: 26,
     borderRadius: 1,
     backgroundColor: '#1A1A1A',
-    transform: [{ rotate: '55deg' }],
+    transform: [{ rotate: '-45deg' }],
   },
 });

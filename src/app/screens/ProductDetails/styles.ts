@@ -19,11 +19,11 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingTop: Spacing.three,
+    paddingTop: Spacing.half,
     paddingBottom: Spacing.six,
   },
   imageWrapper: {
-    marginBottom: 24,
+    marginBottom: 44,
   },
   sectionsWrapper: {
     paddingHorizontal: Spacing.three,

@@ -1,4 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -14,11 +16,12 @@ type ProductHeaderProps = {
 
 export function ProductHeader({ title, onClose }: ProductHeaderProps) {
   const theme = useTheme();
+  const [isClipboardActive, setIsClipboardActive] = useState(false);
 
   return (
     <View style={styles.container}>
       <Pressable onPress={onClose} style={styles.closeButton} hitSlop={8}>
-        <Feather name="x" size={20} color={BrandColors.primary} />
+        <Feather name="x" size={30} color={BrandColors.primary} />
       </Pressable>
 
       <ThemedText
@@ -30,9 +33,17 @@ export function ProductHeader({ title, onClose }: ProductHeaderProps) {
         {title}
       </ThemedText>
 
-      <View style={[styles.iconButton, { backgroundColor: theme.backgroundElement }]}>
-        <Feather name="clipboard" size={18} color={theme.text} />
-      </View>
+      <Pressable
+        onPress={() => setIsClipboardActive((current) => !current)}
+        style={[styles.iconButton, { backgroundColor: theme.backgroundElement }]}
+        hitSlop={8}
+      >
+        {isClipboardActive ? (
+          <MaterialCommunityIcons name="clipboard-check" size={22} color={BrandColors.primary} />
+        ) : (
+          <Feather name="clipboard" size={22} color={theme.text} />
+        )}
+      </Pressable>
     </View>
   );
 }

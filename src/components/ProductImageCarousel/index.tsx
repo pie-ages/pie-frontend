@@ -11,8 +11,8 @@ type ProductImageCarouselProps = {
   images: (string | number)[];
 };
 
-const IMAGE_WIDTH_RATIO = 280 / 393;
-const IMAGE_GAP = Spacing.five;
+const IMAGE_WIDTH_RATIO = 240 / 393;
+const IMAGE_GAP = Spacing.one;
 
 export function ProductImageCarousel({ images }: ProductImageCarouselProps) {
   const theme = useTheme();

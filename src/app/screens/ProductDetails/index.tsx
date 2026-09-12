@@ -90,7 +90,7 @@ function ProductDetails({ id }: { id?: string }) {
             </ThemedText>
             <ThemedText
               type="small"
-              themeColor="textSecondary"
+              themeColor="text"
               style={styles.descriptionText}
               allowFontScaling={false}
             >

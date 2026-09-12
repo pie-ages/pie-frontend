@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 
-import type { Size } from '@/types/Product';
+import type { Size } from '@/types/product';
 
 import { styles } from './styles';
 
