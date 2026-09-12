@@ -1,8 +1,10 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
 import type { LoginPayload } from '@/types/Login';
 
 export function useLoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -36,6 +38,8 @@ export function useLoginForm() {
     } finally {
       setIsLoading(false);
     }
+
+    router.push('/screens/Storefront');
   }
 
   return {

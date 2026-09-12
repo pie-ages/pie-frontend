@@ -45,15 +45,15 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     height: 52,
-    borderRadius: 12,
+    borderRadius: 1000,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primary: {
-    backgroundColor: '#6E263D',
+    backgroundColor: '#661414',
   },
   secondary: {
-    backgroundColor: '#F3EBEE',
+    backgroundColor: '#FDE2D9',
   },
   text: {
     fontSize: 16,
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   secondaryText: {
-    color: '#6E263D',
+    color: '#000000',
   },
   pressed: {
     opacity: 0.8,
