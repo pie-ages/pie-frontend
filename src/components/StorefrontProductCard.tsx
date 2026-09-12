@@ -1,24 +1,19 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Product } from '@/types/Product';
 import { formatPrice } from '@/utils/FormatPrice';
 
 type StorefrontProductCardProps = {
   product: Product;
+  onPress: () => void;
 };
 
-export function StorefrontProductCard({ product }: StorefrontProductCardProps) {
-  function handlePress() {
-    Linking.openURL(product.purchaseUrl).catch(() => {
-      // Falha silenciosa: sem tratamento de erro de navegaÃ§Ã£o externa nesta task.
-    });
-  }
-
+export function StorefrontProductCard({ product, onPress }: StorefrontProductCardProps) {
   return (
     <Pressable
-      onPress={handlePress}
+      onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
       <View style={styles.imageContainer}>

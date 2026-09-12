@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,6 +16,17 @@ export default function StorefrontScreen() {
   const insets = useSafeAreaInsets();
   const { status, products, retry } = useStorefrontCatalog();
 
+  const handleStoreFrontPress = (productId: string) => {
+    try {
+      router.push({
+        pathname: '/screens/ProductDetails',
+        params: { productId },
+      });
+    } catch (error) {
+      console.error('Erro ao navegar para detalhes do produto:', error);
+    }
+  };
+
   return (
     <View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.container}>
@@ -31,6 +43,7 @@ export default function StorefrontScreen() {
           {status === 'success' && (
             <StorefrontProductGrid
               products={products}
+              onProductPress={handleStoreFrontPress}
               contentBottomInset={insets.bottom + BottomTabInset + Spacing.three}
             />
           )}

@@ -1,16 +1,13 @@
 import { Pressable, Text, View } from 'react-native';
 
-import { styles } from './styles';
+import type { Size } from '@/types/Product';
 
-type Size = {
-  label: string;
-  available: boolean;
-};
+import { styles } from './styles';
 
 type ProductSizeSelectorProps = {
   sizes: Size[];
   selectedSize: string | null;
-  onSelectSize: (label: string) => void;
+  onSelectSize: (label: string | null) => void;
 };
 
 export function ProductSizeSelector({
@@ -27,7 +24,7 @@ export function ProductSizeSelector({
           <Pressable
             key={size.label}
             disabled={!size.available}
-            onPress={() => onSelectSize(size.label)}
+            onPress={() => onSelectSize(isSelected ? null : size.label)}
             style={[
               styles.circle,
               isSelected && styles.circleSelected,

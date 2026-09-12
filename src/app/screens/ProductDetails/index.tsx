@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
@@ -14,15 +14,22 @@ import { useTheme } from '@/hooks/UseTheme';
 
 import { styles } from './styles';
 
-type ProductDetailsScreenProps = {
-  id?: string;
-};
+export default function ProductDetailsScreen() {
+  const { productId } = useLocalSearchParams<{ productId: string }>();
+  return <ProductDetails id={productId} />;
+}
 
-export function ProductDetailsScreen({ id }: ProductDetailsScreenProps) {
+function ProductDetails({ id }: { id?: string }) {
   const router = useRouter();
   const theme = useTheme();
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [loadedProductId, setLoadedProductId] = useState<string | undefined>(undefined);
   const { product, isLoading, error } = useProductDetails(id);
+
+  if (product && product.id !== loadedProductId) {
+    setLoadedProductId(product.id);
+    setSelectedSize(product.sizes.find((s) => s.available)?.label ?? null);
+  }
 
   function handleClose() {
     if (router.canGoBack()) {

@@ -9,18 +9,22 @@ export const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   circle: {
-    width: 32,
+    width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: BrandColors.tertiary,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: BrandColors.tertiary,
   },
   circleSelected: {
     backgroundColor: BrandColors.primary,
+    borderColor: BrandColors.primary,
   },
   circleUnavailable: {
-    backgroundColor: `${BrandColors.disabled}29`,
+    backgroundColor: 'transparent',
+    borderColor: `${BrandColors.disabled}50`,
   },
   label: {
     fontSize: 17,

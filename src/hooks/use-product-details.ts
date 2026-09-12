@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { MOCK_PRODUCTS } from '@/mocks/products';
-import type { Product } from '@/types/product';
+import { MOCK_PRODUCTS } from '../mocks/products';
+import type { Product } from '../types/product';
 
 export function useProductDetails(id: string | undefined) {
   const [product, setProduct] = useState<Product | null>(null);
@@ -21,7 +21,7 @@ export function useProductDetails(id: string | undefined) {
 
         if (!isActive) return;
 
-        const found = id ? MOCK_PRODUCTS[id] : undefined;
+        const found = id ? MOCK_PRODUCTS.find((p) => p.id === id) : undefined;
 
         if (!found) {
           setError('Não foi possível carregar este produto.');

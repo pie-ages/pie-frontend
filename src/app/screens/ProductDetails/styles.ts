@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     paddingBottom: Spacing.six,
   },
   imageWrapper: {
-    marginBottom: 48,
+    marginBottom: 24,
   },
   sectionsWrapper: {
     paddingHorizontal: Spacing.three,
