@@ -1,5 +1,7 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+
 type AuthButtonProps = PressableProps & {
   title: string;
   variant?: 'primary' | 'secondary';
@@ -29,7 +31,7 @@ export function AuthButton({
       {...props}
     >
       {isLoading ? (
-        <ActivityIndicator color="#FFFFFF" />
+        <ActivityIndicator color={Colors.white} />
       ) : (
         <Text
           style={[styles.text, variant === 'primary' ? styles.primaryText : styles.secondaryText]}
@@ -50,20 +52,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primary: {
-    backgroundColor: '#6E263D',
+    backgroundColor: Colors.brand.primary,
   },
   secondary: {
-    backgroundColor: '#F3EBEE',
+    backgroundColor: Colors.brand.tertiary,
   },
   text: {
     fontSize: 16,
     fontWeight: '600',
   },
   primaryText: {
-    color: '#FFFFFF',
+    color: Colors.white,
   },
   secondaryText: {
-    color: '#6E263D',
+    color: Colors.brand.primary,
   },
   pressed: {
     opacity: 0.8,
