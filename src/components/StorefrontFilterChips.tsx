@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
-import { MOCK_FILTERS } from '@/mocks/Products';
+import { MOCK_FILTERS } from '@/mocks/products';
 
 type StorefrontFilterChipsProps = {
   onSelect?: (filterId: string) => void;

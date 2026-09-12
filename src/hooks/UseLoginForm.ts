@@ -23,7 +23,7 @@ export function useLoginForm() {
       return;
     }
 
-    const payload: LoginPayload = {
+    const _payload: LoginPayload = {
       email: email.trim(),
       password,
     };
@@ -32,8 +32,6 @@ export function useLoginForm() {
 
     try {
       // A autenticação real será integrada à API futuramente, agora é apenas simulação com o payload pronto
-      console.log('Login payload:', payload);
-
       await new Promise((resolve) => setTimeout(resolve, 700));
     } catch {
       setError('Não foi possível entrar. Tente novamente.');
