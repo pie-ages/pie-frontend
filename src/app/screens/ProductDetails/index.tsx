@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ProductActionButton } from '@/components/ProductActionButton/ProductActionButton';
-import { ProductHeader } from '@/components/ProductHeader/ProductHeader';
-import { ProductImageCarousel } from '@/components/ProductImageCarousel/ProductImageCarousel';
-import { ProductSizeSelector } from '@/components/ProductSizeSelector/ProductSizeSelector';
-import { ThemedText } from '@/components/themed-text';
-import { useProductDetails } from '@/features/auth/hooks/use-product-details';
-import { useTheme } from '@/hooks/use-theme';
+import { ProductActionButton } from '@/components/ProductActionButton';
+import { ProductHeader } from '@/components/ProductHeader';
+import { ProductImageCarousel } from '@/components/ProductImageCarousel';
+import { ProductSizeSelector } from '@/components/ProductSizeSelector';
+import { ThemedText } from '@/components/ThemedText';
+import { useProductDetails } from '@/hooks/use-product-details';
+import { useTheme } from '@/hooks/UseTheme';
 
 import { styles } from './styles';
 

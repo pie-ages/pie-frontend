@@ -1,9 +1,9 @@
 import Feather from '@expo/vector-icons/Feather';
 import { Pressable, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { BrandColors } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { ThemedText } from '@/components/ThemedText';
+import { BrandColors } from '@/constants/Theme';
+import { useTheme } from '@/hooks/UseTheme';
 
 import { styles } from './styles';
 

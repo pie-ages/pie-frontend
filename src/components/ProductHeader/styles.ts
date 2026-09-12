@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { BrandColors, Spacing } from '@/constants/theme';
+import { BrandColors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   container: {

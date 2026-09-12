@@ -1,4 +1,4 @@
-import type { Product } from '@/features/auth/types/product';
+import type { Product } from '@/types/product';
 
 export const MOCK_PRODUCTS: Record<string, Product> = {
   '1': {

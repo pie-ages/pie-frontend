@@ -2,8 +2,8 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { type NativeScrollEvent, type NativeSyntheticEvent, ScrollView, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/constants/Theme';
+import { useTheme } from '@/hooks/UseTheme';
 
 import { styles } from './styles';
 
