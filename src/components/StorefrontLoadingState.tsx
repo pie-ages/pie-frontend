@@ -1,9 +1,11 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+
 export function StorefrontLoadingState() {
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#6E263D" />
+      <ActivityIndicator size="large" color={Colors.brand.accent} />
       <Text style={styles.text}>Carregando produtos...</Text>
     </View>
   );
@@ -19,6 +21,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    color: '#60646C',
+    color: Colors.light.textSecondary,
   },
 });

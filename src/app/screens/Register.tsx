@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
+import { Colors } from '@/constants/Theme';
 import { useRegisterForm } from '@/hooks/UseRegisterForm';
 
 export default function RegisterScreen() {
@@ -109,7 +110,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
 
   backgroundLogo: {
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#1F1F1F',
+    color: Colors.light.text,
     marginBottom: 24,
   },
 
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     fontSize: 14,
-    color: '#B3261E',
+    color: Colors.error,
   },
 
   actions: {

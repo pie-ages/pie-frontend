@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
 import { MOCK_FILTERS } from '@/mocks/products';
 
 type StorefrontFilterChipsProps = {
@@ -57,10 +58,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipDefault: {
-    backgroundColor: '#FDE2D9',
+    backgroundColor: Colors.brand.tertiary,
   },
   chipSelected: {
-    backgroundColor: '#661414',
+    backgroundColor: Colors.brand.primary,
   },
   chipPressed: {
     opacity: 0.8,
@@ -70,9 +71,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   labelDefault: {
-    color: '#000',
+    color: Colors.light.text,
   },
   labelSelected: {
-    color: '#FFF',
+    color: Colors.white,
   },
 });

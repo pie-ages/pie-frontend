@@ -3,6 +3,7 @@ import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, type TextInputProps } from 'react-native';
 
 import { AuthInput } from '@/components/AuthInput';
+import { Colors } from '@/constants/Theme';
 
 type AuthPasswordInputProps = Omit<TextInputProps, 'secureTextEntry'> & {
   label: string;
@@ -31,8 +32,10 @@ export function AuthPasswordInput({
           <SymbolView
             name={isVisible ? 'eye.slash' : 'eye'}
             size={20}
-            tintColor="#9B9B9B"
-            fallback={<Feather name={isVisible ? 'eye-off' : 'eye'} size={20} color="#9B9B9B" />}
+            tintColor={Colors.icon}
+            fallback={
+              <Feather name={isVisible ? 'eye-off' : 'eye'} size={20} color={Colors.icon} />
+            }
           />
         </Pressable>
       }

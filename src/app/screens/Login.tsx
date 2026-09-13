@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
+import { Colors } from '@/constants/Theme';
 import { useLoginForm } from '@/hooks/UseLoginForm';
 
 export default function LoginScreen() {
@@ -89,7 +90,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
 
   keyboardView: {
@@ -117,8 +118,8 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 25,
     fontWeight: '500',
-    color: '#000000',
-    marginBottom: 38,
+    color: Colors.light.text,
+    marginBottom: 20,
   },
 
   logo: {
@@ -137,7 +138,7 @@ const styles = StyleSheet.create({
 
   errorText: {
     fontSize: 14,
-    color: '#B3261E',
+    color: Colors.error,
   },
 
   actions: {
