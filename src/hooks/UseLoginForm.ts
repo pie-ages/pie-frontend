@@ -39,7 +39,7 @@ export function useLoginForm() {
       setIsLoading(false);
     }
 
-    router.push('/screens/Storefront');
+    router.replace('/screens/Storefront');
   }
 
   return {
