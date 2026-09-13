@@ -1,7 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
-import { MOCK_PRODUCTS } from '@/mocks/Products';
+import { MOCK_PRODUCTS } from '@/mocks/products';
 import type { Product } from '@/types/Product';
 
 export type StorefrontStatus = 'loading' | 'success' | 'error' | 'empty';

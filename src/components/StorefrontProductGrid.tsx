@@ -5,11 +5,13 @@ import type { Product } from '@/types/Product';
 
 type StorefrontProductGridProps = {
   products: Product[];
+  onProductPress: (productId: string) => void;
   contentBottomInset: number;
 };
 
 export function StorefrontProductGrid({
   products,
+  onProductPress,
   contentBottomInset,
 }: StorefrontProductGridProps) {
   return (
@@ -20,7 +22,9 @@ export function StorefrontProductGrid({
       columnWrapperStyle={styles.row}
       contentContainerStyle={[styles.content, { paddingBottom: contentBottomInset }]}
       showsVerticalScrollIndicator={false}
-      renderItem={({ item }) => <StorefrontProductCard product={item} />}
+      renderItem={({ item }) => (
+        <StorefrontProductCard product={item} onPress={() => onProductPress(item.id)} />
+      )}
     />
   );
 }
