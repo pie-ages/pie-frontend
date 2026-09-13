@@ -1,6 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+
 export function StorefrontToolBar() {
   return (
     <View style={styles.container}>
@@ -8,11 +10,11 @@ export function StorefrontToolBar() {
 
       <View style={styles.actions}>
         <View style={styles.iconButton}>
-          <Feather name="shopping-bag" size={18} color="#1F1F1F" />
+          <Feather name="shopping-bag" size={18} color={Colors.light.text} />
         </View>
 
         <View style={[styles.iconButton, styles.profileButton]}>
-          <Feather name="user" size={18} color="#1A1A1A" />
+          <Feather name="user" size={18} color={Colors.light.text} />
         </View>
       </View>
     </View>
@@ -28,7 +30,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1F1F1F',
+    color: Colors.light.text,
   },
   actions: {
     flexDirection: 'row',
@@ -40,9 +42,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F0F0F3',
+    backgroundColor: Colors.light.backgroundElement,
   },
   profileButton: {
-    backgroundColor: '#FDE2D9',
+    backgroundColor: Colors.brand.tertiary,
   },
 });

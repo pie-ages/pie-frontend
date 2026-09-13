@@ -1,10 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+
 export function StorefrontEmptyState() {
   return (
     <View style={styles.container}>
-      <Feather name="shopping-bag" size={32} color="#B0B4BA" />
+      <Feather name="shopping-bag" size={32} color={Colors.iconMuted} />
       <Text style={styles.title}>Nenhum produto encontrado</Text>
       <Text style={styles.subtitle}>Tente ajustar os filtros ou volte mais tarde.</Text>
     </View>
@@ -23,12 +25,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F1F1F',
+    color: Colors.light.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#60646C',
+    color: Colors.light.textSecondary,
     textAlign: 'center',
   },
 });

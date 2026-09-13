@@ -2,6 +2,8 @@ import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+
 const PLACEHOLDER_COLOR = '#8C8C8C';
 const ICON_COLOR = '#6B6B6B';
 
@@ -33,7 +35,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#F0F0F3',
+    backgroundColor: Colors.light.backgroundElement,
     paddingHorizontal: 16,
     gap: 10,
   },
@@ -41,6 +43,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     fontSize: 15,
-    color: '#1F1F1F',
+    color: Colors.light.text,
   },
 });

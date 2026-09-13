@@ -1,6 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+
 type StorefrontErrorStateProps = {
   onRetry: () => void;
 };
@@ -8,9 +10,9 @@ type StorefrontErrorStateProps = {
 export function StorefrontErrorState({ onRetry }: StorefrontErrorStateProps) {
   return (
     <View style={styles.container}>
-      <Feather name="alert-circle" size={32} color="#B3261E" />
-      <Text style={styles.title}>NÃ£o foi possÃ­vel carregar a storefront</Text>
-      <Text style={styles.subtitle}>Verifique sua conexÃ£o e tente novamente.</Text>
+      <Feather name="alert-circle" size={32} color={Colors.error} />
+      <Text style={styles.title}>Não foi possível carregar a storefront</Text>
+      <Text style={styles.subtitle}>Verifique sua conexão e tente novamente.</Text>
 
       <Pressable
         onPress={onRetry}
@@ -34,12 +36,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F1F1F',
+    color: Colors.light.text,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#60646C',
+    color: Colors.light.textSecondary,
     textAlign: 'center',
   },
   button: {
@@ -49,7 +51,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#6E263D',
+    backgroundColor: Colors.brand.accent,
   },
   buttonPressed: {
     opacity: 0.85,
@@ -57,6 +59,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: Colors.white,
   },
 });

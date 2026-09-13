@@ -31,7 +31,7 @@ export function AuthButton({
       {...props}
     >
       {isLoading ? (
-        <ActivityIndicator color={Colors.white} />
+        <ActivityIndicator color={variant === 'primary' ? Colors.white : Colors.brand.primary} />
       ) : (
         <Text
           style={[styles.text, variant === 'primary' ? styles.primaryText : styles.secondaryText]}
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   secondaryText: {
-    color: Colors.brand.primary,
+    color: Colors.light.text,
   },
   pressed: {
     opacity: 0.8,
