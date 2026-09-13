@@ -53,8 +53,8 @@ export default function LoginScreen() {
             <View style={styles.bottomContent}>
               <View style={styles.form}>
                 <AuthInput
-                  label="Email"
-                  placeholder="teste@pie.com.br"
+                  label="E-mail"
+                  placeholder="anna@pie.com.br"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     maxWidth: 430,
     alignSelf: 'center',
     paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingTop: 32,
     paddingBottom: 20,
   },
 
@@ -123,14 +123,12 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: '80%',
-    maxWidth: 210,
+    width: '71%',
+    maxWidth: 280,
     aspectRatio: 1,
   },
 
   bottomContent: {
-    flex: 1,
-    justifyContent: 'flex-end',
     marginTop: 24,
   },
 
