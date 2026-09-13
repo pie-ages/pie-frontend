@@ -1,4 +1,4 @@
-import type { FilterOption, Product } from '../types/product';
+import type { FilterGroup, FilterOption, Product } from '../types/product';
 
 const SIZES_VESTUARIO = [
   { label: 'P', available: true },
@@ -20,8 +20,45 @@ export const MOCK_FILTERS: FilterOption[] = [
   { id: 'criativo', label: 'Criativo' },
   { id: 'casual', label: 'Casual' },
   { id: 'classico', label: 'Clássico' },
-  { id: 'minimalista', label: 'Minimalista' },
-  { id: 'elegante', label: 'Elegante' },
+  { id: 'refinado', label: 'Refinado' },
+  { id: 'dramatico', label: 'Dramático' },
+  { id: 'sensual', label: 'Sensual' },
+];
+
+export const MOCK_FILTER_GROUPS: FilterGroup[] = [
+  {
+    id: 'estilos',
+    label: 'Estilos',
+    options: MOCK_FILTERS.filter((filter) => filter.id !== 'todos'),
+  },
+  {
+    id: 'pecas',
+    label: 'Peças de Roupa',
+    options: [
+      { id: 'sapatos', label: 'Sapatos' },
+      { id: 'bermuda', label: 'Bermuda' },
+      { id: 'shorts', label: 'Shorts' },
+      { id: 'conjunto', label: 'Conjunto' },
+      { id: 'camiseta', label: 'Camiseta' },
+      { id: 'camisa', label: 'Camisa' },
+      { id: 'vestido', label: 'Vestido' },
+      { id: 'calca', label: 'Calça' },
+    ],
+  },
+  {
+    id: 'cores',
+    label: 'Cores',
+    options: [
+      { id: 'verde', label: 'Verde' },
+      { id: 'azul', label: 'Azul' },
+      { id: 'marrom', label: 'Marrom' },
+      { id: 'vermelho', label: 'Vermelho' },
+      { id: 'minha-paleta', label: 'Minha paleta' },
+      { id: 'cinza', label: 'Cinza' },
+      { id: 'preto', label: 'Preto' },
+      { id: 'branco', label: 'Branco' },
+    ],
+  },
 ];
 
 const LOJA_PIE: Product['store'] = {
@@ -39,6 +76,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '1',
     name: 'Camiseta azul',
     color: 'Azul',
+    style: 'casual',
+    category: 'camiseta',
     price: 199.9,
     description: 'Camiseta casual de algodão na cor azul, perfeita para o dia a dia.',
     sizes: SIZES_VESTUARIO,
@@ -56,6 +95,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '2',
     name: 'Vestido Verde',
     color: 'Verde',
+    style: 'romantico',
+    category: 'vestido',
     price: 199.0,
     description: 'Vestido longo com manga e laço, ideal para ocasiões especiais.',
     sizes: SIZES_VESTUARIO,
@@ -73,6 +114,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '3',
     name: 'Camiseta azul',
     color: 'Azul',
+    style: 'casual',
+    category: 'camiseta',
     price: 199.9,
     description: 'Camiseta casual de algodão na cor azul, perfeita para o dia a dia.',
     sizes: SIZES_VESTUARIO,
@@ -90,6 +133,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '4',
     name: 'Camiseta azul',
     color: 'Azul',
+    style: 'refinado',
+    category: 'camiseta',
     price: 199.9,
     description: 'Camiseta casual de algodão na cor azul, perfeita para o dia a dia.',
     sizes: SIZES_VESTUARIO,
@@ -106,7 +151,9 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: '5',
     name: 'Conjunto alfaiataria blazer e calça off-white para eventos',
-    color: 'Off-white',
+    color: 'Branco',
+    style: 'elegante',
+    category: 'conjunto',
     price: 459.5,
     description: 'Conjunto social feminino de alfaiataria com calça flare, perfeito para eventos.',
     sizes: SIZES_VESTUARIO,
@@ -124,6 +171,7 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '6',
     name: 'Bolsa de couro',
     color: 'Marrom',
+    style: 'classico',
     price: 349.0,
     description: 'Bolsa tote de couro lezard na cor marrom com bolso lateral.',
     sizes: SIZES_UNICO,
