@@ -1,9 +1,11 @@
 import { Feather } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/Theme';
+
+import { styles } from './styles';
 
 export function StorefrontToolBar() {
   const router = useRouter();
@@ -31,34 +33,3 @@ export function StorefrontToolBar() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.light.backgroundElement,
-  },
-  iconButtonPressed: {
-    opacity: 0.7,
-  },
-  profileButton: {
-    backgroundColor: Colors.brand.tertiary,
-  },
-});

@@ -1,4 +1,4 @@
-import type { FilterOption, Product } from '../types/product';
+import type { FilterGroup, FilterOption, Product } from '../types/product';
 
 const SIZES_VESTUARIO = [
   { label: 'P', available: true },
@@ -11,7 +11,7 @@ const SIZES_UNICO = [{ label: 'Único', available: true }];
 
 /**
  * Dados mockados usados para montar o layout da storefront sem depender do
- * backend. A integraÃ§Ã£o real com a API de listagem acontece na task
+ * backend. A integração real com a API de listagem acontece na task
  * PIE-45 (Integrar storefront com a API de listagem e scroll infinito).
  */
 export const MOCK_FILTERS: FilterOption[] = [
@@ -20,8 +20,45 @@ export const MOCK_FILTERS: FilterOption[] = [
   { id: 'criativo', label: 'Criativo' },
   { id: 'casual', label: 'Casual' },
   { id: 'classico', label: 'Clássico' },
-  { id: 'minimalista', label: 'Minimalista' },
-  { id: 'elegante', label: 'Elegante' },
+  { id: 'refinado', label: 'Refinado' },
+  { id: 'dramatico', label: 'Dramático' },
+  { id: 'sensual', label: 'Sensual' },
+];
+
+export const MOCK_FILTER_GROUPS: FilterGroup[] = [
+  {
+    id: 'estilos',
+    label: 'Estilos',
+    options: MOCK_FILTERS.filter((filter) => filter.id !== 'todos'),
+  },
+  {
+    id: 'pecas',
+    label: 'Peças de Roupa',
+    options: [
+      { id: 'sapatos', label: 'Sapatos' },
+      { id: 'bermuda', label: 'Bermuda' },
+      { id: 'shorts', label: 'Shorts' },
+      { id: 'conjunto', label: 'Conjunto' },
+      { id: 'camiseta', label: 'Camiseta' },
+      { id: 'camisa', label: 'Camisa' },
+      { id: 'vestido', label: 'Vestido' },
+      { id: 'calca', label: 'Calça' },
+    ],
+  },
+  {
+    id: 'cores',
+    label: 'Cores',
+    options: [
+      { id: 'verde', label: 'Verde' },
+      { id: 'azul', label: 'Azul' },
+      { id: 'marrom', label: 'Marrom' },
+      { id: 'vermelho', label: 'Vermelho' },
+      { id: 'minha-paleta', label: 'Minha paleta' },
+      { id: 'cinza', label: 'Cinza' },
+      { id: 'preto', label: 'Preto' },
+      { id: 'branco', label: 'Branco' },
+    ],
+  },
 ];
 
 const LOJA_PIE: Product['store'] = {
@@ -39,6 +76,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '1',
     name: 'Camisa listrada',
     color: 'Azul e branco',
+    style: 'casual',
+    category: 'camisa',
     price: 199.9,
     description:
       'Camisa de botão com listras verticais azuis e brancas, elegante para o dia a dia.',
@@ -54,6 +93,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '2',
     name: 'Vestido',
     color: 'Verde',
+    style: 'romantico',
+    category: 'vestido',
     price: 199.0,
     description: 'Vestido longo com manga e laço, ideal para ocasiões especiais.',
     sizes: SIZES_VESTUARIO,
@@ -71,6 +112,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '3',
     name: 'Casaco Terracota',
     color: 'Terracota',
+    style: 'casual',
+    category: 'conjunto',
     price: 289.0,
     description:
       'Casaco de tecido acetinado na cor terracota, leve e elegante para a meia estação.',
@@ -86,6 +129,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '4',
     name: 'Calça Jeans',
     color: 'Jeans',
+    style: 'refinado',
+    category: 'calca',
     price: 179.9,
     description: 'Calça jeans de cintura alta com corte reto, clássica e versátil.',
     sizes: SIZES_VESTUARIO,
@@ -99,7 +144,9 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: '5',
     name: 'Conjunto alfaiataria blazer e calça off-white para eventos',
-    color: 'Off-white',
+    color: 'Branco',
+    style: 'elegante',
+    category: 'conjunto',
     price: 459.5,
     description: 'Conjunto social feminino de alfaiataria com calça flare, perfeito para eventos.',
     sizes: SIZES_VESTUARIO,
@@ -117,6 +164,8 @@ export const MOCK_PRODUCTS: Product[] = [
     id: '6',
     name: 'Scarpin nude',
     color: 'Nude',
+    style: 'classico',
+    category: 'sapatos',
     price: 249.0,
     description: 'Scarpin de salto médio na cor nude, clássico e versátil para diversas ocasiões.',
     sizes: [
