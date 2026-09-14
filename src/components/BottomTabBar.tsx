@@ -1,7 +1,8 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { TabTriggerSlotProps } from 'expo-router/ui';
 import { forwardRef } from 'react';
-import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
+import { Platform, Pressable, StyleSheet, View, type ViewProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -47,9 +48,24 @@ export const TabBarButton = forwardRef<View, TabBarButtonProps>(function TabBarB
 export function BottomTabBar(props: ViewProps) {
   const insets = useSafeAreaInsets();
 
+  const webStyle =
+    Platform.OS === 'web'
+      ? ({
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.55)',
+        } as object)
+      : undefined;
+
   return (
     <View {...props} style={[styles.wrapper, { bottom: insets.bottom + Spacing.one }]}>
-      <View style={styles.container}>{props.children}</View>
+      {Platform.OS === 'web' ? (
+        <View style={[styles.container, webStyle]}>{props.children}</View>
+      ) : (
+        <BlurView intensity={70} tint="light" style={styles.container}>
+          {props.children}
+        </BlurView>
+      )}
     </View>
   );
 }
@@ -71,12 +87,10 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.two,
     borderRadius: 999,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.07)',
+    boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.10)',
   },
   button: {
     flex: 1,
