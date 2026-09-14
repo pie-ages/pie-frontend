@@ -1,10 +1,10 @@
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
+import { useAuth } from '@/contexts/AuthContext';
 import type { LoginPayload } from '@/types/Login';
 
 export function useLoginForm() {
-  const router = useRouter();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -35,11 +35,12 @@ export function useLoginForm() {
       await new Promise((resolve) => setTimeout(resolve, 700));
     } catch {
       setError('Não foi possível entrar. Tente novamente.');
-    } finally {
       setIsLoading(false);
+      return;
     }
 
-    router.replace('/screens/Storefront');
+    setIsLoading(false);
+    signIn();
   }
 
   return {
