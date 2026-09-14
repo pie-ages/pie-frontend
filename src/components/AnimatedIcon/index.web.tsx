@@ -5,7 +5,7 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { Keyframe, Easing } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import classes from './AnimatedIcon.module.css';
+import classes from './styles.module.css';
 const DURATION = 300;
 const SPLASH_DURATION = 600;
 const HOLD_DURATION = 3000;

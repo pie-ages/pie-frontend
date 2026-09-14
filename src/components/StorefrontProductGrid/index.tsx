@@ -1,7 +1,9 @@
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList } from 'react-native';
 
 import { StorefrontProductCard } from '@/components/StorefrontProductCard';
-import type { Product } from '@/types/Product';
+import type { Product } from '@/types/product';
+
+import { styles } from './styles';
 
 type StorefrontProductGridProps = {
   products: Product[];
@@ -19,6 +21,7 @@ export function StorefrontProductGrid({
       data={products}
       keyExtractor={(item) => item.id}
       numColumns={2}
+      style={styles.list}
       columnWrapperStyle={styles.row}
       contentContainerStyle={[styles.content, { paddingBottom: contentBottomInset }]}
       showsVerticalScrollIndicator={false}
@@ -28,13 +31,3 @@ export function StorefrontProductGrid({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: 8,
-    paddingTop: 0,
-  },
-  row: {
-    gap: 12,
-  },
-});

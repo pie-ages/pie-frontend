@@ -12,12 +12,12 @@ export type Product = {
   id: string;
   name: string;
   color?: string;
+  style?: string;
+  category?: string;
   price: number;
   description: string;
   sizes: Size[];
-  /** Primeira imagem, usada nos cards da vitrine. */
   imageUrl: string | null;
-  /** Lista completa de imagens para o carrossel na tela de detalhes. */
   images: string[];
   purchaseUrl: string;
   store: Store;
@@ -28,4 +28,12 @@ export type Product = {
 export type FilterOption = {
   id: string;
   label: string;
+};
+
+export type FilterGroupId = 'estilos' | 'pecas' | 'cores';
+
+export type FilterGroup = {
+  id: FilterGroupId;
+  label: string;
+  options: FilterOption[];
 };

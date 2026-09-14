@@ -4,17 +4,20 @@ import { StatusBar } from 'expo-status-bar';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { WishlistProvider } from '@/hooks/UseWishlist';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <StatusBar style="dark" />
+      <WishlistProvider>
+        <StatusBar style="dark" />
 
-      <AnimatedSplashOverlay />
+        <AnimatedSplashOverlay />
 
-      <RootNavigator />
+        <RootNavigator />
+      </WishlistProvider>
     </AuthProvider>
   );
 }
@@ -28,13 +31,11 @@ function RootNavigator() {
         headerShown: false,
       }}
     >
-      {/* Fluxo de autenticação: Stack simples, sem Bottom Tab Bar */}
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="screens/Login" />
         <Stack.Screen name="screens/Register" />
       </Stack.Protected>
 
-      {/* Fluxo principal: Bottom Tab Navigator, só acessível com sessão válida */}
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="screens/Storefront" />
@@ -43,6 +44,7 @@ function RootNavigator() {
       </Stack.Protected>
 
       <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="screens/Wishlist" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

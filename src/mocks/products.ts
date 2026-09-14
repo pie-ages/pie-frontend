@@ -1,4 +1,4 @@
-import type { FilterOption, Product } from '../types/product';
+import type { FilterGroup, FilterOption, Product } from '../types/product';
 
 const SIZES_VESTUARIO = [
   { label: 'P', available: true },
@@ -11,7 +11,7 @@ const SIZES_UNICO = [{ label: 'Único', available: true }];
 
 /**
  * Dados mockados usados para montar o layout da storefront sem depender do
- * backend. A integraÃ§Ã£o real com a API de listagem acontece na task
+ * backend. A integração real com a API de listagem acontece na task
  * PIE-45 (Integrar storefront com a API de listagem e scroll infinito).
  */
 export const MOCK_FILTERS: FilterOption[] = [
@@ -20,8 +20,45 @@ export const MOCK_FILTERS: FilterOption[] = [
   { id: 'criativo', label: 'Criativo' },
   { id: 'casual', label: 'Casual' },
   { id: 'classico', label: 'Clássico' },
-  { id: 'minimalista', label: 'Minimalista' },
-  { id: 'elegante', label: 'Elegante' },
+  { id: 'refinado', label: 'Refinado' },
+  { id: 'dramatico', label: 'Dramático' },
+  { id: 'sensual', label: 'Sensual' },
+];
+
+export const MOCK_FILTER_GROUPS: FilterGroup[] = [
+  {
+    id: 'estilos',
+    label: 'Estilos',
+    options: MOCK_FILTERS.filter((filter) => filter.id !== 'todos'),
+  },
+  {
+    id: 'pecas',
+    label: 'Peças de Roupa',
+    options: [
+      { id: 'sapatos', label: 'Sapatos' },
+      { id: 'bermuda', label: 'Bermuda' },
+      { id: 'shorts', label: 'Shorts' },
+      { id: 'conjunto', label: 'Conjunto' },
+      { id: 'camiseta', label: 'Camiseta' },
+      { id: 'camisa', label: 'Camisa' },
+      { id: 'vestido', label: 'Vestido' },
+      { id: 'calca', label: 'Calça' },
+    ],
+  },
+  {
+    id: 'cores',
+    label: 'Cores',
+    options: [
+      { id: 'verde', label: 'Verde' },
+      { id: 'azul', label: 'Azul' },
+      { id: 'marrom', label: 'Marrom' },
+      { id: 'vermelho', label: 'Vermelho' },
+      { id: 'minha-paleta', label: 'Minha paleta' },
+      { id: 'cinza', label: 'Cinza' },
+      { id: 'preto', label: 'Preto' },
+      { id: 'branco', label: 'Branco' },
+    ],
+  },
 ];
 
 const LOJA_PIE: Product['store'] = {
@@ -37,25 +74,27 @@ const LOJA_VERDE: Product['store'] = {
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: '1',
-    name: 'Camiseta azul',
-    color: 'Azul',
+    name: 'Camisa listrada',
+    color: 'Azul e branco',
+    style: 'casual',
+    category: 'camisa',
     price: 199.9,
-    description: 'Camiseta casual de algodão na cor azul, perfeita para o dia a dia.',
+    description:
+      'Camisa de botão com listras verticais azuis e brancas, elegante para o dia a dia.',
     sizes: SIZES_VESTUARIO,
-    imageUrl:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKaJVW2PbrLE6ScmQiPqNUESa2DJM1JiSHqMGzNj7-TA&s=10',
-    images: [
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKaJVW2PbrLE6ScmQiPqNUESa2DJM1JiSHqMGzNj7-TA&s=10',
-    ],
-    purchaseUrl: 'https://example.com/produtos/camiseta-azul',
+    imageUrl: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80&auto=format',
+    images: ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80&auto=format'],
+    purchaseUrl: 'https://example.com/produtos/camisa-listrada',
     store: LOJA_PIE,
     storeName: LOJA_PIE.name,
     isAvailable: true,
   },
   {
     id: '2',
-    name: 'Vestido Verde',
+    name: 'Vestido',
     color: 'Verde',
+    style: 'romantico',
+    category: 'vestido',
     price: 199.0,
     description: 'Vestido longo com manga e laço, ideal para ocasiões especiais.',
     sizes: SIZES_VESTUARIO,
@@ -71,42 +110,43 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: '3',
-    name: 'Camiseta azul',
-    color: 'Azul',
-    price: 199.9,
-    description: 'Camiseta casual de algodão na cor azul, perfeita para o dia a dia.',
+    name: 'Casaco Terracota',
+    color: 'Terracota',
+    style: 'casual',
+    category: 'conjunto',
+    price: 289.0,
+    description:
+      'Casaco de tecido acetinado na cor terracota, leve e elegante para a meia estação.',
     sizes: SIZES_VESTUARIO,
-    imageUrl:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKaJVW2PbrLE6ScmQiPqNUESa2DJM1JiSHqMGzNj7-TA&s=10',
-    images: [
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKaJVW2PbrLE6ScmQiPqNUESa2DJM1JiSHqMGzNj7-TA&s=10',
-    ],
-    purchaseUrl: 'https://example.com/produtos/camiseta-azul-2',
+    imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80&auto=format',
+    images: ['https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80&auto=format'],
+    purchaseUrl: 'https://example.com/produtos/casaco-terracota',
     store: LOJA_PIE,
     storeName: LOJA_PIE.name,
     isAvailable: true,
   },
   {
     id: '4',
-    name: 'Camiseta azul',
-    color: 'Azul',
-    price: 199.9,
-    description: 'Camiseta casual de algodão na cor azul, perfeita para o dia a dia.',
+    name: 'Calça Jeans',
+    color: 'Jeans',
+    style: 'refinado',
+    category: 'calca',
+    price: 179.9,
+    description: 'Calça jeans de cintura alta com corte reto, clássica e versátil.',
     sizes: SIZES_VESTUARIO,
-    imageUrl:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKaJVW2PbrLE6ScmQiPqNUESa2DJM1JiSHqMGzNj7-TA&s=10',
-    images: [
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKaJVW2PbrLE6ScmQiPqNUESa2DJM1JiSHqMGzNj7-TA&s=10',
-    ],
-    purchaseUrl: 'https://example.com/produtos/camiseta-azul-3',
-    store: LOJA_PIE,
-    storeName: LOJA_PIE.name,
+    imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80&auto=format',
+    images: ['https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80&auto=format'],
+    purchaseUrl: 'https://example.com/produtos/calca-jeans',
+    store: LOJA_VERDE,
+    storeName: LOJA_VERDE.name,
     isAvailable: false,
   },
   {
     id: '5',
     name: 'Conjunto alfaiataria blazer e calça off-white para eventos',
-    color: 'Off-white',
+    color: 'Branco',
+    style: 'elegante',
+    category: 'conjunto',
     price: 459.5,
     description: 'Conjunto social feminino de alfaiataria com calça flare, perfeito para eventos.',
     sizes: SIZES_VESTUARIO,
@@ -122,17 +162,22 @@ export const MOCK_PRODUCTS: Product[] = [
   },
   {
     id: '6',
-    name: 'Bolsa de couro',
-    color: 'Marrom',
-    price: 349.0,
-    description: 'Bolsa tote de couro lezard na cor marrom com bolso lateral.',
-    sizes: SIZES_UNICO,
-    imageUrl:
-      'https://corello.fbitsstatic.net/img/p/bolsa-tote-couro-lezard-marrom-couro-marrom-bolso-lateral-158546/351572-9.jpg?w=1600&v=202608251512',
-    images: [
-      'https://corello.fbitsstatic.net/img/p/bolsa-tote-couro-lezard-marrom-couro-marrom-bolso-lateral-158546/351572-9.jpg?w=1600&v=202608251512',
+    name: 'Scarpin nude',
+    color: 'Nude',
+    style: 'classico',
+    category: 'sapatos',
+    price: 249.0,
+    description: 'Scarpin de salto médio na cor nude, clássico e versátil para diversas ocasiões.',
+    sizes: [
+      { label: '35', available: true },
+      { label: '36', available: true },
+      { label: '37', available: true },
+      { label: '38', available: false },
+      { label: '39', available: true },
     ],
-    purchaseUrl: 'https://example.com/produtos/bolsa-couro',
+    imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&q=80&auto=format',
+    images: ['https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&q=80&auto=format'],
+    purchaseUrl: 'https://example.com/produtos/scarpin-nude',
     store: LOJA_PIE,
     storeName: LOJA_PIE.name,
     isAvailable: true,

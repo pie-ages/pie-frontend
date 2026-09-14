@@ -1,9 +1,11 @@
 import Feather from '@expo/vector-icons/Feather';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, type TextInputProps } from 'react-native';
+import { Pressable, type TextInputProps } from 'react-native';
 
 import { AuthInput } from '@/components/AuthInput';
 import { Colors } from '@/constants/Theme';
+
+import { styles } from './styles';
 
 type AuthPasswordInputProps = Omit<TextInputProps, 'secureTextEntry'> & {
   label: string;
@@ -42,12 +44,3 @@ export function AuthPasswordInput({
     />
   );
 }
-
-const styles = StyleSheet.create({
-  visibilityButton: {
-    height: '100%',
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

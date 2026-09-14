@@ -11,6 +11,7 @@ import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { useTheme } from '@/hooks/UseTheme';
+import { useWishlist } from '@/hooks/UseWishlist';
 
 import { styles } from './styles.native';
 
@@ -25,6 +26,7 @@ function ProductDetails({ id }: { id?: string }) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [loadedProductId, setLoadedProductId] = useState<string | undefined>(undefined);
   const { product, isLoading, error } = useProductDetails(id);
+  const { toggle, isInWishlist } = useWishlist();
 
   if (product && product.id !== loadedProductId) {
     setLoadedProductId(product.id);
@@ -72,7 +74,12 @@ function ProductDetails({ id }: { id?: string }) {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      <ProductHeader title={product.name} onClose={handleClose} />
+      <ProductHeader
+        title={product.name}
+        onClose={handleClose}
+        isWishlisted={isInWishlist(product.id)}
+        onToggleWishlist={() => toggle(product)}
+      />
 
       <ScrollView
         style={styles.scrollView}

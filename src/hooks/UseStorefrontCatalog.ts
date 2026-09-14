@@ -2,11 +2,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
 import { MOCK_PRODUCTS } from '@/mocks/products';
-import type { Product } from '@/types/Product';
+import type { Product } from '@/types/product';
 
 export type StorefrontStatus = 'loading' | 'success' | 'error' | 'empty';
 
-const FORCEABLE_STATUSES = ['loading', 'error', 'empty'] as const;
+const FORCEABLE_STATUSES = ['loading', 'error', 'empty'];
 type ForceableStatus = (typeof FORCEABLE_STATUSES)[number];
 
 function resolveForcedStatus(value: string | string[] | undefined): ForceableStatus | null {
