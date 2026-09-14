@@ -28,4 +28,7 @@ export const styles = StyleSheet.create({
   profileButton: {
     backgroundColor: Colors.brand.tertiary,
   },
+  iconButtonPressed: {
+    opacity: 0.7,
+  },
 });

@@ -1,6 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -12,11 +11,17 @@ import { styles } from './styles';
 type ProductHeaderProps = {
   title: string;
   onClose: () => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: () => void;
 };
 
-export function ProductHeader({ title, onClose }: ProductHeaderProps) {
+export function ProductHeader({
+  title,
+  onClose,
+  isWishlisted = false,
+  onToggleWishlist,
+}: ProductHeaderProps) {
   const theme = useTheme();
-  const [isClipboardActive, setIsClipboardActive] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -34,15 +39,18 @@ export function ProductHeader({ title, onClose }: ProductHeaderProps) {
       </ThemedText>
 
       <Pressable
-        onPress={() => setIsClipboardActive((current) => !current)}
-        style={[styles.iconButton, { backgroundColor: theme.backgroundElement }]}
+        onPress={onToggleWishlist}
+        style={[
+          styles.iconButton,
+          { backgroundColor: isWishlisted ? BrandColors.primary : theme.backgroundElement },
+        ]}
         hitSlop={8}
       >
-        {isClipboardActive ? (
-          <MaterialCommunityIcons name="clipboard-check" size={22} color={BrandColors.primary} />
-        ) : (
-          <Feather name="clipboard" size={22} color={theme.text} />
-        )}
+        <MaterialCommunityIcons
+          name="clipboard-text-outline"
+          size={22}
+          color={isWishlisted ? '#FFFFFF' : theme.text}
+        />
       </Pressable>
     </View>
   );

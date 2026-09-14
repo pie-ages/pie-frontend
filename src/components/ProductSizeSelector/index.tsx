@@ -39,7 +39,7 @@ export function ProductSizeSelector({
                 !size.available && styles.labelUnavailable,
               ]}
             >
-              {size.label}
+              {size.label === 'Único' ? 'U' : size.label}
             </Text>
 
             {!size.available && (

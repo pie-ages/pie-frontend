@@ -1,5 +1,7 @@
 import { StyleSheet } from 'react-native';
 
+import { BrandColors } from '@/constants/Theme';
+
 export const CARD_WIDTH = 176;
 
 export const styles = StyleSheet.create({
@@ -32,6 +34,23 @@ export const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  wishlistButton: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wishlistButtonActive: {
+    backgroundColor: BrandColors.primary,
+  },
+  wishlistButtonPressed: {
+    opacity: 0.7,
   },
   storeLogo: {
     position: 'absolute',

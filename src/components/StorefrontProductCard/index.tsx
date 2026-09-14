@@ -1,7 +1,10 @@
 import { Feather } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+import { useWishlist } from '@/hooks/UseWishlist';
 import type { Product } from '@/types/product';
 import { formatPrice } from '@/utils/FormatPrice';
 
@@ -15,6 +18,9 @@ type StorefrontProductCardProps = {
 };
 
 export function StorefrontProductCard({ product, onPress }: StorefrontProductCardProps) {
+  const { toggle, isInWishlist } = useWishlist();
+  const wishlisted = isInWishlist(product.id);
+
   return (
     <Pressable
       onPress={onPress}
@@ -28,6 +34,22 @@ export function StorefrontProductCard({ product, onPress }: StorefrontProductCar
             <Feather name="image" size={28} color="#B0B4BA" />
           </View>
         )}
+
+        <Pressable
+          onPress={() => toggle(product)}
+          style={({ pressed }) => [
+            styles.wishlistButton,
+            wishlisted && styles.wishlistButtonActive,
+            pressed && styles.wishlistButtonPressed,
+          ]}
+          hitSlop={4}
+        >
+          <MaterialCommunityIcons
+            name="clipboard-text-outline"
+            size={18}
+            color={wishlisted ? Colors.white : Colors.icon}
+          />
+        </Pressable>
       </View>
 
       <View style={styles.info}>
