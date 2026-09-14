@@ -1,17 +1,28 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useRouter } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/Theme';
 
 export function StorefrontToolBar() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Vitrine</Text>
 
       <View style={styles.actions}>
-        <View style={styles.iconButton}>
-          <Feather name="shopping-bag" size={18} color={Colors.light.text} />
-        </View>
+        <Pressable
+          onPress={() => router.push('/screens/Wishlist')}
+          style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
+        >
+          <MaterialCommunityIcons
+            name="clipboard-text-outline"
+            size={18}
+            color={Colors.light.text}
+          />
+        </Pressable>
 
         <View style={[styles.iconButton, styles.profileButton]}>
           <Feather name="user" size={18} color={Colors.light.text} />
@@ -43,6 +54,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.light.backgroundElement,
+  },
+  iconButtonPressed: {
+    opacity: 0.7,
   },
   profileButton: {
     backgroundColor: Colors.brand.tertiary,
