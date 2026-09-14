@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
@@ -9,11 +9,10 @@ import { ProductHeader } from '@/components/ProductHeader';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
+import { BrandColors, Spacing } from '@/constants/Theme';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { useTheme } from '@/hooks/UseTheme';
 import { useWishlist } from '@/hooks/UseWishlist';
-
-import { styles } from './styles.native';
 
 export default function ProductDetailsScreen() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
@@ -152,3 +151,69 @@ function ProductDetails({ id }: { id?: string }) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.four,
+  },
+  centerText: {
+    textAlign: 'center',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  content: {
+    paddingTop: Spacing.half,
+    paddingBottom: Spacing.six,
+  },
+  imageWrapper: {
+    marginBottom: 44,
+  },
+  sectionsWrapper: {
+    paddingHorizontal: Spacing.three,
+    gap: Spacing.three,
+  },
+  descriptionSection: {
+    gap: Spacing.one,
+  },
+  sizeSection: {
+    gap: Spacing.two,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sectionLabel: {
+    fontSize: 17,
+    lineHeight: 17,
+  },
+  descriptionText: {
+    fontSize: 17,
+    lineHeight: 17,
+    fontWeight: '400',
+  },
+  priceValue: {
+    fontSize: 32,
+    lineHeight: 32,
+    fontWeight: '700',
+  },
+  storeValue: {
+    color: BrandColors.primary,
+    fontSize: 17,
+    lineHeight: 17,
+    fontWeight: '700',
+  },
+  footer: {
+    gap: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    paddingBottom: Spacing.three,
+    paddingTop: Spacing.two,
+  },
+});
