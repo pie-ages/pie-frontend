@@ -11,7 +11,8 @@ import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { useTheme } from '@/hooks/UseTheme';
-import { styles } from '@/styles/ProductDetailsScreen';
+
+import { styles } from './styles.native';
 
 export default function ProductDetailsScreen() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
