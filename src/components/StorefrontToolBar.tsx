@@ -1,9 +1,18 @@
 import { Feather } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/Theme';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function StorefrontToolBar() {
+  const { signOut } = useAuth();
+
+  function handleLogout() {
+    signOut();
+    router.replace('/screens/Login');
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Vitrine</Text>
@@ -13,9 +22,13 @@ export function StorefrontToolBar() {
           <Feather name="shopping-bag" size={18} color={Colors.light.text} />
         </View>
 
-        <View style={[styles.iconButton, styles.profileButton]}>
+        <Pressable
+          style={[styles.iconButton, styles.profileButton]}
+          onPress={handleLogout}
+          accessibilityLabel="Sair"
+        >
           <Feather name="user" size={18} color={Colors.light.text} />
-        </View>
+        </Pressable>
       </View>
     </View>
   );
