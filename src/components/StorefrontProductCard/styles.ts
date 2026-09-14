@@ -6,7 +6,7 @@ export const CARD_WIDTH = 176;
 
 export const styles = StyleSheet.create({
   card: {
-    width: CARD_WIDTH,
+    flex: 1,
     borderRadius: 20,
     backgroundColor: '#F0F0F0',
     borderWidth: 1,
