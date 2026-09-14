@@ -1,7 +1,10 @@
 import { Feather } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BrandColors, Colors } from '@/constants/Theme';
+import { useWishlist } from '@/hooks/UseWishlist';
 import type { Product } from '@/types/Product';
 import { formatPrice } from '@/utils/FormatPrice';
 
@@ -11,6 +14,9 @@ type StorefrontProductCardProps = {
 };
 
 export function StorefrontProductCard({ product, onPress }: StorefrontProductCardProps) {
+  const { toggle, isInWishlist } = useWishlist();
+  const wishlisted = isInWishlist(product.id);
+
   return (
     <Pressable
       onPress={onPress}
@@ -24,6 +30,22 @@ export function StorefrontProductCard({ product, onPress }: StorefrontProductCar
             <Feather name="image" size={28} color="#B0B4BA" />
           </View>
         )}
+
+        <Pressable
+          onPress={() => toggle(product)}
+          style={({ pressed }) => [
+            styles.wishlistButton,
+            wishlisted && styles.wishlistButtonActive,
+            pressed && styles.wishlistButtonPressed,
+          ]}
+          hitSlop={4}
+        >
+          <MaterialCommunityIcons
+            name="clipboard-text-outline"
+            size={18}
+            color={wishlisted ? Colors.white : Colors.icon}
+          />
+        </Pressable>
       </View>
 
       <View style={styles.info}>
@@ -67,6 +89,23 @@ const styles = StyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  wishlistButton: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.88)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wishlistButtonActive: {
+    backgroundColor: BrandColors.primary,
+  },
+  wishlistButtonPressed: {
+    opacity: 0.7,
   },
   storeLogo: {
     position: 'absolute',
