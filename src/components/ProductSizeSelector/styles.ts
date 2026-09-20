@@ -27,6 +27,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#000000',
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   labelSelected: {
     color: '#FFFFFF',

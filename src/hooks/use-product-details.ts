@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { MOCK_PRODUCTS } from '../mocks/products';
+import { fetchProductDetail } from '@/api/products';
+
 import type { Product } from '../types/product';
 
 export function useProductDetails(id: string | undefined) {
@@ -12,23 +13,37 @@ export function useProductDetails(id: string | undefined) {
     let isActive = true;
 
     async function loadProduct() {
+      if (!id) {
+        setIsLoading(false);
+        setError('Não foi possível carregar este produto.');
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
       setProduct(null);
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 700));
+        const detail = await fetchProductDetail(id);
 
         if (!isActive) return;
 
-        const found = id ? MOCK_PRODUCTS.find((p) => p.id === id) : undefined;
-
-        if (!found) {
-          setError('Não foi possível carregar este produto.');
-          return;
-        }
-
-        setProduct(found);
+        setProduct({
+          id: detail.id,
+          name: detail.name,
+          description: detail.description ?? '',
+          category: detail.category ?? undefined,
+          color: detail.color ?? undefined,
+          style: detail.styles[0] ?? undefined,
+          price: detail.price,
+          imageUrl: detail.imageUrl,
+          images: detail.imageUrl ? [detail.imageUrl] : [],
+          purchaseUrl: detail.purchaseUrl,
+          store: { name: detail.companyName ?? '', logoUrl: '' },
+          storeName: detail.companyName ?? '',
+          isAvailable: detail.available,
+          sizes: detail.sizes.map((s) => ({ label: s, available: true })),
+        });
       } catch {
         if (isActive) {
           setError('Não foi possível carregar este produto.');

@@ -30,7 +30,7 @@ export type FilterOption = {
   label: string;
 };
 
-export type FilterGroupId = 'estilos' | 'pecas' | 'cores';
+export type FilterGroupId = 'estilos' | 'pecas' | 'cores' | 'lojas';
 
 export type FilterGroup = {
   id: FilterGroupId;
