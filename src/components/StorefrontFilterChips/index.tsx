@@ -1,6 +1,6 @@
 import { Pressable, ScrollView, Text } from 'react-native';
 
-import type { FilterGroup, FilterGroupId } from '@/types/product';
+import type { FilterGroup, FilterGroupId } from '@/types/Filter';
 
 import { styles } from './styles';
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { fetchCompanies } from '@/api/companies';
 import { fetchTaxonomy } from '@/api/taxonomy';
-import type { FilterGroup } from '@/types/product';
+import type { FilterGroup } from '@/types/Filter';
 
 type TaxonomyState = {
   filterGroups: FilterGroup[];

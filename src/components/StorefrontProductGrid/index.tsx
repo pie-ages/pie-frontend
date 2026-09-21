@@ -1,12 +1,12 @@
 import { FlatList, Platform, ScrollView, View } from 'react-native';
 
 import { StorefrontProductCard } from '@/components/StorefrontProductCard';
-import type { Product } from '@/types/product';
+import type { CatalogItem } from '@/types/Product';
 
 import { styles } from './styles';
 
 type StorefrontProductGridProps = {
-  products: Product[];
+  products: CatalogItem[];
   onProductPress: (productId: string) => void;
   contentBottomInset: number;
 };
@@ -17,7 +17,7 @@ export function StorefrontProductGrid({
   contentBottomInset,
 }: StorefrontProductGridProps) {
   if (Platform.OS === 'web') {
-    const rows: Product[][] = [];
+    const rows: CatalogItem[][] = [];
     for (let i = 0; i < products.length; i += 2) {
       rows.push(products.slice(i, i + 2));
     }
@@ -42,7 +42,7 @@ export function StorefrontProductGrid({
     );
   }
 
-  const data: (Product | null)[] = products.length % 2 !== 0 ? [...products, null] : products;
+  const data: (CatalogItem | null)[] = products.length % 2 !== 0 ? [...products, null] : products;
 
   return (
     <FlatList

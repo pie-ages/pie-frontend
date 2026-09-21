@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
-import type { LoginPayload } from '@/types/Login';
+import type { LoginPayload } from '@/shared/Login';
 
 export function useLoginForm() {
   const { signIn } = useAuth();
