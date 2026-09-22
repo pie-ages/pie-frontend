@@ -9,11 +9,13 @@ export function fetchCatalog(params: CatalogParams = {}): Promise<CatalogPage> {
   params.categories?.forEach((c) => qs.append('categories', c));
   params.colors?.forEach((c) => qs.append('colors', c));
   params.companies?.forEach((c) => qs.append('companies', c));
-  if (params.page !== undefined) qs.set('page', String(params.page));
-  if (params.size !== undefined) qs.set('size', String(params.size));
-  return apiFetch<CatalogPage>('/products', qs);
+  params.materials?.forEach((m) => qs.append('materials', m));
+  qs.set('page', String(params.page ?? 0));
+  qs.set('size', String(params.size ?? 20));
+  qs.set('sort', params.sort ?? 'name,ASC');
+  return apiFetch<CatalogPage>('/api/products', qs);
 }
 
 export function fetchProductDetail(id: string): Promise<ProductPublicDetail> {
-  return apiFetch<ProductPublicDetail>(`/products/${id}/public`);
+  return apiFetch<ProductPublicDetail>(`/api/products/${id}/public`);
 }

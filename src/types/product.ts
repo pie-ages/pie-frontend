@@ -35,6 +35,8 @@ export type CatalogParams = {
   companies?: string[];
   page?: number;
   size?: number;
+  sort?: string;
+  materials?: string[];
 };
 
 export type ProductPublicDetail = {

@@ -9,7 +9,13 @@ const SEARCH_DEBOUNCE_MS = 300;
 type FiltersByGroup = Record<FilterGroupId, Set<string>>;
 
 function createEmptyFilters(): FiltersByGroup {
-  return { estilos: new Set(), pecas: new Set(), cores: new Set(), lojas: new Set() };
+  return {
+    estilos: new Set(),
+    pecas: new Set(),
+    cores: new Set(),
+    materiais: new Set(),
+    lojas: new Set(),
+  };
 }
 
 function toggleInSet(set: Set<string>, value: string): Set<string> {
@@ -47,6 +53,7 @@ export function useStorefrontFilters() {
       pecas: new Set(appliedFiltersByGroup.pecas),
       cores: new Set(appliedFiltersByGroup.cores),
       lojas: new Set(appliedFiltersByGroup.lojas),
+      materiais: new Set(appliedFiltersByGroup.materiais),
     });
   }, [appliedFiltersByGroup]);
 
@@ -84,6 +91,7 @@ export function useStorefrontFilters() {
         ...appliedFiltersByGroup.pecas,
         ...appliedFiltersByGroup.cores,
         ...appliedFiltersByGroup.lojas,
+        ...appliedFiltersByGroup.materiais,
       ]),
     [appliedFiltersByGroup],
   );
@@ -98,6 +106,8 @@ export function useStorefrontFilters() {
       colors: appliedFiltersByGroup.cores.size > 0 ? [...appliedFiltersByGroup.cores] : undefined,
       companies:
         appliedFiltersByGroup.lojas.size > 0 ? [...appliedFiltersByGroup.lojas] : undefined,
+      materials:
+        appliedFiltersByGroup.materiais.size > 0 ? [...appliedFiltersByGroup.materiais] : undefined,
     }),
     [debouncedSearch, appliedFiltersByGroup],
   );

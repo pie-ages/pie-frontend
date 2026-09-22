@@ -17,7 +17,7 @@ let cached: TaxonomyResponse | null = null;
 
 export async function fetchTaxonomy(): Promise<TaxonomyResponse> {
   if (cached) return cached;
-  const data = await apiFetch<TaxonomyResponse>('/taxonomy');
+  const data = await apiFetch<TaxonomyResponse>('/api/taxonomy');
   cached = data;
   return data;
 }

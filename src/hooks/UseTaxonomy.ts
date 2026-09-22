@@ -46,6 +46,11 @@ export function useTaxonomy(): TaxonomyState {
               label: 'Lojas',
               options: companies.filter((c) => c.name).map((c) => ({ id: c.id, label: c.name })),
             },
+            {
+              id: 'materiais',
+              label: 'Materiais',
+              options: taxonomy.materials.map((t) => ({ id: t.id, label: t.name })),
+            },
           ],
         });
       },

@@ -23,6 +23,10 @@ function makeParamsKey(params: CatalogParams): string {
     [...(params.categories ?? [])].sort().join(','),
     [...(params.colors ?? [])].sort().join(','),
     [...(params.companies ?? [])].sort().join(','),
+    [...(params.materials ?? [])].sort().join(','),
+    params.page ?? 0,
+    params.size ?? 20,
+    params.sort ?? 'name,ASC',
   ].join('|');
 }
 
