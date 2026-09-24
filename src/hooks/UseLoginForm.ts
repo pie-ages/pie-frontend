@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { AuthApiError, login } from '@/lib/auth/auth.service';
 import type { LoginPayload } from '@/types/Login';
 
 export function useLoginForm() {
@@ -10,12 +11,15 @@ export function useLoginForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestInProgress = useRef(false);
 
   function togglePasswordVisibility() {
     setIsPasswordVisible((currentValue) => !currentValue);
   }
 
   async function handleLogin() {
+    if (requestInProgress.current) return;
+
     setError(null);
 
     if (!email.trim() || !password) {
@@ -23,24 +27,27 @@ export function useLoginForm() {
       return;
     }
 
-    const _payload: LoginPayload = {
+    const payload: LoginPayload = {
       email: email.trim(),
       password,
     };
 
+    requestInProgress.current = true;
     setIsLoading(true);
 
     try {
-      // A autenticação real será integrada à API futuramente, agora é apenas simulação com o payload pronto
-      await new Promise((resolve) => setTimeout(resolve, 700));
-    } catch {
-      setError('Não foi possível entrar. Tente novamente.');
+      const response = await login(payload);
+      await signIn(response.token);
+    } catch (loginError) {
+      setError(
+        loginError instanceof AuthApiError
+          ? loginError.message
+          : 'Não foi possível conectar. Verifique sua conexão e tente novamente.',
+      );
+    } finally {
+      requestInProgress.current = false;
       setIsLoading(false);
-      return;
     }
-
-    setIsLoading(false);
-    signIn();
   }
 
   return {

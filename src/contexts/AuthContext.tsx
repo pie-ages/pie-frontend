@@ -1,24 +1,53 @@
-import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
+
+import { getStoredToken, removeStoredToken, storeToken } from '@/lib/auth/auth.storage';
 
 type AuthContextValue = {
   isAuthenticated: boolean;
-  signIn: () => void;
-  signOut: () => void;
+  isInitializing: boolean;
+  signIn: (token: string) => Promise<void>;
+  signOut: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      isAuthenticated,
-      signIn: () => setIsAuthenticated(true),
-      signOut: () => setIsAuthenticated(false),
-    }),
-    [isAuthenticated],
-  );
+  useEffect(() => {
+    let isActive = true;
+
+    getStoredToken()
+      .then((storedToken) => {
+        if (isActive) setToken(storedToken);
+      })
+      .catch(() => removeStoredToken())
+      .finally(() => {
+        if (isActive) setIsInitializing(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  async function signIn(newToken: string) {
+    await storeToken(newToken);
+    setToken(newToken);
+  }
+
+  async function signOut() {
+    await removeStoredToken();
+    setToken(null);
+  }
+
+  const value: AuthContextValue = {
+    isAuthenticated: token !== null,
+    isInitializing,
+    signIn,
+    signOut,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
