@@ -1,7 +1,7 @@
 import { FlatList, Platform, ScrollView, View } from 'react-native';
 
 import { StorefrontProductCard } from '@/components/StorefrontProductCard';
-import type { CatalogItem } from '@/types/product';
+import type { CatalogItem } from '@/types/Product';
 
 import { styles } from './styles';
 

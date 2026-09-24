@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDebouncedValue } from '@/hooks/UseDebouncedValue';
 import type { FilterGroupId } from '@/types/Filter';
-import type { CatalogParams } from '@/types/product';
+import type { CatalogParams } from '@/types/Product';
 
 const SEARCH_DEBOUNCE_MS = 300;
 

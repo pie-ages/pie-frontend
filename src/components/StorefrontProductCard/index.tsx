@@ -5,7 +5,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/hooks/UseWishlist';
-import type { CatalogItem } from '@/types/product';
+import type { CatalogItem } from '@/types/Product';
 import { formatPrice } from '@/utils/FormatPrice';
 
 import { styles, CARD_WIDTH } from './styles';

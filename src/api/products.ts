@@ -1,4 +1,4 @@
-import type { CatalogPage, CatalogParams, ProductPublicDetail } from '@/types/product';
+import type { CatalogPage, CatalogParams, ProductPublicDetail } from '@/types/Product';
 
 import { apiFetch } from './client';
 

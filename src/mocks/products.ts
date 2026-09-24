@@ -1,5 +1,5 @@
 import type { FilterGroup, FilterOption } from '@/types/Filter';
-import type { CatalogItem } from '@/types/product';
+import type { CatalogItem } from '@/types/Product';
 
 export const MOCK_FILTERS: FilterOption[] = [
   { id: 'todos', label: 'Todos' },

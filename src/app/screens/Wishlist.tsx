@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/hooks/UseWishlist';
-import type { CatalogItem } from '@/types/product';
+import type { CatalogItem } from '@/types/Product';
 import { formatPrice } from '@/utils/FormatPrice';
 
 export default function WishlistScreen() {

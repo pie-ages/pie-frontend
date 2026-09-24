@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { fetchCatalog } from '@/api/products';
-import type { CatalogItem, CatalogParams } from '@/types/product';
+import type { CatalogItem, CatalogParams } from '@/types/Product';
 
 export type StorefrontStatus = 'loading' | 'success' | 'error' | 'empty';
 
