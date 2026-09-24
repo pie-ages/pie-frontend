@@ -1,66 +1,59 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDebouncedValue } from '@/hooks/UseDebouncedValue';
-import type { FilterGroupId, Product } from '@/types/product';
+import type { FilterGroupId } from '@/types/Filter';
+import type { CatalogParams } from '@/types/Product';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 type FiltersByGroup = Record<FilterGroupId, Set<string>>;
 
 function createEmptyFilters(): FiltersByGroup {
-  return { estilos: new Set(), pecas: new Set(), cores: new Set() };
+  return {
+    estilos: new Set(),
+    pecas: new Set(),
+    cores: new Set(),
+    materiais: new Set(),
+    lojas: new Set(),
+  };
 }
 
 function toggleInSet(set: Set<string>, value: string): Set<string> {
   const next = new Set(set);
-  if (next.has(value)) {
-    next.delete(value);
-  } else {
-    next.add(value);
-  }
+  if (next.has(value)) next.delete(value);
+  else next.add(value);
   return next;
 }
 
-const PRODUCT_ATTRIBUTE_BY_GROUP: Record<FilterGroupId, (product: Product) => string | undefined> =
-  {
-    estilos: (product) => product.style,
-    pecas: (product) => product.category,
-    cores: (product) => product.color?.toLowerCase(),
-  };
-
-function matchesFilters(product: Product, filters: FiltersByGroup): boolean {
-  return (Object.keys(filters) as FilterGroupId[]).every((groupId) => {
-    const selected = filters[groupId];
-    if (selected.size === 0) return true;
-
-    const attribute = PRODUCT_ATTRIBUTE_BY_GROUP[groupId](product);
-    return attribute != null && selected.has(attribute);
-  });
-}
-
-function matchesSearch(product: Product, search: string): boolean {
-  if (!search) return true;
-  const term = search.toLowerCase();
-  return (
-    product.name.toLowerCase().includes(term) || product.storeName.toLowerCase().includes(term)
-  );
-}
+// Persiste o estado entre unmount/remount causado por navegação de modal na web.
+let _cachedSearch = '';
+let _cachedAppliedFilters: FiltersByGroup = createEmptyFilters();
 
 export function useStorefrontFilters() {
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState(_cachedSearch);
   const debouncedSearch = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS);
   const isSearchPending = searchInput !== debouncedSearch;
 
-  const [appliedFiltersByGroup, setAppliedFiltersByGroup] =
-    useState<FiltersByGroup>(createEmptyFilters);
+  const [appliedFiltersByGroup, setAppliedFiltersByGroup] = useState<FiltersByGroup>(
+    () => _cachedAppliedFilters,
+  );
   const [pendingFiltersByGroup, setPendingFiltersByGroup] =
     useState<FiltersByGroup>(createEmptyFilters);
+
+  useEffect(() => {
+    _cachedSearch = searchInput;
+  }, [searchInput]);
+  useEffect(() => {
+    _cachedAppliedFilters = appliedFiltersByGroup;
+  }, [appliedFiltersByGroup]);
 
   const openSheetDraft = useCallback(() => {
     setPendingFiltersByGroup({
       estilos: new Set(appliedFiltersByGroup.estilos),
       pecas: new Set(appliedFiltersByGroup.pecas),
       cores: new Set(appliedFiltersByGroup.cores),
+      lojas: new Set(appliedFiltersByGroup.lojas),
+      materiais: new Set(appliedFiltersByGroup.materiais),
     });
   }, [appliedFiltersByGroup]);
 
@@ -91,23 +84,32 @@ export function useStorefrontFilters() {
     setSearchInput('');
   }, []);
 
-  const filterProducts = useCallback(
-    (products: Product[]) =>
-      products.filter(
-        (product) =>
-          matchesSearch(product, debouncedSearch) && matchesFilters(product, appliedFiltersByGroup),
-      ),
-    [debouncedSearch, appliedFiltersByGroup],
-  );
-
   const appliedFilterIds = useMemo(
     () =>
       new Set([
         ...appliedFiltersByGroup.estilos,
         ...appliedFiltersByGroup.pecas,
         ...appliedFiltersByGroup.cores,
+        ...appliedFiltersByGroup.lojas,
+        ...appliedFiltersByGroup.materiais,
       ]),
     [appliedFiltersByGroup],
+  );
+
+  const catalogParams = useMemo(
+    (): CatalogParams => ({
+      search: debouncedSearch || undefined,
+      styles:
+        appliedFiltersByGroup.estilos.size > 0 ? [...appliedFiltersByGroup.estilos] : undefined,
+      categories:
+        appliedFiltersByGroup.pecas.size > 0 ? [...appliedFiltersByGroup.pecas] : undefined,
+      colors: appliedFiltersByGroup.cores.size > 0 ? [...appliedFiltersByGroup.cores] : undefined,
+      companies:
+        appliedFiltersByGroup.lojas.size > 0 ? [...appliedFiltersByGroup.lojas] : undefined,
+      materials:
+        appliedFiltersByGroup.materiais.size > 0 ? [...appliedFiltersByGroup.materiais] : undefined,
+    }),
+    [debouncedSearch, appliedFiltersByGroup],
   );
 
   return {
@@ -123,6 +125,6 @@ export function useStorefrontFilters() {
     applyPendingFilters,
     clearAllFilters,
     clearSearch,
-    filterProducts,
+    catalogParams,
   };
 }
