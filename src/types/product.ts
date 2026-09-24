@@ -1,39 +1,58 @@
-export type Size = {
-  label: string;
-  available: boolean;
+export type ProductImage = {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  displayOrder: number;
 };
 
-export type Store = {
-  name: string;
-  logoUrl: string;
-};
-
-export type Product = {
+export type CatalogItem = {
   id: string;
   name: string;
-  color?: string;
-  style?: string;
-  category?: string;
+  category: string | null;
+  color: string | null;
   price: number;
-  description: string;
-  sizes: Size[];
   imageUrl: string | null;
-  images: string[];
   purchaseUrl: string;
-  store: Store;
-  storeName: string;
-  isAvailable: boolean;
+  companyName: string | null;
+  status: string;
+  styles: string[];
+  sizes: string[];
+  materials: string[];
 };
 
-export type FilterOption = {
+export type CatalogPage = {
+  items: CatalogItem[];
+  total: number;
+  page: number;
+  size: number;
+};
+
+export type CatalogParams = {
+  search?: string;
+  styles?: string[];
+  categories?: string[];
+  colors?: string[];
+  companies?: string[];
+  page?: number;
+  size?: number;
+  sort?: string;
+  materials?: string[];
+};
+
+export type ProductPublicDetail = {
   id: string;
-  label: string;
-};
-
-export type FilterGroupId = 'estilos' | 'pecas' | 'cores';
-
-export type FilterGroup = {
-  id: FilterGroupId;
-  label: string;
-  options: FilterOption[];
+  name: string;
+  description: string | null;
+  category: string | null;
+  color: string | null;
+  price: number;
+  imageUrl: string | null;
+  purchaseUrl: string;
+  companyName: string | null;
+  styles: string[];
+  sizes: string[];
+  materials: string[];
+  available: boolean;
+  images: ProductImage[];
+  inWishlist: boolean;
 };

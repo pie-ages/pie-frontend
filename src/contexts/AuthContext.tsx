@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
-import { getStoredToken, removeStoredToken, storeToken } from '@/lib/auth/auth.storage';
+import { getStoredToken, removeStoredToken, storeToken } from '@/utils/auth-storage';
 
 type AuthContextValue = {
   isAuthenticated: boolean;

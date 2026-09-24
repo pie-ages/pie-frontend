@@ -1,10 +1,10 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 
-import type { Product } from '@/types/product';
+import type { CatalogItem } from '@/types/product';
 
 type WishlistContextValue = {
-  items: Product[];
-  toggle: (product: Product) => void;
+  items: CatalogItem[];
+  toggle: (product: CatalogItem) => void;
   remove: (productId: string) => void;
   isInWishlist: (productId: string) => boolean;
 };
@@ -12,9 +12,9 @@ type WishlistContextValue = {
 const WishlistContext = createContext<WishlistContextValue | null>(null);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<Product[]>([]);
+  const [items, setItems] = useState<CatalogItem[]>([]);
 
-  function toggle(product: Product) {
+  function toggle(product: CatalogItem) {
     setItems((prev) =>
       prev.some((item) => item.id === product.id)
         ? prev.filter((item) => item.id !== product.id)

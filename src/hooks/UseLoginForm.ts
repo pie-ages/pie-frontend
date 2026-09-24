@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 
+import { AuthApiError, login } from '@/api/auth';
 import { useAuth } from '@/contexts/AuthContext';
-import { AuthApiError, login } from '@/lib/auth/auth.service';
-import type { LoginPayload } from '@/types/Login';
+import type { LoginPayload } from '@/shared/Login';
 
 export function useLoginForm() {
   const { signIn } = useAuth();

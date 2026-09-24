@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { MOCK_PRODUCTS } from '../mocks/products';
-import type { Product } from '../types/product';
+import { fetchProductDetail } from '@/api/products';
+import type { ProductPublicDetail } from '@/types/product';
 
 export function useProductDetails(id: string | undefined) {
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductPublicDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,23 +12,20 @@ export function useProductDetails(id: string | undefined) {
     let isActive = true;
 
     async function loadProduct() {
+      if (!id) {
+        setIsLoading(false);
+        setError('Não foi possível carregar este produto.');
+        return;
+      }
+
       setIsLoading(true);
       setError(null);
       setProduct(null);
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 700));
-
+        const detail = await fetchProductDetail(id);
         if (!isActive) return;
-
-        const found = id ? MOCK_PRODUCTS.find((p) => p.id === id) : undefined;
-
-        if (!found) {
-          setError('Não foi possível carregar este produto.');
-          return;
-        }
-
-        setProduct(found);
+        setProduct(detail);
       } catch {
         if (isActive) {
           setError('Não foi possível carregar este produto.');

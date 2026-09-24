@@ -1,12 +1,12 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { MOCK_PRODUCTS } from '@/mocks/products';
-import type { Product } from '@/types/product';
+import { fetchCatalog } from '@/api/products';
+import type { CatalogItem, CatalogParams } from '@/types/product';
 
 export type StorefrontStatus = 'loading' | 'success' | 'error' | 'empty';
 
-const FORCEABLE_STATUSES = ['loading', 'error', 'empty'];
+const FORCEABLE_STATUSES = ['loading', 'error', 'empty'] as const;
 type ForceableStatus = (typeof FORCEABLE_STATUSES)[number];
 
 function resolveForcedStatus(value: string | string[] | undefined): ForceableStatus | null {
@@ -16,39 +16,53 @@ function resolveForcedStatus(value: string | string[] | undefined): ForceableSta
     : null;
 }
 
-function fetchMockProducts(forcedStatus: ForceableStatus | null): Promise<Product[]> {
-  return new Promise((resolve, reject) => {
-    if (forcedStatus === 'loading') {
-      return;
-    }
-
-    setTimeout(() => {
-      if (forcedStatus === 'error') {
-        reject(new Error('NÃ£o foi possÃ­vel carregar a storefront.'));
-        return;
-      }
-
-      resolve(forcedStatus === 'empty' ? [] : MOCK_PRODUCTS);
-    }, 600);
-  });
+function makeParamsKey(params: CatalogParams): string {
+  return [
+    params.search ?? '',
+    [...(params.styles ?? [])].sort().join(','),
+    [...(params.categories ?? [])].sort().join(','),
+    [...(params.colors ?? [])].sort().join(','),
+    [...(params.companies ?? [])].sort().join(','),
+    [...(params.materials ?? [])].sort().join(','),
+    params.page ?? 0,
+    params.size ?? 20,
+    params.sort ?? 'name,ASC',
+  ].join('|');
 }
 
-export function useStorefrontCatalog() {
+export function useStorefrontCatalog(params: CatalogParams = {}) {
   const { status: statusParam } = useLocalSearchParams<{ status?: string }>();
   const forcedStatus = resolveForcedStatus(statusParam);
 
   const [status, setStatus] = useState<StorefrontStatus>('loading');
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<CatalogItem[]>([]);
   const [attempt, setAttempt] = useState(0);
 
-  useEffect(() => {
-    let isActive = true;
+  const latestParams = useRef(params);
+  // eslint-disable-next-line react-hooks/refs
+  latestParams.current = params;
 
-    fetchMockProducts(forcedStatus)
-      .then((result) => {
+  const paramsKey = makeParamsKey(params);
+
+  useEffect(() => {
+    if (forcedStatus !== null) {
+      if (forcedStatus !== 'loading') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setProducts([]);
+
+        setStatus(forcedStatus);
+      }
+      return;
+    }
+
+    let isActive = true;
+    setStatus('loading');
+
+    fetchCatalog(latestParams.current)
+      .then((page) => {
         if (!isActive) return;
-        setProducts(result);
-        setStatus(result.length === 0 ? 'empty' : 'success');
+        setProducts(page.items);
+        setStatus(page.items.length === 0 ? 'empty' : 'success');
       })
       .catch(() => {
         if (!isActive) return;
@@ -58,11 +72,11 @@ export function useStorefrontCatalog() {
     return () => {
       isActive = false;
     };
-  }, [forcedStatus, attempt]);
+  }, [forcedStatus, attempt, paramsKey]);
 
   const retry = useCallback(() => {
     setStatus('loading');
-    setAttempt((value) => value + 1);
+    setAttempt((v) => v + 1);
   }, []);
 
   return { status, products, retry };

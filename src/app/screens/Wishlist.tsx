@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/hooks/UseWishlist';
-import type { Product } from '@/types/product';
+import type { CatalogItem } from '@/types/product';
 import { formatPrice } from '@/utils/FormatPrice';
 
 export default function WishlistScreen() {
@@ -76,7 +76,7 @@ function EmptyState({ onExplore }: { onExplore: () => void }) {
   );
 }
 
-function WishlistCard({ product, onRemove }: { product: Product; onRemove: () => void }) {
+function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: () => void }) {
   async function handleViewInStore() {
     await WebBrowser.openBrowserAsync(product.purchaseUrl);
   }
@@ -92,7 +92,7 @@ function WishlistCard({ product, onRemove }: { product: Product; onRemove: () =>
           </View>
         )}
 
-        {!product.isAvailable && <View style={styles.unavailableOverlay} />}
+        {product.status !== 'PUBLISHED' && <View style={styles.unavailableOverlay} />}
 
         <Pressable
           onPress={onRemove}
@@ -110,7 +110,7 @@ function WishlistCard({ product, onRemove }: { product: Product; onRemove: () =>
         {product.color ? <Text style={styles.cardColor}>{product.color}</Text> : null}
         <Text style={styles.cardPrice}>{formatPrice(product.price)}</Text>
 
-        {product.isAvailable ? (
+        {product.status === 'PUBLISHED' ? (
           <Pressable
             onPress={handleViewInStore}
             style={({ pressed }) => [styles.storeButton, pressed && styles.storeButtonPressed]}
