@@ -22,7 +22,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       .then((storedToken) => {
         if (isActive) setToken(storedToken);
       })
-      .catch(() => removeStoredToken())
+      .catch(() => {
+        if (isActive) setToken(null);
+      })
       .finally(() => {
         if (isActive) setIsInitializing(false);
       });
