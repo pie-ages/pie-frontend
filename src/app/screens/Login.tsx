@@ -60,6 +60,7 @@ export default function LoginScreen() {
                   autoCorrect={false}
                   value={email}
                   onChangeText={setEmail}
+                  editable={!isLoading}
                 />
 
                 <AuthPasswordInput
@@ -69,6 +70,7 @@ export default function LoginScreen() {
                   onChangeText={setPassword}
                   isVisible={isPasswordVisible}
                   onToggleVisibility={togglePasswordVisibility}
+                  editable={!isLoading}
                 />
 
                 {error && <Text style={styles.errorText}>{error}</Text>}
@@ -77,7 +79,12 @@ export default function LoginScreen() {
               <View style={styles.actions}>
                 <AuthButton title="Login" onPress={handleLogin} isLoading={isLoading} />
 
-                <AuthButton title="Criar Conta" variant="secondary" onPress={handleCreateAccount} />
+                <AuthButton
+                  title="Criar Conta"
+                  variant="secondary"
+                  onPress={handleCreateAccount}
+                  disabled={isLoading}
+                />
               </View>
             </View>
           </View>
