@@ -24,7 +24,6 @@ function makeParamsKey(params: CatalogParams): string {
     [...(params.colors ?? [])].sort().join(','),
     [...(params.companies ?? [])].sort().join(','),
     [...(params.materials ?? [])].sort().join(','),
-    params.page ?? 0,
     params.size ?? 20,
     params.sort ?? 'name,ASC',
   ].join('|');
@@ -36,8 +35,15 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
 
   const [status, setStatus] = useState<StorefrontStatus>('loading');
   const [products, setProducts] = useState<CatalogItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
+  const isFetching = useRef(false);
+  // Incremented on every initial load reset; stale callbacks compare against it before mutating state.
+  const generation = useRef(0);
   const latestParams = useRef(params);
   // eslint-disable-next-line react-hooks/refs
   latestParams.current = params;
@@ -49,35 +55,97 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
       if (forcedStatus !== 'loading') {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setProducts([]);
-
         setStatus(forcedStatus);
       }
       return;
     }
 
     let isActive = true;
+    generation.current += 1;
+    const gen = generation.current;
+    isFetching.current = true;
     setStatus('loading');
+    setProducts([]);
+    setCurrentPage(0);
+    setHasNextPage(false);
 
-    fetchCatalog(latestParams.current)
+    fetchCatalog({ ...latestParams.current, page: 0 })
       .then((page) => {
-        if (!isActive) return;
+        if (!isActive || generation.current !== gen) return;
         setProducts(page.items);
+        setHasNextPage((page.page + 1) * page.size < page.total);
+        setCurrentPage(0);
         setStatus(page.items.length === 0 ? 'empty' : 'success');
       })
       .catch(() => {
-        if (!isActive) return;
+        if (!isActive || generation.current !== gen) return;
         setStatus('error');
+      })
+      .finally(() => {
+        if (isActive && generation.current === gen) isFetching.current = false;
       });
 
     return () => {
       isActive = false;
     };
-  }, [forcedStatus, attempt, paramsKey]);
+  }, [forcedStatus, paramsKey, attempt]);
+
+  const loadNextPage = useCallback(() => {
+    if (isFetching.current || !hasNextPage) return;
+
+    const nextPage = currentPage + 1;
+    const gen = generation.current;
+    isFetching.current = true;
+    setIsFetchingNextPage(true);
+
+    fetchCatalog({ ...latestParams.current, page: nextPage })
+      .then((page) => {
+        if (generation.current !== gen) return;
+        setProducts((prev) => [...prev, ...page.items]);
+        setHasNextPage((page.page + 1) * page.size < page.total);
+        setCurrentPage(nextPage);
+      })
+      .catch(() => {
+        // existing products are preserved on pagination error
+      })
+      .finally(() => {
+        if (generation.current === gen) {
+          isFetching.current = false;
+          setIsFetchingNextPage(false);
+        }
+      });
+  }, [hasNextPage, currentPage]);
+
+  const refresh = useCallback(() => {
+    if (isFetching.current) return;
+
+    const gen = generation.current;
+    isFetching.current = true;
+    setRefreshing(true);
+
+    fetchCatalog({ ...latestParams.current, page: 0 })
+      .then((page) => {
+        if (generation.current !== gen) return;
+        setProducts(page.items);
+        setHasNextPage((page.page + 1) * page.size < page.total);
+        setCurrentPage(0);
+        setStatus(page.items.length === 0 ? 'empty' : 'success');
+      })
+      .catch(() => {
+        if (generation.current !== gen) return;
+        setStatus((prev) => (prev === 'success' ? 'success' : 'error'));
+      })
+      .finally(() => {
+        if (generation.current === gen) {
+          isFetching.current = false;
+          setRefreshing(false);
+        }
+      });
+  }, []);
 
   const retry = useCallback(() => {
-    setStatus('loading');
     setAttempt((v) => v + 1);
   }, []);
 
-  return { status, products, retry };
+  return { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing };
 }
