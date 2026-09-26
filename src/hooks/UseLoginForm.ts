@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 
-import { AuthApiError, login } from '@/api/auth';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthApiError, useAuth } from '@/contexts/AuthContext';
 import type { LoginPayload } from '@/shared/Login';
 
 export function useLoginForm() {
@@ -36,8 +35,7 @@ export function useLoginForm() {
     setIsLoading(true);
 
     try {
-      const response = await login(payload);
-      await signIn(response.token);
+      await signIn(payload);
     } catch (loginError) {
       setError(
         loginError instanceof AuthApiError
