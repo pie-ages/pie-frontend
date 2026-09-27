@@ -41,6 +41,7 @@ function RootNavigator() {
         <Stack.Screen name="screens/Storefront" />
         <Stack.Screen name="screens/Closet" />
         <Stack.Screen name="screens/Looks" />
+        <Stack.Screen name="screens/StyleQuiz" />
       </Stack.Protected>
 
       <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />
