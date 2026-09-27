@@ -1,3 +1,9 @@
+import { Inter_400Regular, Inter_700Bold } from '@expo-google-fonts/inter';
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_700Bold,
+} from '@expo-google-fonts/plus-jakarta-sans';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -24,8 +30,14 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { isAuthenticated, isInitializing } = useAuth();
+  const [fontsLoaded] = useFonts({
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_700Bold,
+    Inter_400Regular,
+    Inter_700Bold,
+  });
 
-  if (isInitializing) return null;
+  if (isInitializing || !fontsLoaded) return null;
 
   return (
     <Stack

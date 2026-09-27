@@ -1,9 +1,7 @@
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { Colors } from '@/constants/Theme';
 import { useLayoutScale } from '@/hooks/UseLayoutScale';
 import type { StyleQuizOption } from '@/types/StyleQuiz';
 
@@ -14,7 +12,6 @@ type StyleQuizOptionCardProps = {
   index: number;
   isSelected: boolean;
   onSelect: () => void;
-  onZoom?: () => void;
 };
 
 export function StyleQuizOptionCard({
@@ -22,7 +19,6 @@ export function StyleQuizOptionCard({
   index,
   isSelected,
   onSelect,
-  onZoom,
 }: StyleQuizOptionCardProps) {
   const { s } = useLayoutScale();
   const styles = useMemo(() => createStyles(s), [s]);
@@ -41,28 +37,17 @@ export function StyleQuizOptionCard({
       ]}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: option.imageUrl }} style={styles.image} contentFit="cover" />
+        <Image
+          source={typeof option.imageUrl === 'string' ? { uri: option.imageUrl } : option.imageUrl}
+          style={styles.image}
+          contentFit="cover"
+        />
 
         <View style={[styles.badge, index === 0 ? styles.badgePrimary : styles.badgeSecondary]}>
           <Text style={styles.badgeText} allowFontScaling={false}>
             {badgeLabel}
           </Text>
         </View>
-
-        <Pressable
-          onPress={onZoom}
-          disabled={!onZoom}
-          hitSlop={6}
-          accessibilityRole="button"
-          accessibilityLabel={`Ampliar imagem de ${option.label}`}
-          style={styles.zoomButton}
-        >
-          <MaterialCommunityIcons
-            name="magnify-plus-outline"
-            size={s(14)}
-            color={Colors.light.text}
-          />
-        </Pressable>
       </View>
 
       <View style={styles.info}>

@@ -1,9 +1,3 @@
-import { Inter_400Regular, Inter_700Bold } from '@expo-google-fonts/inter';
-import {
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_700Bold,
-} from '@expo-google-fonts/plus-jakarta-sans';
-import { useFonts } from 'expo-font';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,12 +17,6 @@ export default function StyleQuizScreen() {
   const insets = useSafeAreaInsets();
   const { s } = useLayoutScale();
   const scaledStyles = useMemo(() => createScaledStyles(s), [s]);
-  const [fontsLoaded] = useFonts({
-    PlusJakartaSans_400Regular,
-    PlusJakartaSans_700Bold,
-    Inter_400Regular,
-    Inter_700Bold,
-  });
   const { questions, isLoading, error } = useStyleQuiz();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, StyleQuizAnswer>>({});
@@ -36,7 +24,7 @@ export default function StyleQuizScreen() {
 
   const closePreview = useCallback(() => setPendingAnswer(null), []);
 
-  if (isLoading || !fontsLoaded) {
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.centered}>

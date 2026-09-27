@@ -4,7 +4,7 @@ export type StyleQuizOption = {
   id: string;
   label: string;
   description?: string;
-  imageUrl: string;
+  imageUrl: string | number;
   style: StyleCode;
 };
 

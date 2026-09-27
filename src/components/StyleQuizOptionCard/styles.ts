@@ -57,17 +57,6 @@ export function createStyles(s: ScaleFn) {
       lineHeight: s(13.5),
       color: Colors.white,
     },
-    zoomButton: {
-      position: 'absolute',
-      right: s(8),
-      bottom: s(8),
-      width: s(28),
-      height: s(28),
-      borderRadius: 9999,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: Colors.white,
-    },
     info: {
       width: '100%',
       paddingTop: s(2),
