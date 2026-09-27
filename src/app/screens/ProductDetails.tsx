@@ -13,6 +13,24 @@ import { BrandColors, Spacing } from '@/constants/Theme';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { useTheme } from '@/hooks/UseTheme';
 import { useWishlist } from '@/hooks/UseWishlist';
+import type { CatalogItem, ProductPublicDetail } from '@/types/Product';
+
+function toWishlistItem(detail: ProductPublicDetail): CatalogItem {
+  return {
+    id: detail.id,
+    name: detail.name,
+    category: detail.category,
+    color: detail.color,
+    price: detail.price,
+    imageUrl: detail.imageUrl,
+    purchaseUrl: detail.purchaseUrl,
+    companyName: detail.companyName,
+    status: detail.available ? 'PUBLISHED' : 'PAUSED',
+    styles: detail.styles,
+    sizes: detail.sizes,
+    materials: detail.materials,
+  };
+}
 
 export default function ProductDetailsScreen() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
@@ -29,7 +47,7 @@ function ProductDetails({ id }: { id?: string }) {
 
   if (product && product.id !== loadedProductId) {
     setLoadedProductId(product.id);
-    setSelectedSize(product.sizes.find((s) => s.available)?.label ?? null);
+    setSelectedSize(product.sizes[0] ?? null);
   }
 
   function handleClose() {
@@ -77,7 +95,7 @@ function ProductDetails({ id }: { id?: string }) {
         title={product.name}
         onClose={handleClose}
         isWishlisted={isInWishlist(product.id)}
-        onToggleWishlist={() => toggle(product)}
+        onToggleWishlist={() => toggle(toWishlistItem(product))}
       />
 
       <ScrollView
@@ -86,7 +104,7 @@ function ProductDetails({ id }: { id?: string }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.imageWrapper}>
-          <ProductImageCarousel images={product.images} />
+          <ProductImageCarousel images={product.images.map((img) => img.url)} />
         </View>
 
         <View style={styles.sectionsWrapper}>
@@ -130,12 +148,12 @@ function ProductDetails({ id }: { id?: string }) {
             </ThemedText>
             <Pressable onPress={handlePurchase}>
               <ThemedText type="small" style={styles.storeValue} allowFontScaling={false}>
-                {product.storeName}
+                {product.companyName ?? ''}
               </ThemedText>
             </Pressable>
           </View>
 
-          {!product.isAvailable && (
+          {!product.available && (
             <ThemedText type="small" themeColor="textSecondary" style={styles.centerText}>
               Este produto não está mais disponível para compra.
             </ThemedText>
@@ -143,7 +161,7 @@ function ProductDetails({ id }: { id?: string }) {
         </View>
       </ScrollView>
 
-      {product.isAvailable && (
+      {product.available && (
         <View style={styles.footer}>
           <ProductActionButton title="Já tenho! Adicionar ao closet" />
         </View>

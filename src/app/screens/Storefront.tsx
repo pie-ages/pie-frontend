@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { StorefrontEmptyState } from '@/components/StorefrontEmptyState';
@@ -14,12 +14,13 @@ import { StorefrontToolBar } from '@/components/StorefrontToolBar';
 import { BottomTabInset, Spacing } from '@/constants/Theme';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
-import { MOCK_FILTER_GROUPS } from '@/mocks/products';
+import { useTaxonomy } from '@/hooks/UseTaxonomy';
 
 export default function StorefrontScreen() {
   const insets = useSafeAreaInsets();
-  const { status, products, retry } = useStorefrontCatalog();
+  const { height: windowHeight } = useWindowDimensions();
   const [isSheetVisible, setSheetVisible] = useState(false);
+  const { filterGroups } = useTaxonomy();
   const {
     searchInput,
     setSearchInput,
@@ -32,8 +33,9 @@ export default function StorefrontScreen() {
     applyPendingFilters,
     clearAllFilters,
     clearSearch,
-    filterProducts,
+    catalogParams,
   } = useStorefrontFilters();
+  const { status, products, retry } = useStorefrontCatalog(catalogParams);
 
   const handleStoreFrontPress = (productId: string) => {
     try {
@@ -56,11 +58,16 @@ export default function StorefrontScreen() {
     setSheetVisible(false);
   };
 
-  const visibleProducts = useMemo(() => filterProducts(products), [filterProducts, products]);
-  const hasNoResults = status === 'success' && visibleProducts.length === 0;
+  const isLoading = status === 'loading' || isSearchPending;
 
   return (
-    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
+    <View
+      style={[
+        styles.safeArea,
+        { paddingTop: insets.top },
+        Platform.OS === 'web' && { maxHeight: windowHeight, overflow: 'hidden' },
+      ]}
+    >
       <View style={styles.container}>
         <View style={styles.header}>
           <View style={styles.paddedHeader}>
@@ -72,7 +79,7 @@ export default function StorefrontScreen() {
             />
           </View>
           <StorefrontFilterChips
-            groups={MOCK_FILTER_GROUPS}
+            groups={filterGroups}
             selectedIds={appliedFilterIds}
             onToggle={toggleAppliedFilter}
             onOpenSheet={handleOpenSheet}
@@ -80,14 +87,12 @@ export default function StorefrontScreen() {
         </View>
 
         <View style={styles.body}>
-          {status === 'loading' && <StorefrontLoadingState />}
-          {status === 'error' && <StorefrontErrorState onRetry={retry} />}
-          {status === 'empty' && <StorefrontEmptyState />}
-          {isSearchPending && status === 'success' && <StorefrontLoadingState />}
-          {!isSearchPending && hasNoResults && <StorefrontEmptyState />}
-          {!isSearchPending && status === 'success' && !hasNoResults && (
+          {isLoading && <StorefrontLoadingState />}
+          {!isLoading && status === 'error' && <StorefrontErrorState onRetry={retry} />}
+          {!isLoading && status === 'empty' && <StorefrontEmptyState />}
+          {!isLoading && status === 'success' && (
             <StorefrontProductGrid
-              products={visibleProducts}
+              products={products}
               onProductPress={handleStoreFrontPress}
               contentBottomInset={insets.bottom + BottomTabInset + Spacing.three}
             />
@@ -97,7 +102,7 @@ export default function StorefrontScreen() {
 
       <StorefrontFilterSheet
         visible={isSheetVisible}
-        groups={MOCK_FILTER_GROUPS}
+        groups={filterGroups}
         pendingFiltersByGroup={pendingFiltersByGroup}
         onTogglePending={togglePendingFilter}
         onApply={handleApplySheet}
@@ -115,6 +120,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    minHeight: 0,
     width: '100%',
   },
   header: {
@@ -128,6 +134,8 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    minHeight: 0,
     paddingHorizontal: 8,
+    overflow: 'hidden',
   },
 });

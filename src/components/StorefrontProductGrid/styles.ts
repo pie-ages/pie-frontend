@@ -5,6 +5,7 @@ import { Spacing } from '@/constants/Theme';
 export const styles = StyleSheet.create({
   list: {
     flex: 1,
+    minHeight: 0,
   },
   content: {
     gap: 8,
