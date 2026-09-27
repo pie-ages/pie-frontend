@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { UserStyleProvider } from '@/hooks/UseUserStyle';
 import { WishlistProvider } from '@/hooks/UseWishlist';
 
 SplashScreen.preventAutoHideAsync();
@@ -12,11 +13,13 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <WishlistProvider>
-        <StatusBar style="dark" />
+        <UserStyleProvider>
+          <StatusBar style="dark" />
 
-        <AnimatedSplashOverlay />
+          <AnimatedSplashOverlay />
 
-        <RootNavigator />
+          <RootNavigator />
+        </UserStyleProvider>
       </WishlistProvider>
     </AuthProvider>
   );
@@ -43,6 +46,7 @@ function RootNavigator() {
         <Stack.Screen name="screens/Storefront" />
         <Stack.Screen name="screens/Closet" />
         <Stack.Screen name="screens/Looks" />
+        <Stack.Screen name="screens/MyStyle" />
       </Stack.Protected>
 
       <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />

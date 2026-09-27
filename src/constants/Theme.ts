@@ -7,6 +7,8 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
+import type { Style } from '@/types/Style';
+
 export const Colors = {
   light: {
     text: '#1F1F1F',
@@ -39,6 +41,16 @@ export const Colors = {
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+
+export const StyleBackgrounds: Record<Style, string> = {
+  romantico: '#F4D7DE',
+  criativo: '#FFD98E',
+  casual: '#CFE8E0',
+  classico: '#E4DED3',
+  refinado: '#D9C9A8',
+  dramatico: '#3A2E39',
+  sensual: '#6E263D',
+};
 
 export const BrandColors = {
   primary: '#661414',
