@@ -7,7 +7,7 @@ type UserStyleContextValue = {
   styles: Style[];
   setStyles: (styles: Style[]) => void;
   identifiedStyle: IdentifiedStyle | null;
-  setIdentifiedStyle: (style: IdentifiedStyle) => void;
+  setIdentifiedStyle: (style: IdentifiedStyle | null) => void;
 };
 
 const UserStyleContext = createContext<UserStyleContextValue | null>(null);

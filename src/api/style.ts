@@ -52,3 +52,35 @@ export async function submitStyleQuizAndIdentify(
     throw error;
   }
 }
+
+export async function getIdentifiedStyle(): Promise<IdentifiedStyle | null> {
+  const token = await getStoredToken();
+  if (!token) throw new StyleSessionError('Sua sessão expirou. Entre novamente para continuar.');
+
+  try {
+    const response = await axios.get<unknown>(`${API_URL}/api/users/me/style/identified`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (
+      typeof response.data !== 'object' ||
+      response.data === null ||
+      !('styles' in response.data)
+    ) {
+      throw new Error('A API retornou um estilo inválido. Tente novamente.');
+    }
+    if (Array.isArray(response.data.styles) && response.data.styles.length === 0) return null;
+    const style = resolveIdentifiedStyle(response.data.styles);
+    if (!style) throw new Error('A API retornou um estilo inválido. Tente novamente.');
+    return style;
+  } catch (error) {
+    if (isAxiosError<ErrorResponse>(error)) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message;
+      if (status === 401 || (status === 404 && message?.startsWith('Usuário não encontrado'))) {
+        throw new StyleSessionError('Sua sessão expirou. Entre novamente para continuar.');
+      }
+      throw new Error(message ?? ERROR_MESSAGE);
+    }
+    throw error;
+  }
+}

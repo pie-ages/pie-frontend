@@ -1,15 +1,78 @@
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { getIdentifiedStyle, StyleSessionError } from '@/api/style';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { Spacing } from '@/constants/Theme';
+import { useAuth } from '@/contexts/AuthContext';
 import { useUserStyle } from '@/hooks/UseUserStyle';
 import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 
 export default function MyStyleScreen() {
   const insets = useSafeAreaInsets();
-  const { identifiedStyle } = useUserStyle();
+  const { identifiedStyle, setIdentifiedStyle } = useUserStyle();
+  const { signOut } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadCount, setReloadCount] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+
+    getIdentifiedStyle()
+      .then((style) => {
+        if (!active) return;
+        if (style) setIdentifiedStyle(style);
+        else {
+          setIdentifiedStyle(null);
+          router.replace('/screens/StyleQuiz');
+        }
+      })
+      .catch(async (error: unknown) => {
+        if (!active) return;
+        if (error instanceof StyleSessionError) {
+          await signOut();
+          router.replace('/screens/Login');
+          return;
+        }
+        setLoadError(
+          error instanceof Error ? error.message : 'Não foi possível carregar seu estilo.',
+        );
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [reloadCount, setIdentifiedStyle, signOut]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.centered}>
+        <Text>{loadError}</Text>
+        <ProductActionButton
+          title="Tentar novamente"
+          onPress={() => {
+            setLoadError(null);
+            setIsLoading(true);
+            setReloadCount((count) => count + 1);
+          }}
+        />
+      </View>
+    );
+  }
 
   if (!identifiedStyle) return null;
 
@@ -38,6 +101,7 @@ export default function MyStyleScreen() {
 }
 
 const styles = StyleSheet.create({
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.four },
   container: {
     flex: 1,
     justifyContent: 'flex-end',

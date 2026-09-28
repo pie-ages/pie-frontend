@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
+import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { StyleOptionGrid } from '@/components/StyleOptionGrid';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useStyleSelection } from '@/hooks/UseStyleSelection';
@@ -12,9 +13,7 @@ export default function StyleSelectionScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>
-          Caso{'\n'}você queira{'\n'}personalizar seu estilo
-        </Text>
+        <ScreenToolBar title={'Caso\nvocê queira\npersonalizar seu estilo'} />
         <Text style={styles.subtitle}>
           Escolha um estilo para começar. Você pode ajustar os detalhes depois.
         </Text>
@@ -42,18 +41,13 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.four,
     gap: Spacing.three,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: Colors.light.text,
-    lineHeight: 36,
-  },
   subtitle: {
     fontSize: 15,
     color: Colors.light.textSecondary,
   },
   grid: {
-    marginTop: Spacing.four,
+    flex: 1,
+    marginTop: Spacing.three,
   },
   footer: {
     padding: Spacing.four,

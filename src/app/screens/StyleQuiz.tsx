@@ -50,7 +50,8 @@ export default function StyleQuizScreen() {
       const run = identificationRunner(getStyleQuizSubmissions(questions, selectedAnswers));
       if (!run.started) return;
       dispatchIdentification({ type: 'start' });
-      setIdentifiedStyle(await run.promise);
+      const identifiedStyle = await run.promise;
+      setIdentifiedStyle(identifiedStyle);
       completeStyleQuiz();
       dispatchIdentification({ type: 'success' });
       router.replace('/screens/MyStyle');
