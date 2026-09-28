@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -18,6 +19,9 @@ export default function ColorimetryResultScreen() {
     MOCK_COLORIMETRY_PREFERENCES.favoriteColors,
   );
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const pickerColors = Array.from(new Set([...highlightColors, ...avoidColors]));
 
@@ -28,9 +32,30 @@ export default function ColorimetryResultScreen() {
     setActiveSlot(null);
   }
 
-  function handleEnter() {}
+  function handleEnter() {
+    router.replace('/(tabs)');
+  }
 
   function handleRedoColorimetry() {}
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.centered]}>
+        <ActivityIndicator size="large" color={Colors.brand.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.centered]}>
+        <ThemedText themeColor="textSecondary">{error}</ThemedText>
+        <Pressable onPress={() => setError(null)} hitSlop={8} style={styles.retryButton}>
+          <Text style={styles.redoLink}>Tentar novamente</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -61,7 +86,7 @@ export default function ColorimetryResultScreen() {
         </View>
 
         <View style={styles.footer}>
-          <AuthButton title="Entrar" onPress={handleEnter} />
+          <AuthButton title="Entrar" onPress={handleEnter} isLoading={isSaving} />
 
           <Pressable onPress={handleRedoColorimetry} hitSlop={8}>
             <Text style={styles.redoLink}>Refazer colorimetria</Text>
@@ -85,17 +110,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.three,
+  },
   content: {
     flexGrow: 1,
     paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.three,
-    gap: Spacing.four,
+    gap: Spacing.five,
   },
   title: {
-    fontSize: 32,
-    lineHeight: 38,
     marginTop: Spacing.four,
     color: '#292524',
+    fontSize: 36,
+    fontWeight: '700',
+    letterSpacing: -0.43,
+    lineHeight: 40,
   },
   rows: {
     gap: Spacing.three,
@@ -104,7 +136,10 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     alignItems: 'center',
     gap: Spacing.three,
-    paddingTop: Spacing.four,
+    paddingTop: Spacing.five,
+  },
+  retryButton: {
+    paddingVertical: Spacing.two,
   },
   redoLink: {
     color: Colors.brand.primary,

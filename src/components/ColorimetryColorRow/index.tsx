@@ -31,7 +31,6 @@ export function ColorimetryColorRow({
           <ColorSwatch
             key={`${color}-${index}`}
             color={color}
-            size={30}
             selected={!!onSlotPress && color !== emptyColor}
             onPress={onSlotPress ? () => onSlotPress(index) : undefined}
           />
