@@ -69,7 +69,13 @@ export default function LooksScreen() {
         <View style={styles.header}>
           <ScreenToolBar
             title="Meus Looks"
-            actions={[{ icon: 'plus', accessibilityLabel: 'Criar look' }]}
+            actions={[
+              {
+                icon: 'plus',
+                accessibilityLabel: 'Criar look',
+                onPress: () => router.push('/screens/CreateLook'),
+              },
+            ]}
           />
           <LooksViewModeToggle value={viewMode} onChange={handleChangeViewMode} />
         </View>

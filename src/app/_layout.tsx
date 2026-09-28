@@ -72,6 +72,7 @@ function RootNavigator() {
 
       <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />
       <Stack.Screen name="screens/Wishlist" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="screens/CreateLook" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
