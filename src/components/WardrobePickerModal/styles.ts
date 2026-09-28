@@ -3,9 +3,17 @@ import { StyleSheet } from 'react-native';
 import { Colors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
-  container: {
+  backdrop: {
     flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+  },
+  container: {
+    height: '88%',
     backgroundColor: Colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
