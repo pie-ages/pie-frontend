@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   ScrollView,
   Text,
@@ -11,24 +11,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CategoryRow from '@/components/CategoryRow';
-import { mockClosetData, ClosetData } from '@/mocks/closetMocks';
+import { useWardrobeRows } from '@/hooks/UseWardrobeRows';
 
 export default function ClosetScreen() {
-  const [data, setData] = useState<ClosetData | null>(null);
-  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'empty'>('loading');
-
-  useEffect(() => {
-    const loadData = setTimeout(() => {
-      if (mockClosetData.rows.length === 0) {
-        setStatus('empty');
-      } else {
-        setData(mockClosetData);
-        setStatus('success');
-      }
-    }, 1500);
-
-    return () => clearTimeout(loadData);
-  }, []);
+  const { status, rows, retry, loadMore, retryRow } = useWardrobeRows();
 
   if (status === 'loading') {
     return (
@@ -43,6 +29,14 @@ export default function ClosetScreen() {
     return (
       <SafeAreaView style={styles.centerContainer}>
         <Text style={styles.statusText}>Ocorreu um erro ao carregar as peças.</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          activeOpacity={0.7}
+          onPress={() => void retry()}
+          accessibilityRole="button"
+        >
+          <Text style={styles.retryText}>Tentar novamente</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -67,7 +61,14 @@ export default function ClosetScreen() {
             <Text style={styles.statusText}>O seu guarda-roupa está vazio.</Text>
           </View>
         ) : (
-          data?.rows.map((row) => <CategoryRow key={row.id} data={row} />)
+          rows.map((row) => (
+            <CategoryRow
+              key={row.id}
+              data={row}
+              onEndReached={(rowId) => void loadMore(rowId)}
+              onRetry={(rowId) => void retryRow(rowId)}
+            />
+          ))
         )}
       </ScrollView>
     </SafeAreaView>
@@ -138,5 +139,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     color: '#6B7280',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 22,
+    backgroundColor: '#111827',
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
