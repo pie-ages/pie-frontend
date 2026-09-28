@@ -1,70 +1,84 @@
-import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { isCancel } from 'axios';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { MOCK_LOOKS } from '@/mocks/looks';
-import type { Look } from '@/types/look';
+import { fetchLooks } from '@/api/looks';
+import { appendLookPage, type Look } from '@/types/look';
 
 export type LooksStatus = 'loading' | 'success' | 'error' | 'empty';
 
-const FORCEABLE_STATUSES = ['loading', 'error', 'empty'] as const;
-type ForceableStatus = (typeof FORCEABLE_STATUSES)[number];
-
-function resolveForcedStatus(value: string | string[] | undefined): ForceableStatus | null {
-  const normalized = Array.isArray(value) ? value[0] : value;
-  return (FORCEABLE_STATUSES as readonly string[]).includes(normalized ?? '')
-    ? (normalized as ForceableStatus)
-    : null;
-}
-
-function fetchMockLooks(forcedStatus: ForceableStatus | null): Promise<Look[]> {
-  return new Promise((resolve, reject) => {
-    if (forcedStatus === 'loading') {
-      return;
-    }
-
-    setTimeout(() => {
-      if (forcedStatus === 'error') {
-        reject(new Error('Não foi possível carregar os looks.'));
-        return;
-      }
-
-      resolve(forcedStatus === 'empty' ? [] : MOCK_LOOKS);
-    }, 600);
-  });
-}
-
 export function useLooksCollection() {
-  const { status: statusParam } = useLocalSearchParams<{ status?: string }>();
-  const forcedStatus = resolveForcedStatus(statusParam);
-
   const [status, setStatus] = useState<LooksStatus>('loading');
   const [looks, setLooks] = useState<Look[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pageError, setPageError] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const inFlight = useRef(false);
+  const controllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    let isActive = true;
-
-    fetchMockLooks(forcedStatus)
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    inFlight.current = true;
+    fetchLooks(0, controller.signal)
       .then((result) => {
-        if (!isActive) return;
-        setLooks(result);
-        setStatus(result.length === 0 ? 'empty' : 'success');
+        if (controller.signal.aborted) return;
+        inFlight.current = false;
+        setLooks(result.items);
+        setPage(result.page);
+        setHasNext(result.hasNext);
+        setPageError(false);
+        setStatus(result.items.length === 0 ? 'empty' : 'success');
       })
-      .catch(() => {
-        if (!isActive) return;
-        setStatus('error');
+      .catch((error) => {
+        if (!controller.signal.aborted && !isCancel(error)) {
+          inFlight.current = false;
+          setStatus('error');
+        }
+      })
+      .finally(() => {
+        if (controllerRef.current === controller) inFlight.current = false;
       });
 
     return () => {
-      isActive = false;
+      controllerRef.current?.abort();
+      controllerRef.current = null;
+      inFlight.current = false;
     };
-  }, [forcedStatus, attempt]);
+  }, [attempt]);
+
+  const loadMore = useCallback(
+    async (retryPage = false) => {
+      if (status !== 'success' || !hasNext || inFlight.current || (pageError && !retryPage)) return;
+      inFlight.current = true;
+      setLoadingMore(true);
+      setPageError(false);
+      const controller = new AbortController();
+      controllerRef.current = controller;
+
+      try {
+        const result = await fetchLooks(page + 1, controller.signal);
+        if (controller.signal.aborted) return;
+        setLooks((previous) => appendLookPage(previous, result.items));
+        setPage(result.page);
+        setHasNext(result.hasNext);
+      } catch (error) {
+        if (!controller.signal.aborted && !isCancel(error)) setPageError(true);
+      } finally {
+        if (controllerRef.current === controller) {
+          inFlight.current = false;
+          setLoadingMore(false);
+        }
+      }
+    },
+    [hasNext, page, pageError, status],
+  );
 
   const retry = useCallback(() => {
     setStatus('loading');
-    setLooks([]);
     setAttempt((value) => value + 1);
   }, []);
 
-  return { status, looks, retry };
+  return { status, looks, retry, hasNext, loadingMore, pageError, loadMore };
 }

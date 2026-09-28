@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { Text, View } from 'react-native';
 
+import { LookImage } from '@/components/LookImage';
 import { Colors } from '@/constants/Theme';
 import type { Look } from '@/types/look';
 
@@ -40,21 +40,11 @@ export function LookPiecesStack({ look }: LookPiecesStackProps) {
               },
             ]}
           >
-            {item.imageUrl ? (
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={styles.pieceImage}
-                contentFit="cover"
-                accessibilityLabel={item.name ?? 'Peça sem nome'}
-              />
-            ) : (
-              <Feather
-                name="image"
-                size={28}
-                color={Colors.iconMuted}
-                accessibilityLabel={item.name ? `Sem imagem para ${item.name}` : 'Peça sem imagem'}
-              />
-            )}
+            <LookImage
+              uri={item.imageUrl}
+              style={styles.pieceImage}
+              accessibilityLabel={item.name ?? 'Peça sem nome'}
+            />
           </View>
         );
       })}
