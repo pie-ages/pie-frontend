@@ -64,7 +64,11 @@ export function StyleQuizChoicePreview({
             <View style={styles.card}>
               <View style={styles.imageContainer}>
                 <Image
-                  source={{ uri: selectedOption.imageUrl }}
+                  source={
+                    typeof selectedOption.imageUrl === 'string'
+                      ? { uri: selectedOption.imageUrl }
+                      : selectedOption.imageUrl
+                  }
                   style={styles.image}
                   contentFit="cover"
                 />
@@ -94,7 +98,11 @@ export function StyleQuizChoicePreview({
                   <View key={option.id} style={styles.smallCard}>
                     <View style={styles.imageContainer}>
                       <Image
-                        source={{ uri: option.imageUrl }}
+                        source={
+                          typeof option.imageUrl === 'string'
+                            ? { uri: option.imageUrl }
+                            : option.imageUrl
+                        }
                         style={styles.image}
                         contentFit="cover"
                       />
