@@ -1,8 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 
+import { LookImage } from '@/components/LookImage';
 import { LookPiecesStack } from '@/components/LookPiecesStack';
 import { Colors } from '@/constants/Theme';
 import type { Look } from '@/types/look';
@@ -93,7 +93,11 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
             accessibilityLabel={`${look.name}: voltar para as peças`}
             style={styles.backFill}
           >
-            <Image source={{ uri: look.imageUrl! }} style={styles.backImage} contentFit="cover" />
+            <LookImage
+              uri={look.imageUrl}
+              style={styles.backImage}
+              accessibilityLabel={look.name}
+            />
           </Pressable>
         ) : (
           <View style={styles.addPhoto}>

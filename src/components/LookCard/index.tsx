@@ -1,8 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 
+import { LookImage } from '@/components/LookImage';
 import { Colors } from '@/constants/Theme';
 import type { Look } from '@/types/look';
 
@@ -50,18 +50,14 @@ export function LookCard({ look, onPress }: LookCardProps) {
             style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: frontRotateY }] }]}
           >
             <View style={styles.collage}>
+              {look.items.length === 0 && <LookImage uri={null} style={styles.collageImage} />}
               {look.items.slice(0, 4).map((item) => (
                 <View key={item.id} style={styles.collageCell}>
-                  {item.imageUrl ? (
-                    <Image
-                      source={{ uri: item.imageUrl }}
-                      style={styles.collageImage}
-                      contentFit="cover"
-                      accessibilityLabel={item.name ?? 'Peça sem nome'}
-                    />
-                  ) : (
-                    <Feather name="image" size={20} color={Colors.iconMuted} />
-                  )}
+                  <LookImage
+                    uri={item.imageUrl}
+                    style={styles.collageImage}
+                    accessibilityLabel={item.name ?? 'Peça sem nome'}
+                  />
                 </View>
               ))}
             </View>
@@ -74,7 +70,7 @@ export function LookCard({ look, onPress }: LookCardProps) {
                 { transform: [{ perspective: 1000 }, { rotateY: backRotateY }] },
               ]}
             >
-              <Image source={{ uri: look.imageUrl! }} style={styles.photo} contentFit="cover" />
+              <LookImage uri={look.imageUrl} style={styles.photo} accessibilityLabel={look.name} />
             </Animated.View>
           ) : null}
         </Pressable>
