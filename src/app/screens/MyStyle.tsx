@@ -3,36 +3,30 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
-import { Spacing, StyleTextColors } from '@/constants/Theme';
+import { Spacing } from '@/constants/Theme';
 import { useUserStyle } from '@/hooks/UseUserStyle';
-import { STYLE_BACKGROUNDS, STYLE_DESCRIPTIONS, STYLE_LABELS } from '@/types/Style';
+import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 
 export default function MyStyleScreen() {
   const insets = useSafeAreaInsets();
-  const { styles: userStyles } = useUserStyle();
-  const style = userStyles[0];
+  const { identifiedStyle } = useUserStyle();
 
-  if (!style) return null;
+  if (!identifiedStyle) return null;
 
-  const textColors = StyleTextColors[style];
+  const info = IDENTIFIED_STYLE_INFO[identifiedStyle];
 
   return (
     <View
       style={[
         styles.container,
-        { paddingBottom: insets.bottom + Spacing.four, backgroundColor: STYLE_BACKGROUNDS[style] },
+        { paddingBottom: insets.bottom + Spacing.four, backgroundColor: info.background },
       ]}
     >
-      <Text style={[styles.title, { color: textColors.base }]}>
-        Seu estilo é{' '}
-        <Text style={[styles.highlight, { color: textColors.highlight }]}>
-          {STYLE_LABELS[style]}
-        </Text>
+      <Text style={[styles.title, { color: '#24312E' }]}>
+        Seu estilo é <Text style={[styles.highlight, { color: info.highlight }]}>{info.label}</Text>
       </Text>
 
-      <Text style={[styles.description, { color: textColors.base }]}>
-        {STYLE_DESCRIPTIONS[style]}
-      </Text>
+      <Text style={[styles.description, { color: '#24312E' }]}>{info.description}</Text>
 
       <ProductActionButton
         title="Continuar"

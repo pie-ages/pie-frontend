@@ -1,4 +1,5 @@
-import type { Style } from './Style';
+import type { IdentifiedStyle } from './IdentifiedStyle';
+import type { StyleQuizSubmission } from './StyleQuiz';
 
 export type StyleIdentificationState =
   | { status: 'idle'; error: null }
@@ -22,15 +23,15 @@ export function styleIdentificationReducer(
   return INITIAL_STYLE_IDENTIFICATION_STATE;
 }
 
-type Identify = () => Promise<Style[]>;
+type Identify = (answers: StyleQuizSubmission[]) => Promise<IdentifiedStyle>;
 
 export function createStyleIdentificationRunner(identify: Identify) {
-  let pending: Promise<Style[]> | null = null;
+  let pending: Promise<IdentifiedStyle> | null = null;
 
-  return () => {
+  return (answers: StyleQuizSubmission[]) => {
     if (pending) return { started: false, promise: pending };
 
-    pending = identify().finally(() => {
+    pending = identify(answers).finally(() => {
       pending = null;
     });
     return { started: true, promise: pending };

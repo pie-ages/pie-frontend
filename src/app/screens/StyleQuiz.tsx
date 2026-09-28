@@ -3,7 +3,7 @@ import { useCallback, useMemo, useReducer, useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { identifyStyle, StyleSessionError } from '@/api/style';
+import { submitStyleQuizAndIdentify, StyleSessionError } from '@/api/style';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { StyleQuizChoicePreview } from '@/components/StyleQuizChoicePreview';
 import { StyleQuizFooter } from '@/components/StyleQuizFooter';
@@ -19,6 +19,7 @@ import {
   styleIdentificationReducer,
 } from '@/types/StyleIdentification';
 import type { StyleQuizAnswer } from '@/types/StyleQuiz';
+import { getStyleQuizSubmissions } from '@/utils/style-quiz-answers';
 
 const TITLE_TOP = 92;
 const MIN_TITLE_GAP = 8;
@@ -28,7 +29,7 @@ export default function StyleQuizScreen() {
   const { s } = useLayoutScale();
   const scaledStyles = useMemo(() => createScaledStyles(s), [s]);
   const { questions, isLoading, error: quizError } = useStyleQuiz();
-  const { setStyles } = useUserStyle();
+  const { setIdentifiedStyle } = useUserStyle();
   const { completeStyleQuiz, signOut } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, StyleQuizAnswer>>({});
@@ -37,18 +38,19 @@ export default function StyleQuizScreen() {
     styleIdentificationReducer,
     INITIAL_STYLE_IDENTIFICATION_STATE,
   );
-  const identificationRunner = useMemo(() => createStyleIdentificationRunner(identifyStyle), []);
+  const identificationRunner = useMemo(
+    () => createStyleIdentificationRunner(submitStyleQuizAndIdentify),
+    [],
+  );
 
   const closePreview = useCallback(() => setPendingAnswer(null), []);
 
-  async function runIdentification() {
-    const run = identificationRunner();
-    if (!run.started) return;
-
-    dispatchIdentification({ type: 'start' });
+  async function runIdentification(selectedAnswers: Record<string, StyleQuizAnswer> = answers) {
     try {
-      const identifiedStyles = await run.promise;
-      setStyles(identifiedStyles);
+      const run = identificationRunner(getStyleQuizSubmissions(questions, selectedAnswers));
+      if (!run.started) return;
+      dispatchIdentification({ type: 'start' });
+      setIdentifiedStyle(await run.promise);
       completeStyleQuiz();
       dispatchIdentification({ type: 'success' });
       router.replace('/screens/MyStyle');
@@ -97,7 +99,15 @@ export default function StyleQuizScreen() {
           <ProductActionButton
             title="Tentar novamente"
             style={styles.retryButton}
-            onPress={runIdentification}
+            onPress={() => void runIdentification()}
+          />
+          <ProductActionButton
+            title="Alterar respostas"
+            style={styles.retryButton}
+            onPress={() => {
+              setCurrentIndex(0);
+              dispatchIdentification({ type: 'success' });
+            }}
           />
         </View>
       </SafeAreaView>
@@ -136,7 +146,7 @@ export default function StyleQuizScreen() {
       return;
     }
 
-    void runIdentification();
+    void runIdentification(updatedAnswers);
   }
 
   return (

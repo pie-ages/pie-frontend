@@ -40,32 +40,3 @@ export const STYLE_BACKGROUNDS: Record<Style, string> = {
   dramatico: '#3A2E39',
   sensual: '#6E263D',
 };
-
-const QUIZ_STYLE_CODE_MAP: Record<string, Style> = {
-  CLASSIC: 'classico',
-  CLASSICO: 'classico',
-  CASUAL: 'casual',
-  ROMANTIC: 'romantico',
-  ROMANTICO: 'romantico',
-  REFINED: 'refinado',
-  REFINADO: 'refinado',
-  DRAMATIC: 'dramatico',
-  DRAMATICO: 'dramatico',
-  CREATIVE: 'criativo',
-  CRIATIVO: 'criativo',
-  SENSUAL: 'sensual',
-};
-
-export function resolveIdentifiedStyles(styles: unknown): Style[] | null {
-  if (!Array.isArray(styles) || styles.length === 0) return null;
-
-  const resolved = styles.map((style) => {
-    if (typeof style !== 'string') return null;
-    return (
-      QUIZ_STYLE_CODE_MAP[style.toUpperCase()] ??
-      (STYLES.includes(style.toLowerCase() as Style) ? (style.toLowerCase() as Style) : null)
-    );
-  });
-
-  return resolved.every((style): style is Style => style !== null) ? [...new Set(resolved)] : null;
-}
