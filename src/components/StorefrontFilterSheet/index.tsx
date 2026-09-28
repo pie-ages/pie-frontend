@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Colors, Spacing } from '@/constants/Theme';
-import type { FilterGroup, FilterGroupId } from '@/types/product';
+import type { FilterGroup, FilterGroupId } from '@/types/Filter';
 
 import { styles } from './styles';
 

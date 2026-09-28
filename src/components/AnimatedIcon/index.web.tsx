@@ -10,9 +10,6 @@ const DURATION = 300;
 const SPLASH_DURATION = 600;
 const HOLD_DURATION = 3000;
 
-// Keep close to app.json's splash `imageWidth` (220) on phone-sized screens so the
-// handoff from the native splash to this overlay doesn't visibly jump, while still
-// shrinking on very small screens and capping out on tablets/desktop.
 const MIN_SPLASH_IMAGE_SIZE = 150;
 const MAX_SPLASH_IMAGE_SIZE = 280;
 

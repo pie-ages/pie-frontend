@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,10 +6,11 @@ import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
 import { Colors } from '@/constants/Theme';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRegisterForm } from '@/hooks/UseRegisterForm';
 
 export default function RegisterScreen() {
-  const router = useRouter();
+  const { completeMockSignUp } = useAuth();
 
   const {
     name,
@@ -34,7 +34,7 @@ export default function RegisterScreen() {
     const success = await handleRegister();
 
     if (success) {
-      router.replace('/screens/Login');
+      await completeMockSignUp();
     }
   }
 
