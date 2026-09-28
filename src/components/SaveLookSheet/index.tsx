@@ -48,9 +48,18 @@ export function SaveLookSheet({
   const scrollRef = useRef<ScrollView>(null);
   const [page, setPage] = useState(0);
   const [pageWidth, setPageWidth] = useState(0);
+  const [pageHeights, setPageHeights] = useState<[number, number]>([0, 0]);
   const [wasVisible, setWasVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const isLastPage = page >= 1;
+
+  const setPageHeight = (index: 0 | 1, height: number) =>
+    setPageHeights((current) => {
+      if (Math.abs(current[index] - height) < 1) return current;
+      const next: [number, number] = [current[0], current[1]];
+      next[index] = height;
+      return next;
+    });
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -133,12 +142,16 @@ export function SaveLookSheet({
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
+            style={pageHeights[page] ? { height: pageHeights[page] } : undefined}
             onLayout={(event) => setPageWidth(event.nativeEvent.layout.width)}
             onScroll={(event) => {
               if (pageWidth) setPage(Math.round(event.nativeEvent.contentOffset.x / pageWidth));
             }}
           >
-            <View style={[styles.page, { width: pageWidth }]}>
+            <View
+              style={[styles.page, { width: pageWidth }]}
+              onLayout={(event) => setPageHeight(0, event.nativeEvent.layout.height)}
+            >
               <Text style={styles.label}>Nome do Look</Text>
               <TextInput
                 value={name}
@@ -163,7 +176,10 @@ export function SaveLookSheet({
               />
             </View>
 
-            <View style={[styles.page, { width: pageWidth }]}>
+            <View
+              style={[styles.page, { width: pageWidth }]}
+              onLayout={(event) => setPageHeight(1, event.nativeEvent.layout.height)}
+            >
               <Text style={styles.label}>Foto do Look</Text>
               <Text style={styles.hint}>
                 Se você quiser, pode adicionar uma foto do look para ver na tela de looks.

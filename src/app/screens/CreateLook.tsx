@@ -101,10 +101,8 @@ export default function CreateLookScreen() {
         </Pressable>
       </View>
 
-      <ScrollView
-        style={styles.compositionScroll}
-        contentContainerStyle={styles.compositionContent}
-        showsVerticalScrollIndicator={false}
+      <View
+        style={styles.composition}
         onLayout={(event) => setAreaHeight(event.nativeEvent.layout.height)}
       >
         {form.items.map((piece) => (
@@ -147,7 +145,7 @@ export default function CreateLookScreen() {
             </View>
           </Pressable>
         ) : null}
-      </ScrollView>
+      </View>
 
       <View style={styles.footer}>
         {form.error && !isSaving ? (
@@ -295,12 +293,9 @@ const styles = StyleSheet.create({
   closePressed: {
     opacity: 0.7,
   },
-  compositionScroll: {
+  composition: {
     flex: 1,
     minHeight: 0,
-  },
-  compositionContent: {
-    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.two,
