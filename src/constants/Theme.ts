@@ -5,7 +5,7 @@
 
 import '@/global.css';
 
-import { Platform } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 export const Colors = {
   light: {
@@ -70,6 +70,24 @@ export const Fonts = Platform.select({
     mono: 'var(--font-mono)',
   },
 });
+
+export const FontFamilies = {
+  jakartaRegular: 'PlusJakartaSans_400Regular',
+  jakartaBold: 'PlusJakartaSans_700Bold',
+  interRegular: 'Inter_400Regular',
+  interBold: 'Inter_700Bold',
+} as const;
+
+export const SystemFonts: Record<'regular' | 'bold', TextStyle> = {
+  regular: Platform.select<TextStyle>({
+    ios: { fontWeight: '400' },
+    default: { fontFamily: FontFamilies.interRegular },
+  }),
+  bold: Platform.select<TextStyle>({
+    ios: { fontWeight: '700' },
+    default: { fontFamily: FontFamilies.interBold },
+  }),
+};
 
 export const Spacing = {
   half: 2,
