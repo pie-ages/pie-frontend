@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/Theme';
@@ -15,6 +16,9 @@ type LookPieceCardProps = {
 };
 
 export function LookPieceCard({ piece, onPress, selected = false, onRemove }: LookPieceCardProps) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(piece.imageUrl) && !failed;
+
   return (
     <View style={styles.wrapper}>
       <Pressable
@@ -30,8 +34,13 @@ export function LookPieceCard({ piece, onPress, selected = false, onRemove }: Lo
         ]}
       >
         <View style={styles.imageContainer}>
-          {piece.imageUrl ? (
-            <Image source={{ uri: piece.imageUrl }} style={styles.image} contentFit="cover" />
+          {showImage ? (
+            <Image
+              source={{ uri: piece.imageUrl! }}
+              style={styles.image}
+              contentFit="cover"
+              onError={() => setFailed(true)}
+            />
           ) : (
             <View style={styles.imageFallback}>
               <Feather name="image" size={22} color={Colors.iconMuted} />

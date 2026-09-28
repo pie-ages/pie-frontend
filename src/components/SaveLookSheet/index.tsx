@@ -1,6 +1,16 @@
 import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import {
+  Keyboard,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors } from '@/constants/Theme';
@@ -11,10 +21,12 @@ type SaveLookSheetProps = {
   visible: boolean;
   name: string;
   description: string;
+  imageUri: string | null;
   error: string | null;
   saving: boolean;
   onChangeName: (value: string) => void;
   onChangeDescription: (value: string) => void;
+  onPickImage: () => void;
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -23,10 +35,12 @@ export function SaveLookSheet({
   visible,
   name,
   description,
+  imageUri,
   error,
   saving,
   onChangeName,
   onChangeDescription,
+  onPickImage,
   onCancel,
   onConfirm,
 }: SaveLookSheetProps) {
@@ -35,7 +49,35 @@ export function SaveLookSheet({
   const [page, setPage] = useState(0);
   const [pageWidth, setPageWidth] = useState(0);
   const [wasVisible, setWasVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const isLastPage = page >= 1;
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const viewport = typeof window !== 'undefined' ? window.visualViewport : null;
+      if (!viewport) return;
+      const update = () => {
+        const overlap = window.innerHeight - viewport.height - viewport.offsetTop;
+        setKeyboardHeight(overlap > 60 ? overlap : 0);
+      };
+      viewport.addEventListener('resize', update);
+      viewport.addEventListener('scroll', update);
+      return () => {
+        viewport.removeEventListener('resize', update);
+        viewport.removeEventListener('scroll', update);
+      };
+    }
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const show = Keyboard.addListener(showEvent, (event) =>
+      setKeyboardHeight(event.endCoordinates.height),
+    );
+    const hide = Keyboard.addListener(hideEvent, () => setKeyboardHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   if (visible !== wasVisible) {
     setWasVisible(visible);
@@ -49,7 +91,15 @@ export function SaveLookSheet({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
-        <View style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]}>
+        <View
+          style={[
+            styles.sheet,
+            {
+              marginBottom: keyboardHeight,
+              paddingBottom: keyboardHeight > 0 ? 16 : insets.bottom + 16,
+            },
+          ]}
+        >
           <View style={styles.header}>
             <Pressable
               onPress={onCancel}
@@ -111,11 +161,6 @@ export function SaveLookSheet({
                 style={styles.input}
                 accessibilityLabel="Descrição do look"
               />
-              {error ? (
-                <Text accessibilityRole="alert" style={styles.error}>
-                  {error}
-                </Text>
-              ) : null}
             </View>
 
             <View style={[styles.page, { width: pageWidth }]}>
@@ -123,18 +168,37 @@ export function SaveLookSheet({
               <Text style={styles.hint}>
                 Se você quiser, pode adicionar uma foto do look para ver na tela de looks.
               </Text>
-              <View style={styles.photoPlaceholder}>
-                <View style={[styles.corner, styles.cornerTL]} />
-                <View style={[styles.corner, styles.cornerTR]} />
-                <View style={[styles.corner, styles.cornerBL]} />
-                <View style={[styles.corner, styles.cornerBR]} />
-                <View style={styles.cameraCircle}>
-                  <Feather name="camera" size={30} color={Colors.white} />
-                </View>
-              </View>
-              <Text style={styles.hint}>Upload disponível em uma próxima versão.</Text>
+              <Pressable
+                onPress={onPickImage}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar foto do look"
+                style={styles.photoPlaceholder}
+              >
+                {imageUri ? (
+                  <Image source={{ uri: imageUri }} style={styles.photo} contentFit="cover" />
+                ) : (
+                  <>
+                    <View style={[styles.corner, styles.cornerTL]} />
+                    <View style={[styles.corner, styles.cornerTR]} />
+                    <View style={[styles.corner, styles.cornerBL]} />
+                    <View style={[styles.corner, styles.cornerBR]} />
+                    <View style={styles.cameraCircle}>
+                      <Feather name="camera" size={30} color={Colors.white} />
+                    </View>
+                  </>
+                )}
+              </Pressable>
+              <Text style={styles.hint}>
+                {imageUri ? 'Toque para trocar a foto.' : 'Toque para escolher uma foto.'}
+              </Text>
             </View>
           </ScrollView>
+
+          {error ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {error}
+            </Text>
+          ) : null}
 
           <View style={styles.dots}>
             {[0, 1].map((index) => (

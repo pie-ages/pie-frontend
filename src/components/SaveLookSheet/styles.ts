@@ -14,6 +14,7 @@ export const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.two,
+    maxHeight: '92%',
   },
   header: {
     flexDirection: 'row',
@@ -75,6 +76,10 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.placeholder,
   },
+  photo: {
+    width: '100%',
+    height: '100%',
+  },
   corner: {
     position: 'absolute',
     width: 26,
@@ -121,6 +126,8 @@ export const styles = StyleSheet.create({
   error: {
     fontSize: 14,
     color: Colors.error,
+    textAlign: 'center',
+    paddingTop: Spacing.two,
   },
   dots: {
     flexDirection: 'row',
