@@ -35,7 +35,8 @@ export default function StorefrontScreen() {
     clearSearch,
     catalogParams,
   } = useStorefrontFilters();
-  const { status, products, retry } = useStorefrontCatalog(catalogParams);
+  const { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing } =
+    useStorefrontCatalog(catalogParams);
 
   const handleStoreFrontPress = (productId: string) => {
     try {
@@ -95,6 +96,10 @@ export default function StorefrontScreen() {
               products={products}
               onProductPress={handleStoreFrontPress}
               contentBottomInset={insets.bottom + BottomTabInset + Spacing.three}
+              onEndReached={loadNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onRefresh={refresh}
+              refreshing={refreshing}
             />
           )}
         </View>

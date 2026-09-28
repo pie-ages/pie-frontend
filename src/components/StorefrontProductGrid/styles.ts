@@ -15,4 +15,12 @@ export const styles = StyleSheet.create({
   row: {
     gap: 12,
   },
+  footer: {
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  refreshIndicator: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
 });
