@@ -4,7 +4,8 @@ import { Colors } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   card: {
-    flex: 1,
+    flexGrow: 0,
+    flexBasis: '31%',
     height: 64,
     borderRadius: 16,
     alignItems: 'center',

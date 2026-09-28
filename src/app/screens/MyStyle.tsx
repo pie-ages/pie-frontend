@@ -1,29 +1,34 @@
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
-import { ThemedText } from '@/components/ThemedText';
-import { Spacing, StyleBackgrounds } from '@/constants/Theme';
+import { Spacing, StyleBackgrounds, StyleTextColors } from '@/constants/Theme';
 import { useUserStyle } from '@/hooks/UseUserStyle';
 import { STYLE_LABELS } from '@/types/Style';
 
 export default function MyStyleScreen() {
   const insets = useSafeAreaInsets();
-  const { style } = useUserStyle();
+  const { styles: userStyles } = useUserStyle();
+  const style = userStyles[0];
+  const textColors = StyleTextColors[style];
 
   return (
     <View
       style={[
         styles.container,
-        { paddingTop: insets.top, backgroundColor: StyleBackgrounds[style] },
+        { paddingBottom: insets.bottom + Spacing.four, backgroundColor: StyleBackgrounds[style] },
       ]}
     >
-      <ThemedText type="small">Seu estilo é</ThemedText>
-      <ThemedText type="title">{STYLE_LABELS[style]}</ThemedText>
+      <Text style={[styles.title, { color: textColors.base }]}>
+        Seu estilo é{' '}
+        <Text style={[styles.highlight, { color: textColors.highlight }]}>
+          {STYLE_LABELS[style]}
+        </Text>
+      </Text>
 
       <ProductActionButton
-        title="Alterar estilo"
+        title="Continuar"
         style={styles.button}
         onPress={() => router.push('/screens/StyleSelection')}
       />
@@ -34,12 +39,19 @@ export default function MyStyleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.two,
+    justifyContent: 'flex-end',
     paddingHorizontal: Spacing.four,
   },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    lineHeight: 36,
+    marginBottom: Spacing.five,
+  },
+  highlight: {
+    fontWeight: '800',
+  },
   button: {
-    marginTop: Spacing.four,
+    marginTop: Spacing.two,
   },
 });

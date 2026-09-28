@@ -25,7 +25,6 @@ function toggleInSet(set: Set<string>, value: string): Set<string> {
   return next;
 }
 
-// Persiste o estado entre unmount/remount causado por navegação de modal na web.
 let _cachedSearch = '';
 let _cachedAppliedFilters: FiltersByGroup = createEmptyFilters();
 

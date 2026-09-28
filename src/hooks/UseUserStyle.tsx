@@ -1,20 +1,20 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 
 import { MOCK_USER_STYLE } from '@/mocks/style';
-import { resolveStyle, Style } from '@/types/Style';
+import { resolveStyles, Style } from '@/types/Style';
 
 type UserStyleContextValue = {
-  style: Style;
-  setStyle: (style: Style) => void;
+  styles: Style[];
+  setStyles: (styles: Style[]) => void;
 };
 
 const UserStyleContext = createContext<UserStyleContextValue | null>(null);
 
 export function UserStyleProvider({ children }: { children: ReactNode }) {
-  const [style, setStyle] = useState<Style>(resolveStyle(MOCK_USER_STYLE.styles));
+  const [styles, setStyles] = useState<Style[]>(resolveStyles(MOCK_USER_STYLE.styles));
 
   return (
-    <UserStyleContext.Provider value={{ style, setStyle }}>{children}</UserStyleContext.Provider>
+    <UserStyleContext.Provider value={{ styles, setStyles }}>{children}</UserStyleContext.Provider>
   );
 }
 

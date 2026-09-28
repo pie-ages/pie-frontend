@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import type { RegisterPayload } from '@/shared/Register';
 
-// simua temporariamente a chamada que futuramente será realizada pela API
 async function simulateRegisterRequest(_payload: RegisterPayload) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
 }
@@ -68,8 +67,6 @@ export function useRegisterForm() {
         password,
       };
 
-      // Futuramente:
-      // await api.post('/users', payload);
       await simulateRegisterRequest(payload);
 
       return true;
