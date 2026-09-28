@@ -68,11 +68,11 @@ function RootNavigator() {
         <Stack.Screen name="screens/MyStyle" />
         <Stack.Screen name="screens/StyleQuiz" />
         <Stack.Screen name="screens/StyleSelection" />
+        <Stack.Screen name="screens/CreateLook" />
       </Stack.Protected>
 
       <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />
       <Stack.Screen name="screens/Wishlist" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="screens/CreateLook" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

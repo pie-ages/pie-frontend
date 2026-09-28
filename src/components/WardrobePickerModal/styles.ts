@@ -3,9 +3,17 @@ import { StyleSheet } from 'react-native';
 import { Colors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
-  container: {
+  backdrop: {
     flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+  },
+  container: {
+    height: '88%',
     backgroundColor: Colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
   },
   header: {
     flexDirection: 'row',
@@ -61,5 +69,17 @@ export const styles = StyleSheet.create({
     paddingTop: Spacing.two,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: Colors.border,
+  },
+  state: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+    paddingHorizontal: Spacing.four,
+  },
+  stateText: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
   },
 });

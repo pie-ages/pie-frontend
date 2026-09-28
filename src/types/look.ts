@@ -23,7 +23,9 @@ export type LooksPage = {
 export type LooksViewMode = 'grid' | 'focus';
 
 export type WardrobePiece = LookItem & {
-  category: 'Parte de cima' | 'Parte de baixo' | 'Calçados';
+  category: string;
+  wardrobeItemId?: string | null;
+  productId?: string | null;
 };
 
 export type LookDraft = {
