@@ -1,7 +1,6 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 
-import { MOCK_USER_STYLE } from '@/mocks/style';
-import { resolveStyles, Style } from '@/types/Style';
+import { Style } from '@/types/Style';
 
 type UserStyleContextValue = {
   styles: Style[];
@@ -11,7 +10,7 @@ type UserStyleContextValue = {
 const UserStyleContext = createContext<UserStyleContextValue | null>(null);
 
 export function UserStyleProvider({ children }: { children: ReactNode }) {
-  const [styles, setStyles] = useState<Style[]>(resolveStyles(MOCK_USER_STYLE.styles));
+  const [styles, setStyles] = useState<Style[]>([]);
 
   return (
     <UserStyleContext.Provider value={{ styles, setStyles }}>{children}</UserStyleContext.Provider>

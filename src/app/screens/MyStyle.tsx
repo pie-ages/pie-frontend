@@ -3,21 +3,24 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
-import { Spacing, StyleBackgrounds, StyleTextColors } from '@/constants/Theme';
+import { Spacing, StyleTextColors } from '@/constants/Theme';
 import { useUserStyle } from '@/hooks/UseUserStyle';
-import { STYLE_LABELS } from '@/types/Style';
+import { STYLE_BACKGROUNDS, STYLE_DESCRIPTIONS, STYLE_LABELS } from '@/types/Style';
 
 export default function MyStyleScreen() {
   const insets = useSafeAreaInsets();
   const { styles: userStyles } = useUserStyle();
   const style = userStyles[0];
+
+  if (!style) return null;
+
   const textColors = StyleTextColors[style];
 
   return (
     <View
       style={[
         styles.container,
-        { paddingBottom: insets.bottom + Spacing.four, backgroundColor: StyleBackgrounds[style] },
+        { paddingBottom: insets.bottom + Spacing.four, backgroundColor: STYLE_BACKGROUNDS[style] },
       ]}
     >
       <Text style={[styles.title, { color: textColors.base }]}>
@@ -25,6 +28,10 @@ export default function MyStyleScreen() {
         <Text style={[styles.highlight, { color: textColors.highlight }]}>
           {STYLE_LABELS[style]}
         </Text>
+      </Text>
+
+      <Text style={[styles.description, { color: textColors.base }]}>
+        {STYLE_DESCRIPTIONS[style]}
       </Text>
 
       <ProductActionButton
@@ -50,6 +57,11 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontWeight: '800',
+  },
+  description: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: Spacing.three,
   },
   button: {
     marginTop: Spacing.two,
