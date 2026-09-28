@@ -143,6 +143,7 @@ export function SaveLookSheet({
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
             style={pageHeights[page] ? { height: pageHeights[page] } : undefined}
+            contentContainerStyle={styles.pager}
             onLayout={(event) => setPageWidth(event.nativeEvent.layout.width)}
             onScroll={(event) => {
               if (pageWidth) setPage(Math.round(event.nativeEvent.contentOffset.x / pageWidth));

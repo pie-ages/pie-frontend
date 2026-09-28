@@ -46,6 +46,9 @@ export const styles = StyleSheet.create({
   pressed: {
     opacity: 0.7,
   },
+  pager: {
+    alignItems: 'flex-start',
+  },
   page: {
     gap: Spacing.two,
     paddingVertical: Spacing.three,
