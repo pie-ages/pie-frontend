@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import type { LookImageAsset } from '@/api/looks';
 import { AuthButton } from '@/components/AuthButton';
 import { LookPieceCard } from '@/components/LookPieceCard';
 import { LOOK_PIECE_ASPECT_RATIO } from '@/components/LookPiecesStack/styles';
@@ -21,22 +23,31 @@ import { SaveLookSheet } from '@/components/SaveLookSheet';
 import { WardrobePickerModal } from '@/components/WardrobePickerModal';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useLookForm } from '@/hooks/UseLookForm';
-import { MOCK_WARDROBE_PIECES } from '@/mocks/wardrobe';
+import { useWardrobe } from '@/hooks/UseWardrobe';
 import { MAX_LOOK_PIECES } from '@/types/look';
 
 export default function CreateLookScreen() {
   const insets = useSafeAreaInsets();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const form = useLookForm();
+  const wardrobe = useWardrobe();
   const [isPicking, setIsPicking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [image, setImage] = useState<LookImageAsset | null>(null);
 
   const busy = form.operation !== null;
   const selectedIds = form.items.map((item) => item.id);
   const canAddMore = form.items.length < MAX_LOOK_PIECES;
-  const slotWidth = Math.min(windowWidth * 0.67, 300);
-  const pieceHeight = slotWidth / LOOK_PIECE_ASPECT_RATIO;
-  const emptyAddHeight = pieceHeight * 3 + Spacing.two * 2;
+  const [areaHeight, setAreaHeight] = useState(0);
+  const gap = Spacing.two;
+  const padding = Spacing.three;
+  const widthCap = Math.min(windowWidth * 0.67, 300);
+  const heightByWidth = widthCap / LOOK_PIECE_ASPECT_RATIO;
+  const heightToFitThree = areaHeight ? (areaHeight - padding * 2 - gap * 2) / 3 : heightByWidth;
+  const slotHeight = Math.max(Math.min(heightByWidth, heightToFitThree), 0);
+  const slotWidth = slotHeight * LOOK_PIECE_ASPECT_RATIO;
+  const emptyAddHeight = slotHeight * 3 + gap * 2;
 
   const goBack = () => {
     if (router.canGoBack()) {
@@ -46,10 +57,23 @@ export default function CreateLookScreen() {
     }
   };
 
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+    });
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      setImage({ uri: asset.uri, fileName: asset.fileName, mimeType: asset.mimeType });
+    }
+  };
+
   const handleConfirmSave = () => {
-    form.saveLook(() => {
+    form.saveLook(image, () => {
       setIsSaving(false);
-      goBack();
+      setSaved(true);
     });
   };
 
@@ -77,14 +101,19 @@ export default function CreateLookScreen() {
         </Pressable>
       </View>
 
-      <ScrollView
-        style={styles.compositionScroll}
-        contentContainerStyle={styles.compositionContent}
-        showsVerticalScrollIndicator={false}
+      <View
+        style={styles.composition}
+        onLayout={(event) => setAreaHeight(event.nativeEvent.layout.height)}
       >
         {form.items.map((piece) => (
-          <View key={piece.id} style={[styles.slot, { width: slotWidth }]}>
-            <Image source={{ uri: piece.imageUrl! }} style={styles.slotImage} contentFit="cover" />
+          <View key={piece.id} style={[styles.slot, { width: slotWidth, height: slotHeight }]}>
+            {piece.imageUrl ? (
+              <Image source={{ uri: piece.imageUrl }} style={styles.slotImage} contentFit="cover" />
+            ) : (
+              <View style={styles.slotFallback}>
+                <Feather name="image" size={28} color={Colors.iconMuted} />
+              </View>
+            )}
             <Pressable
               onPress={() => form.togglePiece(piece)}
               accessibilityRole="button"
@@ -107,7 +136,7 @@ export default function CreateLookScreen() {
               styles.addSlot,
               form.items.length === 0
                 ? { width: slotWidth, height: emptyAddHeight }
-                : { width: slotWidth, aspectRatio: LOOK_PIECE_ASPECT_RATIO },
+                : { width: slotWidth, height: slotHeight },
               pressed && styles.pressed,
             ]}
           >
@@ -116,9 +145,14 @@ export default function CreateLookScreen() {
             </View>
           </Pressable>
         ) : null}
-      </ScrollView>
+      </View>
 
       <View style={styles.footer}>
+        {form.error && !isSaving ? (
+          <Text accessibilityRole="alert" style={styles.error}>
+            {form.error}
+          </Text>
+        ) : null}
         {form.items.length > 0 ? (
           <AuthButton
             title="Salvar Look"
@@ -140,7 +174,9 @@ export default function CreateLookScreen() {
 
       <WardrobePickerModal
         visible={isPicking}
-        pieces={MOCK_WARDROBE_PIECES}
+        pieces={wardrobe.pieces}
+        status={wardrobe.status}
+        onRetry={wardrobe.retry}
         selectedIds={selectedIds}
         onToggle={form.togglePiece}
         onClose={() => setIsPicking(false)}
@@ -150,10 +186,12 @@ export default function CreateLookScreen() {
         visible={isSaving}
         name={form.name}
         description={form.description}
+        imageUri={image?.uri ?? null}
         error={form.error}
         saving={form.operation === 'save'}
         onChangeName={form.updateName}
         onChangeDescription={form.updateDescription}
+        onPickImage={pickImage}
         onCancel={() => setIsSaving(false)}
         onConfirm={handleConfirmSave}
       />
@@ -201,6 +239,19 @@ export default function CreateLookScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={saved} transparent animationType="fade" onRequestClose={goBack}>
+        <View style={styles.successBackdrop}>
+          <View style={styles.successCard}>
+            <View style={styles.successCircle}>
+              <Feather name="check" size={32} color={Colors.white} />
+            </View>
+            <Text style={styles.successTitle}>Look salvo!</Text>
+            <Text style={styles.successMessage}>Seu look foi criado com sucesso.</Text>
+            <AuthButton title="Ver meus looks" onPress={goBack} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -242,19 +293,15 @@ const styles = StyleSheet.create({
   closePressed: {
     opacity: 0.7,
   },
-  compositionScroll: {
+  composition: {
     flex: 1,
     minHeight: 0,
-  },
-  compositionContent: {
-    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.two,
     padding: Spacing.three,
   },
   slot: {
-    aspectRatio: LOOK_PIECE_ASPECT_RATIO,
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: Colors.white,
@@ -264,6 +311,18 @@ const styles = StyleSheet.create({
   slotImage: {
     width: '100%',
     height: '100%',
+  },
+  slotFallback: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.light.backgroundElement,
+  },
+  error: {
+    fontSize: 14,
+    color: Colors.error,
+    textAlign: 'center',
   },
   remove: {
     position: 'absolute',
@@ -306,5 +365,40 @@ const styles = StyleSheet.create({
   suggestionCell: {
     width: '40%',
     alignSelf: 'center',
+  },
+  successBackdrop: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.four,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+  },
+  successCard: {
+    width: '100%',
+    maxWidth: 360,
+    alignItems: 'center',
+    gap: Spacing.two,
+    padding: Spacing.four,
+    borderRadius: 24,
+    backgroundColor: Colors.white,
+  },
+  successCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.brand.primary,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.light.text,
+  },
+  successMessage: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: Colors.light.textSecondary,
+    paddingBottom: Spacing.one,
   },
 });

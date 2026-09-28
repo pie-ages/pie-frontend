@@ -1,3 +1,5 @@
+import { getStoredToken } from '@/utils/auth-storage';
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 export async function apiFetch<T>(path: string, params?: URLSearchParams): Promise<T> {
@@ -8,4 +10,44 @@ export async function apiFetch<T>(path: string, params?: URLSearchParams): Promi
     throw new Error(`API error: ${response.status} ${response.statusText}`);
   }
   return response.json() as Promise<T>;
+}
+
+async function authHeaders(): Promise<Record<string, string>> {
+  const token = await getStoredToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function parse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  return response.json() as Promise<T>;
+}
+
+export async function apiGetAuth<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    headers: await authHeaders(),
+  });
+  return parse<T>(response);
+}
+
+export async function apiPostAuth<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: { ...(await authHeaders()), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return parse<T>(response);
+}
+
+export async function apiUploadAuth<T>(path: string, formData: FormData): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: await authHeaders(),
+    body: formData,
+  });
+  return parse<T>(response);
 }
