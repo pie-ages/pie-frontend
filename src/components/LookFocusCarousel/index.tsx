@@ -136,8 +136,6 @@ export function LookFocusCarousel({
         horizontal
         contentContainerStyle={[styles.content, { paddingHorizontal: sideInset }]}
         snapToInterval={itemPitch || undefined}
-        snapToAlignment="center"
-        disableIntervalMomentum
         decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
         scrollEventThrottle={16}
