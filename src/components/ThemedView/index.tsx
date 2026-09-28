@@ -4,12 +4,10 @@ import { ThemeColor } from '@/constants/Theme';
 import { useTheme } from '@/hooks/UseTheme';
 
 export type ThemedViewProps = ViewProps & {
-  lightColor?: string;
-  darkColor?: string;
   type?: ThemeColor;
 };
 
-export function ThemedView({ style, lightColor, darkColor, type, ...otherProps }: ThemedViewProps) {
+export function ThemedView({ style, type, ...otherProps }: ThemedViewProps) {
   const theme = useTheme();
 
   return <View style={[{ backgroundColor: theme[type ?? 'background'] }, style]} {...otherProps} />;

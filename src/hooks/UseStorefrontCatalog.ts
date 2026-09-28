@@ -1,12 +1,12 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { MOCK_PRODUCTS } from '@/mocks/products';
-import type { Product } from '@/types/product';
+import { fetchCatalog } from '@/api/products';
+import type { CatalogItem, CatalogParams } from '@/types/Product';
 
 export type StorefrontStatus = 'loading' | 'success' | 'error' | 'empty';
 
-const FORCEABLE_STATUSES = ['loading', 'error', 'empty'];
+const FORCEABLE_STATUSES = ['loading', 'error', 'empty'] as const;
 type ForceableStatus = (typeof FORCEABLE_STATUSES)[number];
 
 function resolveForcedStatus(value: string | string[] | undefined): ForceableStatus | null {
@@ -16,54 +16,133 @@ function resolveForcedStatus(value: string | string[] | undefined): ForceableSta
     : null;
 }
 
-function fetchMockProducts(forcedStatus: ForceableStatus | null): Promise<Product[]> {
-  return new Promise((resolve, reject) => {
-    if (forcedStatus === 'loading') {
-      return;
-    }
-
-    setTimeout(() => {
-      if (forcedStatus === 'error') {
-        reject(new Error('NÃ£o foi possÃ­vel carregar a storefront.'));
-        return;
-      }
-
-      resolve(forcedStatus === 'empty' ? [] : MOCK_PRODUCTS);
-    }, 600);
-  });
+function makeParamsKey(params: CatalogParams): string {
+  return [
+    params.search ?? '',
+    [...(params.styles ?? [])].sort().join(','),
+    [...(params.categories ?? [])].sort().join(','),
+    [...(params.colors ?? [])].sort().join(','),
+    [...(params.companies ?? [])].sort().join(','),
+    [...(params.materials ?? [])].sort().join(','),
+    params.size ?? 20,
+    params.sort ?? 'name,ASC',
+  ].join('|');
 }
 
-export function useStorefrontCatalog() {
+export function useStorefrontCatalog(params: CatalogParams = {}) {
   const { status: statusParam } = useLocalSearchParams<{ status?: string }>();
   const forcedStatus = resolveForcedStatus(statusParam);
 
   const [status, setStatus] = useState<StorefrontStatus>('loading');
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<CatalogItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
-  useEffect(() => {
-    let isActive = true;
+  const isFetching = useRef(false);
+  const generation = useRef(0);
+  const latestParams = useRef(params);
+  // eslint-disable-next-line react-hooks/refs
+  latestParams.current = params;
 
-    fetchMockProducts(forcedStatus)
-      .then((result) => {
-        if (!isActive) return;
-        setProducts(result);
-        setStatus(result.length === 0 ? 'empty' : 'success');
+  const paramsKey = makeParamsKey(params);
+
+  useEffect(() => {
+    if (forcedStatus !== null) {
+      if (forcedStatus !== 'loading') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setProducts([]);
+        setStatus(forcedStatus);
+      }
+      return;
+    }
+
+    let isActive = true;
+    generation.current += 1;
+    const gen = generation.current;
+    isFetching.current = true;
+    setStatus('loading');
+    setProducts([]);
+    setCurrentPage(0);
+    setHasNextPage(false);
+
+    fetchCatalog({ ...latestParams.current, page: 0 })
+      .then((page) => {
+        if (!isActive || generation.current !== gen) return;
+        setProducts(page.items);
+        setHasNextPage((page.page + 1) * page.size < page.total);
+        setCurrentPage(0);
+        setStatus(page.items.length === 0 ? 'empty' : 'success');
       })
       .catch(() => {
-        if (!isActive) return;
+        if (!isActive || generation.current !== gen) return;
         setStatus('error');
+      })
+      .finally(() => {
+        if (isActive && generation.current === gen) isFetching.current = false;
       });
 
     return () => {
       isActive = false;
     };
-  }, [forcedStatus, attempt]);
+  }, [forcedStatus, paramsKey, attempt]);
 
-  const retry = useCallback(() => {
-    setStatus('loading');
-    setAttempt((value) => value + 1);
+  const loadNextPage = useCallback(() => {
+    if (isFetching.current || !hasNextPage) return;
+
+    const nextPage = currentPage + 1;
+    const gen = generation.current;
+    isFetching.current = true;
+    setIsFetchingNextPage(true);
+
+    fetchCatalog({ ...latestParams.current, page: nextPage })
+      .then((page) => {
+        if (generation.current !== gen) return;
+        setProducts((prev) => [...prev, ...page.items]);
+        setHasNextPage((page.page + 1) * page.size < page.total);
+        setCurrentPage(nextPage);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (generation.current === gen) {
+          isFetching.current = false;
+          setIsFetchingNextPage(false);
+        }
+      });
+  }, [hasNextPage, currentPage]);
+
+  const refresh = useCallback(() => {
+    if (isFetching.current) return;
+
+    const gen = generation.current;
+    isFetching.current = true;
+    setRefreshing(true);
+
+    fetchCatalog({ ...latestParams.current, page: 0 })
+      .then((page) => {
+        if (generation.current !== gen) return;
+        setProducts(page.items);
+        setHasNextPage((page.page + 1) * page.size < page.total);
+        setCurrentPage(0);
+        setStatus(page.items.length === 0 ? 'empty' : 'success');
+      })
+      .catch(() => {
+        if (generation.current !== gen) return;
+        setStatus((prev) => (prev === 'success' ? 'success' : 'error'));
+      })
+      .finally(() => {
+        if (generation.current === gen) {
+          isFetching.current = false;
+          setRefreshing(false);
+        }
+      });
   }, []);
 
-  return { status, products, retry };
+  const retry = useCallback(() => {
+    setAttempt((v) => v + 1);
+  }, []);
+
+  return { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing };
 }

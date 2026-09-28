@@ -55,7 +55,7 @@ export function BottomTabBar(props: ViewProps) {
       ? ({
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          backgroundColor: 'rgba(255, 255, 255, 0.55)',
+          backgroundColor: 'rgba(235, 235, 240, 0.65)',
         } as object)
       : undefined;
 
@@ -64,7 +64,7 @@ export function BottomTabBar(props: ViewProps) {
       {Platform.OS === 'web' ? (
         <View style={[styles.container, webStyle]}>{props.children}</View>
       ) : (
-        <BlurView intensity={70} tint="light" style={styles.container}>
+        <BlurView intensity={45} tint="light" style={styles.container}>
           {props.children}
         </BlurView>
       )}

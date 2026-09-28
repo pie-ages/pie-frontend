@@ -1,11 +1,8 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import '@/global.css';
 
-import { Platform } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
+
+import type { Style } from '@/types/Style';
 
 export const Colors = {
   light: {
@@ -15,14 +12,6 @@ export const Colors = {
     background: '#FFFFFF',
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
-  },
-  dark: {
-    text: '#D9D9D9',
-    textSecondary: '#B0B4BA',
-    textGreen: '#323A32',
-    background: '#1C1C1C',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
   },
   brand: {
     primary: '#661414',
@@ -38,7 +27,27 @@ export const Colors = {
   white: '#FFFFFF',
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors.light;
+
+export const StyleBackgrounds: Record<Style, string> = {
+  romantico: '#F4D7DE',
+  criativo: '#FFD98E',
+  casual: '#CFE8E0',
+  classico: '#E4DED3',
+  refinado: '#D9C9A8',
+  dramatico: '#3A2E39',
+  sensual: '#6E263D',
+};
+
+export const StyleTextColors: Record<Style, { base: string; highlight: string }> = {
+  romantico: { base: '#1F1F1F', highlight: '#661414' },
+  criativo: { base: '#1F1F1F', highlight: '#661414' },
+  casual: { base: '#1F1F1F', highlight: '#661414' },
+  classico: { base: '#1F1F1F', highlight: '#661414' },
+  refinado: { base: '#1F1F1F', highlight: '#661414' },
+  dramatico: { base: '#FFFFFF', highlight: '#FDE2D9' },
+  sensual: { base: '#FFFFFF', highlight: '#FDE2D9' },
+};
 
 export const BrandColors = {
   primary: '#661414',
@@ -48,13 +57,9 @@ export const BrandColors = {
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -71,6 +76,24 @@ export const Fonts = Platform.select({
   },
 });
 
+export const FontFamilies = {
+  jakartaRegular: 'PlusJakartaSans_400Regular',
+  jakartaBold: 'PlusJakartaSans_700Bold',
+  interRegular: 'Inter_400Regular',
+  interBold: 'Inter_700Bold',
+} as const;
+
+export const SystemFonts: Record<'regular' | 'bold', TextStyle> = {
+  regular: Platform.select<TextStyle>({
+    ios: { fontWeight: '400' },
+    default: { fontFamily: FontFamilies.interRegular },
+  }),
+  bold: Platform.select<TextStyle>({
+    ios: { fontWeight: '700' },
+    default: { fontFamily: FontFamilies.interBold },
+  }),
+};
+
 export const Spacing = {
   half: 2,
   one: 4,
@@ -81,5 +104,5 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const BottomTabInset = Platform.select({ ios: 80, android: 80, web: 90 }) ?? 0;
 export const MaxContentWidth = 800;

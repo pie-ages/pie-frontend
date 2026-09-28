@@ -1,13 +1,11 @@
 import { Pressable, Text, View } from 'react-native';
 
-import type { Size } from '@/types/product';
-
 import { styles } from './styles';
 
 type ProductSizeSelectorProps = {
-  sizes: Size[];
+  sizes: string[];
   selectedSize: string | null;
-  onSelectSize: (label: string | null) => void;
+  onSelectSize: (size: string | null) => void;
 };
 
 export function ProductSizeSelector({
@@ -18,35 +16,20 @@ export function ProductSizeSelector({
   return (
     <View style={styles.container}>
       {sizes.map((size) => {
-        const isSelected = size.label === selectedSize;
+        const isSelected = size === selectedSize;
 
         return (
           <Pressable
-            key={size.label}
-            disabled={!size.available}
-            onPress={() => onSelectSize(isSelected ? null : size.label)}
-            style={[
-              styles.circle,
-              isSelected && styles.circleSelected,
-              !size.available && styles.circleUnavailable,
-            ]}
+            key={size}
+            onPress={() => onSelectSize(isSelected ? null : size)}
+            style={[styles.circle, isSelected && styles.circleSelected]}
           >
             <Text
               allowFontScaling={false}
-              style={[
-                styles.label,
-                isSelected && styles.labelSelected,
-                !size.available && styles.labelUnavailable,
-              ]}
+              style={[styles.label, isSelected && styles.labelSelected]}
             >
-              {size.label === 'Único' ? 'U' : size.label}
+              {size === 'Único' ? 'U' : size}
             </Text>
-
-            {!size.available && (
-              <View style={styles.strikeContainer} pointerEvents="none">
-                <View style={styles.strikeLine} />
-              </View>
-            )}
           </Pressable>
         );
       })}
