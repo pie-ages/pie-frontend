@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -33,7 +33,7 @@ export default function ColorimetryResultScreen() {
   }
 
   function handleEnter() {
-    router.replace('/(tabs)');
+    router.replace('/(tabs)/Storefront');
   }
 
   function handleRedoColorimetry() {}
@@ -59,40 +59,38 @@ export default function ColorimetryResultScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <ThemedText type="title" style={styles.title}>
-          Resultado da colorimetria feito utilizando IA
-        </ThemedText>
+      <ThemedText type="title" style={styles.title}>
+        Resultado da colorimetria feito utilizando IA
+      </ThemedText>
 
-        <View style={styles.rows}>
-          <ColorimetryColorRow
-            title="Suas cores de destaque"
-            colors={highlightColors}
-            caption="Tons terrosos e quentes valorizam sua pele."
-          />
+      <View style={styles.rows}>
+        <ColorimetryColorRow
+          title="Suas cores de destaque"
+          colors={highlightColors}
+          caption="Tons terrosos e quentes valorizam sua pele."
+        />
 
-          <ColorimetryColorRow
-            title="Cores a evitar perto do rosto"
-            colors={avoidColors}
-            caption="Tons de baixo contraste com o seu tom de pele"
-          />
+        <ColorimetryColorRow
+          title="Cores a evitar perto do rosto"
+          colors={avoidColors}
+          caption="Tons de baixo contraste com o seu tom de pele"
+        />
 
-          <ColorimetryColorRow
-            title="Escolha suas Cores Favoritas"
-            colors={favoriteColors}
-            emptyColor={EMPTY_FAVORITE_COLOR}
-            onSlotPress={setActiveSlot}
-          />
-        </View>
+        <ColorimetryColorRow
+          title="Escolha suas Cores Favoritas"
+          colors={favoriteColors}
+          emptyColor={EMPTY_FAVORITE_COLOR}
+          onSlotPress={setActiveSlot}
+        />
+      </View>
 
-        <View style={styles.footer}>
-          <AuthButton title="Entrar" onPress={handleEnter} isLoading={isSaving} />
+      <View style={styles.footer}>
+        <AuthButton title="Entrar" onPress={handleEnter} isLoading={isSaving} />
 
-          <Pressable onPress={handleRedoColorimetry} hitSlop={8}>
-            <Text style={styles.redoLink}>Refazer colorimetria</Text>
-          </Pressable>
-        </View>
-      </ScrollView>
+        <Pressable onPress={handleRedoColorimetry} hitSlop={8}>
+          <Text style={styles.redoLink}>Refazer colorimetria</Text>
+        </Pressable>
+      </View>
 
       <ColorPickerModal
         visible={activeSlot !== null}
@@ -109,6 +107,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: Colors.white,
+    paddingHorizontal: Spacing.two,
   },
   centered: {
     justifyContent: 'center',
@@ -122,7 +121,8 @@ const styles = StyleSheet.create({
     gap: Spacing.five,
   },
   title: {
-    marginTop: Spacing.four,
+    paddingTop: Spacing.fortyFour,
+    paddingBottom: Spacing.five,
     color: '#292524',
     fontSize: 36,
     fontWeight: '700',
