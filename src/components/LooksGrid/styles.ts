@@ -1,0 +1,18 @@
+import { StyleSheet } from 'react-native';
+
+import { Spacing } from '@/constants/Theme';
+
+export const styles = StyleSheet.create({
+  list: {
+    flex: 1,
+    minHeight: 0,
+  },
+  content: {
+    gap: 8,
+    paddingTop: Spacing.three,
+    paddingHorizontal: Spacing.two,
+  },
+  row: {
+    gap: 12,
+  },
+});
