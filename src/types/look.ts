@@ -21,3 +21,15 @@ export type LooksPage = {
 };
 
 export type LooksViewMode = 'grid' | 'focus';
+
+export type WardrobePiece = LookItem & {
+  category: 'Parte de cima' | 'Parte de baixo' | 'Calçados';
+};
+
+export type LookDraft = {
+  name: string;
+  description: string;
+  items: WardrobePiece[];
+};
+
+export const MAX_LOOK_PIECES = 3;
