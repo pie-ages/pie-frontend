@@ -28,7 +28,7 @@ export function LooksViewModeToggle({ value, onChange }: LooksViewModeToggleProp
             onPress={() => onChange(option.value)}
             style={[styles.segment, isSelected && styles.segmentSelected]}
           >
-            <Text style={styles.label}>{option.label}</Text>
+            <Text style={[styles.label, isSelected && styles.labelSelected]}>{option.label}</Text>
           </Pressable>
         );
       })}

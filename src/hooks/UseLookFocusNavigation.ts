@@ -20,10 +20,6 @@ export function useLookFocusNavigation(looks: Look[], initialLookId?: string) {
   return {
     activeIndex,
     activeLook,
-    hasPrevious: activeIndex > 0,
-    hasNext: activeIndex < looks.length - 1,
     goTo,
-    goPrevious: () => goTo(activeIndex - 1),
-    goNext: () => goTo(activeIndex + 1),
   };
 }

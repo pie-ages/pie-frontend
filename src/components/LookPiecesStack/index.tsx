@@ -11,7 +11,6 @@ type LookPiecesStackProps = {
   look: Look;
 };
 
-// Mostra apenas as peças do look, empilhadas no tamanho original.
 export function LookPiecesStack({ look }: LookPiecesStackProps) {
   if (look.items.length === 0) {
     return (
@@ -30,11 +29,16 @@ export function LookPiecesStack({ look }: LookPiecesStackProps) {
             <Image
               source={{ uri: item.imageUrl }}
               style={styles.pieceImage}
-              contentFit="contain"
-              accessibilityLabel={item.name}
+              contentFit="cover"
+              accessibilityLabel={item.name ?? 'Peça sem nome'}
             />
           ) : (
-            <Feather name="image" size={28} color={Colors.iconMuted} />
+            <Feather
+              name="image"
+              size={28}
+              color={Colors.iconMuted}
+              accessibilityLabel={item.name ? `Sem imagem para ${item.name}` : 'Peça sem imagem'}
+            />
           )}
         </View>
       ))}

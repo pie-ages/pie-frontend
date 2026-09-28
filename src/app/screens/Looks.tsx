@@ -1,15 +1,17 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { LoadingState } from '@/components/LoadingState';
 import { LookFocusCarousel } from '@/components/LookFocusCarousel';
 import { LookFocusInfo } from '@/components/LookFocusInfo';
-import { LooksEmptyState } from '@/components/LooksEmptyState';
-import { LooksErrorState } from '@/components/LooksErrorState';
-import { LooksLoadingState } from '@/components/LooksLoadingState';
-import { LooksToolBar } from '@/components/LooksToolBar';
+import { LookFocusPagination } from '@/components/LookFocusPagination';
 import { LooksViewModeToggle } from '@/components/LooksViewModeToggle';
+import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useLookFocusNavigation } from '@/hooks/UseLookFocusNavigation';
 import { useLooksCollection } from '@/hooks/UseLooksCollection';
@@ -30,28 +32,41 @@ export default function LooksScreen() {
     params.lookId ?? MOCK_INITIAL_LOOK_ID,
   );
 
-  const focusBottomPadding = insets.bottom + BottomTabInset + Spacing.three;
-  // Altura livre para os cards depois do título, para a tela não precisar de scroll vertical.
+  const focusBottomPadding = insets.bottom + BottomTabInset + Spacing.six;
   const maxCardHeight =
     focusAreaHeight - Spacing.three - focusBottomPadding - infoHeight - Spacing.three;
 
-  // Preserva o look visualizado na rota para a futura integração com o Grid Mode.
   const handleChangeViewMode = (mode: LooksViewMode) => {
     setViewMode(mode);
-    router.setParams({ viewMode: mode, lookId: activeLook?.id });
+    router.setParams({ viewMode: mode, lookId: activeLook?.id ?? undefined });
   };
 
   return (
     <View style={[styles.safeArea, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <LooksToolBar />
+        <ScreenToolBar
+          title="Meus Looks"
+          actions={[{ icon: 'plus', accessibilityLabel: 'Criar look' }]}
+        />
         <LooksViewModeToggle value={viewMode} onChange={handleChangeViewMode} />
       </View>
 
       <View style={styles.body}>
-        {status === 'loading' && <LooksLoadingState />}
-        {status === 'error' && <LooksErrorState onRetry={retry} />}
-        {status === 'empty' && <LooksEmptyState />}
+        {status === 'loading' && <LoadingState text="Carregando looks..." />}
+        {status === 'error' && (
+          <ErrorState
+            title="Não foi possível carregar os looks"
+            subtitle="Verifique sua conexão e tente novamente."
+            onRetry={retry}
+          />
+        )}
+        {status === 'empty' && (
+          <EmptyState
+            icon={<Ionicons name="sparkles-outline" size={32} color={Colors.icon} />}
+            title="Você ainda não tem looks"
+            subtitle="Monte seu primeiro look para vê-lo aqui."
+          />
+        )}
         {status === 'success' && viewMode === 'focus' && (
           <View
             style={[styles.focusContent, { paddingBottom: focusBottomPadding }]}
@@ -64,8 +79,12 @@ export default function LooksScreen() {
               maxHeight={maxCardHeight}
             />
             {activeLook && (
-              <View onLayout={(event) => setInfoHeight(event.nativeEvent.layout.height)}>
+              <View
+                style={styles.focusFooter}
+                onLayout={(event) => setInfoHeight(event.nativeEvent.layout.height)}
+              >
                 <LookFocusInfo look={activeLook} />
+                <LookFocusPagination count={looks.length} activeIndex={activeIndex} />
               </View>
             )}
           </View>
@@ -87,7 +106,7 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: 12,
-    paddingTop: 8,
+    paddingTop: Spacing.two,
     paddingHorizontal: Spacing.three,
   },
   body: {
@@ -95,8 +114,12 @@ const styles = StyleSheet.create({
   },
   focusContent: {
     flex: 1,
+    justifyContent: 'center',
     gap: Spacing.three,
     paddingTop: Spacing.three,
+  },
+  focusFooter: {
+    gap: Spacing.two,
   },
   gridPlaceholder: {
     flex: 1,

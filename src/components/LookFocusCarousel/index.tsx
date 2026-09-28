@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  Pressable,
   ScrollView,
   View,
 } from 'react-native';
 
-import { LookPiecesStack } from '@/components/LookPiecesStack';
+import { LookFlipCard } from '@/components/LookFlipCard';
+import {
+  LOOK_EMPTY_CARD_ASPECT_RATIO,
+  LOOK_PIECE_ASPECT_RATIO,
+  LOOK_PIECE_GAP,
+} from '@/components/LookPiecesStack/styles';
 import { Spacing } from '@/constants/Theme';
 import type { Look } from '@/types/look';
 
@@ -15,19 +20,16 @@ import { styles } from './styles';
 
 const CARD_WIDTH_RATIO = 0.67;
 const CARD_GAP = Spacing.four;
-const EMPTY_CARD_ASPECT_RATIO = 0.65;
-const PIECE_ASPECT_RATIO = 1.45;
-const PIECE_GAP = 6;
+const INACTIVE_OPACITY = 0.4;
 
-// Maior largura em que o card mais alto ainda cabe em maxHeight, evitando scroll vertical.
 function getMaxCardWidthForHeight(looks: Look[], maxHeight: number) {
   const maxPieces = Math.max(0, ...looks.map((look) => look.items.length));
   const emptyLimit = looks.some((look) => look.items.length === 0)
-    ? maxHeight * EMPTY_CARD_ASPECT_RATIO
+    ? maxHeight * LOOK_EMPTY_CARD_ASPECT_RATIO
     : Infinity;
   const piecesLimit =
     maxPieces > 0
-      ? ((maxHeight - (maxPieces - 1) * PIECE_GAP) * PIECE_ASPECT_RATIO) / maxPieces
+      ? ((maxHeight - (maxPieces - 1) * LOOK_PIECE_GAP) * LOOK_PIECE_ASPECT_RATIO) / maxPieces
       : Infinity;
   return Math.max(Math.min(emptyLimit, piecesLimit), 0);
 }
@@ -36,6 +38,7 @@ type LookFocusCarouselProps = {
   looks: Look[];
   activeIndex: number;
   onChangeIndex: (index: number) => void;
+  onAddPhoto?: (lookId: string) => void;
   maxHeight: number;
 };
 
@@ -43,12 +46,15 @@ export function LookFocusCarousel({
   looks,
   activeIndex,
   onChangeIndex,
+  onAddPhoto,
   maxHeight,
 }: LookFocusCarouselProps) {
   const scrollRef = useRef<ScrollView>(null);
   const scrollOffset = useRef(0);
+  const [scrollX] = useState(() => new Animated.Value(0));
   const programmaticTarget = useRef<number | null>(null);
   const hasPositioned = useRef(false);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [carouselWidth, setCarouselWidth] = useState(0);
 
   const cardWidth =
@@ -58,7 +64,6 @@ export function LookFocusCarousel({
   const itemPitch = cardWidth + CARD_GAP;
   const sideInset = Math.max((carouselWidth - cardWidth) / 2, 0);
 
-  // Sincroniza o scroll quando o look ativo muda por fora do gesto (toque no vizinho ou lookId inicial).
   useEffect(() => {
     if (!itemPitch) return;
     if (hasPositioned.current && Math.round(scrollOffset.current / itemPitch) === activeIndex) {
@@ -74,9 +79,17 @@ export function LookFocusCarousel({
     scrollRef.current?.scrollTo({ x: target, animated: shouldAnimate });
   }, [activeIndex, itemPitch]);
 
+  useEffect(
+    () => () => {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    },
+    [],
+  );
+
   function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
     if (!itemPitch) return;
     scrollOffset.current = event.nativeEvent.contentOffset.x;
+    scrollX.setValue(scrollOffset.current);
 
     if (programmaticTarget.current !== null) {
       if (Math.abs(scrollOffset.current - programmaticTarget.current) < 1) {
@@ -90,6 +103,19 @@ export function LookFocusCarousel({
       looks.length - 1,
     );
     if (index !== activeIndex) onChangeIndex(index);
+
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => snapToNearest(scrollOffset.current), 120);
+  }
+
+  function snapToNearest(offsetX: number) {
+    if (!itemPitch) return;
+    const index = Math.min(Math.max(Math.round(offsetX / itemPitch), 0), looks.length - 1);
+    const target = index * itemPitch;
+    if (Math.abs(scrollOffset.current - target) < 1) return;
+    programmaticTarget.current = target;
+    scrollRef.current?.scrollTo({ x: target, animated: true });
+    if (index !== activeIndex) onChangeIndex(index);
   }
 
   return (
@@ -102,6 +128,8 @@ export function LookFocusCarousel({
         horizontal
         contentContainerStyle={[styles.content, { paddingHorizontal: sideInset }]}
         snapToInterval={itemPitch || undefined}
+        snapToAlignment="center"
+        disableIntervalMomentum
         decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
         scrollEventThrottle={16}
@@ -109,25 +137,31 @@ export function LookFocusCarousel({
         onScrollBeginDrag={() => {
           programmaticTarget.current = null;
         }}
+        onMomentumScrollEnd={(event) => snapToNearest(event.nativeEvent.contentOffset.x)}
       >
         {cardWidth > 0 &&
           looks.map((look, index) => {
-            const isActive = index === activeIndex;
+            const opacity = scrollX.interpolate({
+              inputRange: [(index - 1) * itemPitch, index * itemPitch, (index + 1) * itemPitch],
+              outputRange: [INACTIVE_OPACITY, 1, INACTIVE_OPACITY],
+              extrapolate: 'clamp',
+            });
 
             return (
-              <Pressable
+              <Animated.View
                 key={look.id}
-                disabled={isActive}
-                onPress={() => onChangeIndex(index)}
-                accessibilityRole="button"
-                accessibilityLabel={isActive ? look.name : `Ver ${look.name}`}
                 style={[
-                  { width: cardWidth },
+                  { width: cardWidth, opacity },
                   index < looks.length - 1 && { marginRight: CARD_GAP },
                 ]}
               >
-                <LookPiecesStack look={look} />
-              </Pressable>
+                <LookFlipCard
+                  look={look}
+                  interactive={index === activeIndex}
+                  onSelect={() => onChangeIndex(index)}
+                  onAddPhoto={onAddPhoto}
+                />
+              </Animated.View>
             );
           })}
       </ScrollView>

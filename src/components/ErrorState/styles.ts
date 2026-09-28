@@ -1,15 +1,15 @@
 import { StyleSheet } from 'react-native';
 
-import { Colors } from '@/constants/Theme';
+import { Colors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 64,
-    paddingHorizontal: 32,
+    gap: Spacing.two,
+    paddingVertical: Spacing.six,
+    paddingHorizontal: Spacing.five,
   },
   title: {
     fontSize: 16,
@@ -23,9 +23,9 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    marginTop: 16,
+    marginTop: Spacing.three,
     height: 44,
-    paddingHorizontal: 24,
+    paddingHorizontal: Spacing.four,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',

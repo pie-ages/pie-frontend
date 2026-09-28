@@ -1,3 +1,6 @@
+// TODO(integração): este hook é temporário e serve apenas para carregar dados
+// mockados enquanto o backend de looks não existe. Ao integrar com a API real,
+// remover este arquivo e o mock em '@/mocks/looks'.
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -6,7 +9,7 @@ import type { Look } from '@/types/look';
 
 export type LooksStatus = 'loading' | 'success' | 'error' | 'empty';
 
-const FORCEABLE_STATUSES = ['loading', 'error', 'empty'];
+const FORCEABLE_STATUSES = ['loading', 'error', 'empty'] as const;
 type ForceableStatus = (typeof FORCEABLE_STATUSES)[number];
 
 function resolveForcedStatus(value: string | string[] | undefined): ForceableStatus | null {
@@ -62,6 +65,7 @@ export function useLooksCollection() {
 
   const retry = useCallback(() => {
     setStatus('loading');
+    setLooks([]);
     setAttempt((value) => value + 1);
   }, []);
 

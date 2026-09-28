@@ -13,4 +13,11 @@ export type Look = {
   items: LookItem[];
 };
 
+export type LooksPage = {
+  items: Look[];
+  total: number;
+  page: number;
+  size: number;
+};
+
 export type LooksViewMode = 'grid' | 'focus';

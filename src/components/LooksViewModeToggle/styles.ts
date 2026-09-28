@@ -29,4 +29,7 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.light.text,
   },
+  labelSelected: {
+    color: Colors.brand.accent,
+  },
 });

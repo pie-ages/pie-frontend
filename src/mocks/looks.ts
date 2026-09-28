@@ -1,9 +1,9 @@
 import type { Look } from '../types/look';
 
 /**
- * Dados mockados usados para montar o Focus Mode dos looks sem depender do
- * backend. A integração real com a API de looks e a conexão com o Grid Mode
- * acontecem em task separada.
+ * TODO(integração): dados mockados temporários usados enquanto o backend de looks
+ * não existe. Ao integrar com a API real, remover este arquivo e o hook
+ * '@/hooks/UseLooksCollection'.
  */
 export const MOCK_LOOKS: Look[] = [
   {
@@ -78,7 +78,7 @@ export const MOCK_LOOKS: Look[] = [
   {
     id: '4',
     name: 'Look alfaiataria',
-    imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80&auto=format',
+    imageUrl: null,
     style: 'Clássico',
     occasion: 'Trabalho',
     items: [
@@ -104,10 +104,30 @@ export const MOCK_LOOKS: Look[] = [
   },
   {
     id: '5',
-    name: 'Look sem peças',
+    name: 'Look romântico',
     imageUrl: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=600&q=80&auto=format',
     style: 'Romântico',
-    items: [],
+    occasion: 'Encontro',
+    items: [
+      {
+        id: '51',
+        name: 'Blusa de cetim rosé',
+        imageUrl:
+          'https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=400&q=80&auto=format',
+      },
+      {
+        id: '52',
+        name: 'Calça jeans',
+        imageUrl:
+          'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80&auto=format',
+      },
+      {
+        id: '53',
+        name: 'Scarpin nude',
+        imageUrl:
+          'https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=400&q=80&auto=format',
+      },
+    ],
   },
 ];
 
