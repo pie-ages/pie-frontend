@@ -1,6 +1,3 @@
-// TODO(integração): este hook é temporário e serve apenas para carregar dados
-// mockados enquanto o backend de looks não existe. Ao integrar com a API real,
-// remover este arquivo e o mock em '@/mocks/looks'.
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 

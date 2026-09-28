@@ -21,7 +21,9 @@ export class AuthApiError extends Error {
 type AuthContextValue = {
   isAuthenticated: boolean;
   isInitializing: boolean;
+  pendingStyleQuiz: boolean;
   signIn: (payload: LoginPayload) => Promise<void>;
+  completeMockSignUp: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -30,6 +32,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: PropsWithChildren) {
   const [token, setToken] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [pendingStyleQuiz, setPendingStyleQuiz] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -75,15 +78,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setToken(response.data.token);
   }
 
+  async function completeMockSignUp() {
+    const mockToken = `mock-signup-${Date.now()}`;
+    await storeToken(mockToken);
+    setPendingStyleQuiz(true);
+    setToken(mockToken);
+  }
+
   async function signOut() {
     await removeStoredToken();
+    setPendingStyleQuiz(false);
     setToken(null);
   }
 
   const value: AuthContextValue = {
     isAuthenticated: token !== null,
     isInitializing,
+    pendingStyleQuiz,
     signIn,
+    completeMockSignUp,
     signOut,
   };
 

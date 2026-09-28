@@ -1,10 +1,5 @@
 import type { Look } from '../types/look';
 
-/**
- * TODO(integração): dados mockados temporários usados enquanto o backend de looks
- * não existe. Ao integrar com a API real, remover este arquivo e o hook
- * '@/hooks/UseLooksCollection'.
- */
 export const MOCK_LOOKS: Look[] = [
   {
     id: '1',

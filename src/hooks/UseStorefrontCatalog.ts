@@ -42,7 +42,6 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
   const [attempt, setAttempt] = useState(0);
 
   const isFetching = useRef(false);
-  // Incremented on every initial load reset; stale callbacks compare against it before mutating state.
   const generation = useRef(0);
   const latestParams = useRef(params);
   // eslint-disable-next-line react-hooks/refs
@@ -105,9 +104,7 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
         setHasNextPage((page.page + 1) * page.size < page.total);
         setCurrentPage(nextPage);
       })
-      .catch(() => {
-        // existing products are preserved on pagination error
-      })
+      .catch(() => {})
       .finally(() => {
         if (generation.current === gen) {
           isFetching.current = false;

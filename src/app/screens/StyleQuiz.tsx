@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +9,31 @@ import { StyleQuizOptionCard } from '@/components/StyleQuizOptionCard';
 import { Colors, Spacing, SystemFonts } from '@/constants/Theme';
 import { MAX_CONTENT_WIDTH, type ScaleFn, useLayoutScale } from '@/hooks/UseLayoutScale';
 import { useStyleQuiz } from '@/hooks/UseStyleQuiz';
-import type { StyleQuizAnswer } from '@/types/StyleQuiz';
+import { useUserStyle } from '@/hooks/UseUserStyle';
+import { resolveStyleFromQuizCodes } from '@/types/Style';
+import type { StyleQuizAnswer, StyleQuizQuestion } from '@/types/StyleQuiz';
+
+function answersToStyleCodes(
+  questions: StyleQuizQuestion[],
+  answers: Record<string, StyleQuizAnswer>,
+): string[] {
+  const codes: string[] = [];
+
+  for (const question of questions) {
+    const answer = answers[question.id];
+    if (!answer || answer.type === 'none') continue;
+
+    if (answer.type === 'both') {
+      for (const option of question.options) codes.push(option.style);
+      continue;
+    }
+
+    const option = question.options.find((o) => o.id === answer.optionId);
+    if (option) codes.push(option.style);
+  }
+
+  return codes;
+}
 
 const TITLE_TOP = 92;
 const MIN_TITLE_GAP = 8;
@@ -18,6 +43,7 @@ export default function StyleQuizScreen() {
   const { s } = useLayoutScale();
   const scaledStyles = useMemo(() => createScaledStyles(s), [s]);
   const { questions, isLoading, error } = useStyleQuiz();
+  const { setStyles } = useUserStyle();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, StyleQuizAnswer>>({});
   const [pendingAnswer, setPendingAnswer] = useState<StyleQuizAnswer | null>(null);
@@ -57,12 +83,18 @@ export default function StyleQuizScreen() {
   function handleConfirmPreview() {
     if (!pendingAnswer) return;
 
-    setAnswers((previous) => ({ ...previous, [currentQuestion.id]: pendingAnswer }));
+    const updatedAnswers = { ...answers, [currentQuestion.id]: pendingAnswer };
+    setAnswers(updatedAnswers);
     setPendingAnswer(null);
 
     if (!isLastQuestion) {
       setCurrentIndex((index) => index + 1);
+      return;
     }
+
+    const codes = answersToStyleCodes(questions, updatedAnswers);
+    setStyles([resolveStyleFromQuizCodes(codes)]);
+    router.replace('/screens/MyStyle');
   }
 
   return (
