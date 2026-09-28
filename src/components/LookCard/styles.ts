@@ -17,6 +17,14 @@ export const styles = StyleSheet.create({
   mediaTap: {
     flex: 1,
   },
+  face: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backfaceVisibility: 'hidden',
+  },
   pressed: {
     opacity: 0.85,
   },
