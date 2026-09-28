@@ -5,6 +5,7 @@ import { Colors } from '@/constants/Theme';
 export const LOOK_PIECE_GAP = 6;
 export const LOOK_PIECE_ASPECT_RATIO = 1.45;
 export const LOOK_EMPTY_CARD_ASPECT_RATIO = 0.65;
+export const LOOK_PIECE_RADIUS = 12;
 
 export const styles = StyleSheet.create({
   container: {
@@ -16,7 +17,6 @@ export const styles = StyleSheet.create({
     aspectRatio: LOOK_PIECE_ASPECT_RATIO,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: Colors.white,
     borderWidth: StyleSheet.hairlineWidth,

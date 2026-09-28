@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
@@ -10,6 +10,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { LookFocusCarousel } from '@/components/LookFocusCarousel';
 import { LookFocusInfo } from '@/components/LookFocusInfo';
 import { LookFocusPagination } from '@/components/LookFocusPagination';
+import { LooksGrid } from '@/components/LooksGrid';
 import { LooksViewModeToggle } from '@/components/LooksViewModeToggle';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
@@ -20,80 +21,108 @@ import type { LooksViewMode } from '@/types/look';
 
 export default function LooksScreen() {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const params = useLocalSearchParams<{ lookId?: string; viewMode?: string }>();
-  const [focusAreaHeight, setFocusAreaHeight] = useState(0);
-  const [infoHeight, setInfoHeight] = useState(0);
+  const [carouselAreaHeight, setCarouselAreaHeight] = useState(0);
   const [viewMode, setViewMode] = useState<LooksViewMode>(
     params.viewMode === 'grid' ? 'grid' : 'focus',
   );
+  const [contentOpacity] = useState(() => new Animated.Value(1));
   const { status, looks, retry } = useLooksCollection();
   const { activeIndex, activeLook, goTo } = useLookFocusNavigation(
     looks,
     params.lookId ?? MOCK_INITIAL_LOOK_ID,
   );
 
-  const focusBottomPadding = insets.bottom + BottomTabInset + Spacing.six;
-  const maxCardHeight =
-    focusAreaHeight - Spacing.three - focusBottomPadding - infoHeight - Spacing.three;
+  useEffect(() => {
+    contentOpacity.setValue(0);
+    Animated.timing(contentOpacity, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  }, [viewMode, contentOpacity]);
+
+  const focusBottomPadding = insets.bottom + BottomTabInset + Spacing.two;
 
   const handleChangeViewMode = (mode: LooksViewMode) => {
     setViewMode(mode);
     router.setParams({ viewMode: mode, lookId: activeLook?.id ?? undefined });
   };
 
-  return (
-    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <ScreenToolBar
-          title="Meus Looks"
-          actions={[{ icon: 'plus', accessibilityLabel: 'Criar look' }]}
-        />
-        <LooksViewModeToggle value={viewMode} onChange={handleChangeViewMode} />
-      </View>
+  const handleLookPress = (id: string) => {
+    const index = looks.findIndex((look) => look.id === id);
+    if (index >= 0) goTo(index);
+    setViewMode('focus');
+    router.setParams({ viewMode: 'focus', lookId: id });
+  };
 
-      <View style={styles.body}>
-        {status === 'loading' && <LoadingState text="Carregando looks..." />}
-        {status === 'error' && (
-          <ErrorState
-            title="Não foi possível carregar os looks"
-            subtitle="Verifique sua conexão e tente novamente."
-            onRetry={retry}
+  return (
+    <View
+      style={[
+        styles.safeArea,
+        { paddingTop: insets.top },
+        Platform.OS === 'web' && { maxHeight: windowHeight, overflow: 'hidden' },
+      ]}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <ScreenToolBar
+            title="Meus Looks"
+            actions={[{ icon: 'plus', accessibilityLabel: 'Criar look' }]}
           />
-        )}
-        {status === 'empty' && (
-          <EmptyState
-            icon={<Ionicons name="sparkles-outline" size={32} color={Colors.icon} />}
-            title="Você ainda não tem looks"
-            subtitle="Monte seu primeiro look para vê-lo aqui."
-          />
-        )}
-        {status === 'success' && viewMode === 'focus' && (
-          <View
-            style={[styles.focusContent, { paddingBottom: focusBottomPadding }]}
-            onLayout={(event) => setFocusAreaHeight(event.nativeEvent.layout.height)}
-          >
-            <LookFocusCarousel
-              looks={looks}
-              activeIndex={activeIndex}
-              onChangeIndex={goTo}
-              maxHeight={maxCardHeight}
+          <LooksViewModeToggle value={viewMode} onChange={handleChangeViewMode} />
+        </View>
+
+        <View style={styles.body}>
+          {status === 'loading' && <LoadingState text="Carregando looks..." />}
+          {status === 'error' && (
+            <ErrorState
+              title="Não foi possível carregar os looks"
+              subtitle="Verifique sua conexão e tente novamente."
+              onRetry={retry}
             />
-            {activeLook && (
-              <View
-                style={styles.focusFooter}
-                onLayout={(event) => setInfoHeight(event.nativeEvent.layout.height)}
-              >
-                <LookFocusInfo look={activeLook} />
-                <LookFocusPagination count={looks.length} activeIndex={activeIndex} />
-              </View>
-            )}
-          </View>
-        )}
-        {status === 'success' && viewMode === 'grid' && (
-          <View style={styles.gridPlaceholder}>
-            <Text style={styles.gridPlaceholderText}>O Grid Mode será construído em breve.</Text>
-          </View>
-        )}
+          )}
+          {status === 'empty' && (
+            <EmptyState
+              icon={<Ionicons name="sparkles-outline" size={32} color={Colors.icon} />}
+              title="Você ainda não tem looks"
+              subtitle="Monte seu primeiro look para vê-lo aqui."
+            />
+          )}
+          {status === 'success' && (
+            <Animated.View style={[styles.modeContainer, { opacity: contentOpacity }]}>
+              {viewMode === 'focus' && (
+                <View style={[styles.focusContent, { paddingBottom: focusBottomPadding }]}>
+                  <View
+                    style={styles.focusCarousel}
+                    onLayout={(event) => setCarouselAreaHeight(event.nativeEvent.layout.height)}
+                  >
+                    <LookFocusCarousel
+                      looks={looks}
+                      activeIndex={activeIndex}
+                      onChangeIndex={goTo}
+                      maxHeight={carouselAreaHeight}
+                    />
+                  </View>
+                  {activeLook && (
+                    <View style={styles.focusFooter}>
+                      <LookFocusInfo look={activeLook} />
+                      <LookFocusPagination count={looks.length} activeIndex={activeIndex} />
+                    </View>
+                  )}
+                </View>
+              )}
+              {viewMode === 'grid' && (
+                <LooksGrid
+                  looks={looks}
+                  onLookPress={handleLookPress}
+                  contentBottomInset={insets.bottom + BottomTabInset + Spacing.three}
+                />
+              )}
+            </Animated.View>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -104,6 +133,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  container: {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+  },
   header: {
     gap: 12,
     paddingTop: Spacing.two,
@@ -111,25 +145,24 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    minHeight: 0,
+    paddingHorizontal: 8,
+    overflow: 'hidden',
+  },
+  modeContainer: {
+    flex: 1,
+    minHeight: 0,
   },
   focusContent: {
     flex: 1,
-    justifyContent: 'center',
-    gap: Spacing.three,
+    justifyContent: 'space-between',
     paddingTop: Spacing.three,
+  },
+  focusCarousel: {
+    flex: 1,
+    justifyContent: 'center',
   },
   focusFooter: {
     gap: Spacing.two,
-  },
-  gridPlaceholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.five,
-  },
-  gridPlaceholderText: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
   },
 });

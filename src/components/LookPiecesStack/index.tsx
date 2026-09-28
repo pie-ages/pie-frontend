@@ -5,7 +5,7 @@ import { Text, View } from 'react-native';
 import { Colors } from '@/constants/Theme';
 import type { Look } from '@/types/look';
 
-import { styles } from './styles';
+import { LOOK_PIECE_RADIUS, styles } from './styles';
 
 type LookPiecesStackProps = {
   look: Look;
@@ -23,25 +23,41 @@ export function LookPiecesStack({ look }: LookPiecesStackProps) {
 
   return (
     <View style={styles.container} accessibilityLabel={look.name}>
-      {look.items.map((item) => (
-        <View key={item.id} style={styles.piece}>
-          {item.imageUrl ? (
-            <Image
-              source={{ uri: item.imageUrl }}
-              style={styles.pieceImage}
-              contentFit="cover"
-              accessibilityLabel={item.name ?? 'Peça sem nome'}
-            />
-          ) : (
-            <Feather
-              name="image"
-              size={28}
-              color={Colors.iconMuted}
-              accessibilityLabel={item.name ? `Sem imagem para ${item.name}` : 'Peça sem imagem'}
-            />
-          )}
-        </View>
-      ))}
+      {look.items.map((item, index) => {
+        const isFirst = index === 0;
+        const isLast = index === look.items.length - 1;
+
+        return (
+          <View
+            key={item.id}
+            style={[
+              styles.piece,
+              {
+                borderTopLeftRadius: isFirst ? LOOK_PIECE_RADIUS : 0,
+                borderTopRightRadius: isFirst ? LOOK_PIECE_RADIUS : 0,
+                borderBottomLeftRadius: isLast ? LOOK_PIECE_RADIUS : 0,
+                borderBottomRightRadius: isLast ? LOOK_PIECE_RADIUS : 0,
+              },
+            ]}
+          >
+            {item.imageUrl ? (
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={styles.pieceImage}
+                contentFit="cover"
+                accessibilityLabel={item.name ?? 'Peça sem nome'}
+              />
+            ) : (
+              <Feather
+                name="image"
+                size={28}
+                color={Colors.iconMuted}
+                accessibilityLabel={item.name ? `Sem imagem para ${item.name}` : 'Peça sem imagem'}
+              />
+            )}
+          </View>
+        );
+      })}
     </View>
   );
 }

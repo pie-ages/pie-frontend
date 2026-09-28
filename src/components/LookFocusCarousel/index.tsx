@@ -3,6 +3,7 @@ import {
   Animated,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  Platform,
   ScrollView,
   View,
 } from 'react-native';
@@ -86,6 +87,16 @@ export function LookFocusCarousel({
     [],
   );
 
+  function currentIndex(offsetX: number) {
+    return Math.min(Math.max(Math.round(offsetX / itemPitch), 0), looks.length - 1);
+  }
+
+  function updateActiveIndex(offsetX: number) {
+    if (!itemPitch) return;
+    const index = currentIndex(offsetX);
+    if (index !== activeIndex) onChangeIndex(index);
+  }
+
   function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
     if (!itemPitch) return;
     scrollOffset.current = event.nativeEvent.contentOffset.x;
@@ -98,24 +109,21 @@ export function LookFocusCarousel({
       return;
     }
 
-    const index = Math.min(
-      Math.max(Math.round(scrollOffset.current / itemPitch), 0),
-      looks.length - 1,
-    );
-    if (index !== activeIndex) onChangeIndex(index);
-
-    if (idleTimer.current) clearTimeout(idleTimer.current);
-    idleTimer.current = setTimeout(() => snapToNearest(scrollOffset.current), 120);
+    if (Platform.OS === 'web') {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => snapToNearest(scrollOffset.current), 120);
+    }
   }
 
   function snapToNearest(offsetX: number) {
     if (!itemPitch) return;
-    const index = Math.min(Math.max(Math.round(offsetX / itemPitch), 0), looks.length - 1);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    const index = currentIndex(offsetX);
     const target = index * itemPitch;
+    if (index !== activeIndex) onChangeIndex(index);
     if (Math.abs(scrollOffset.current - target) < 1) return;
     programmaticTarget.current = target;
     scrollRef.current?.scrollTo({ x: target, animated: true });
-    if (index !== activeIndex) onChangeIndex(index);
   }
 
   return (
@@ -128,8 +136,6 @@ export function LookFocusCarousel({
         horizontal
         contentContainerStyle={[styles.content, { paddingHorizontal: sideInset }]}
         snapToInterval={itemPitch || undefined}
-        snapToAlignment="center"
-        disableIntervalMomentum
         decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
         scrollEventThrottle={16}
@@ -137,7 +143,14 @@ export function LookFocusCarousel({
         onScrollBeginDrag={() => {
           programmaticTarget.current = null;
         }}
-        onMomentumScrollEnd={(event) => snapToNearest(event.nativeEvent.contentOffset.x)}
+        onMomentumScrollEnd={(event) => {
+          const offsetX = event.nativeEvent.contentOffset.x;
+          if (Platform.OS === 'web') {
+            snapToNearest(offsetX);
+          } else {
+            updateActiveIndex(offsetX);
+          }
+        }}
       >
         {cardWidth > 0 &&
           looks.map((look, index) => {
