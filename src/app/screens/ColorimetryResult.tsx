@@ -8,37 +8,41 @@ import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
 import { ColorPickerModal } from '@/components/ColorPickerModal';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
-import { MOCK_COLORIMETRY_PREFERENCES } from '@/mocks/colorimetry';
+import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 
 const EMPTY_FAVORITE_COLOR = '#999999';
 
 export default function ColorimetryResultScreen() {
-  const { highlightColors, avoidColors } = MOCK_COLORIMETRY_PREFERENCES;
+  const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
+    useColorimetryPreferences();
 
-  const [favoriteColors, setFavoriteColors] = useState<string[]>(
-    MOCK_COLORIMETRY_PREFERENCES.favoriteColors,
-  );
+  const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const pickerColors = Array.from(new Set([...highlightColors, ...avoidColors]));
+  const favoriteColors = preferences
+    ? preferences.favoriteColors.map((c, i) => colorOverrides[i] ?? c)
+    : [];
+
+  const pickerColors = preferences
+    ? Array.from(new Set([...preferences.highlightColors, ...preferences.avoidColors]))
+    : [];
 
   function handleSelectFavorite(color: string) {
     if (activeSlot === null) return;
-
-    setFavoriteColors((prev) => prev.map((c, i) => (i === activeSlot ? color : c)));
+    setColorOverrides((prev) => ({ ...prev, [activeSlot]: color }));
     setActiveSlot(null);
   }
 
-  function handleEnter() {
-    router.replace('/(tabs)/Storefront');
+  async function handleEnter() {
+    const success = await saveFavoriteColors(favoriteColors);
+    if (success) {
+      router.replace('/(tabs)/Storefront');
+    }
   }
 
   function handleRedoColorimetry() {}
 
-  if (isLoading) {
+  if (status === 'loading') {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
         <ActivityIndicator size="large" color={Colors.brand.primary} />
@@ -46,11 +50,13 @@ export default function ColorimetryResultScreen() {
     );
   }
 
-  if (error) {
+  if (status === 'error') {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
-        <ThemedText themeColor="textSecondary">{error}</ThemedText>
-        <Pressable onPress={() => setError(null)} hitSlop={8} style={styles.retryButton}>
+        <ThemedText themeColor="textSecondary">
+          Não foi possível carregar sua colorimetria.
+        </ThemedText>
+        <Pressable onPress={retry} hitSlop={8} style={styles.retryButton}>
           <Text style={styles.redoLink}>Tentar novamente</Text>
         </Pressable>
       </SafeAreaView>
@@ -66,13 +72,13 @@ export default function ColorimetryResultScreen() {
       <View style={styles.rows}>
         <ColorimetryColorRow
           title="Suas cores de destaque"
-          colors={highlightColors}
+          colors={preferences!.highlightColors}
           caption="Tons terrosos e quentes valorizam sua pele."
         />
 
         <ColorimetryColorRow
           title="Cores a evitar perto do rosto"
-          colors={avoidColors}
+          colors={preferences!.avoidColors}
           caption="Tons de baixo contraste com o seu tom de pele"
         />
 
@@ -83,6 +89,12 @@ export default function ColorimetryResultScreen() {
           onSlotPress={setActiveSlot}
         />
       </View>
+
+      {saveError && (
+        <ThemedText style={styles.saveError} themeColor="textSecondary">
+          {saveError}
+        </ThemedText>
+      )}
 
       <View style={styles.footer}>
         <AuthButton title="Entrar" onPress={handleEnter} isLoading={isSaving} />
@@ -114,12 +126,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
   },
-  content: {
-    flexGrow: 1,
-    paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.three,
-    gap: Spacing.five,
-  },
   title: {
     paddingTop: Spacing.fortyFour,
     paddingBottom: Spacing.five,
@@ -131,6 +137,10 @@ const styles = StyleSheet.create({
   },
   rows: {
     gap: Spacing.three,
+  },
+  saveError: {
+    marginTop: Spacing.two,
+    textAlign: 'center',
   },
   footer: {
     marginTop: 'auto',
