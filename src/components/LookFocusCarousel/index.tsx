@@ -98,24 +98,19 @@ export function LookFocusCarousel({
       return;
     }
 
-    const index = Math.min(
-      Math.max(Math.round(scrollOffset.current / itemPitch), 0),
-      looks.length - 1,
-    );
-    if (index !== activeIndex) onChangeIndex(index);
-
     if (idleTimer.current) clearTimeout(idleTimer.current);
     idleTimer.current = setTimeout(() => snapToNearest(scrollOffset.current), 120);
   }
 
   function snapToNearest(offsetX: number) {
     if (!itemPitch) return;
+    if (idleTimer.current) clearTimeout(idleTimer.current);
     const index = Math.min(Math.max(Math.round(offsetX / itemPitch), 0), looks.length - 1);
     const target = index * itemPitch;
+    if (index !== activeIndex) onChangeIndex(index);
     if (Math.abs(scrollOffset.current - target) < 1) return;
     programmaticTarget.current = target;
     scrollRef.current?.scrollTo({ x: target, animated: true });
-    if (index !== activeIndex) onChangeIndex(index);
   }
 
   return (

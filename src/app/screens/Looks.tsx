@@ -23,8 +23,7 @@ export default function LooksScreen() {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const params = useLocalSearchParams<{ lookId?: string; viewMode?: string }>();
-  const [focusAreaHeight, setFocusAreaHeight] = useState(0);
-  const [infoHeight, setInfoHeight] = useState(0);
+  const [carouselAreaHeight, setCarouselAreaHeight] = useState(0);
   const [viewMode, setViewMode] = useState<LooksViewMode>(
     params.viewMode === 'grid' ? 'grid' : 'focus',
   );
@@ -44,9 +43,7 @@ export default function LooksScreen() {
     }).start();
   }, [viewMode, contentOpacity]);
 
-  const focusBottomPadding = insets.bottom + BottomTabInset + Spacing.six;
-  const maxCardHeight =
-    focusAreaHeight - Spacing.three - focusBottomPadding - infoHeight - Spacing.three;
+  const focusBottomPadding = insets.bottom + BottomTabInset + Spacing.two;
 
   const handleChangeViewMode = (mode: LooksViewMode) => {
     setViewMode(mode);
@@ -96,21 +93,20 @@ export default function LooksScreen() {
           {status === 'success' && (
             <Animated.View style={[styles.modeContainer, { opacity: contentOpacity }]}>
               {viewMode === 'focus' && (
-                <View
-                  style={[styles.focusContent, { paddingBottom: focusBottomPadding }]}
-                  onLayout={(event) => setFocusAreaHeight(event.nativeEvent.layout.height)}
-                >
-                  <LookFocusCarousel
-                    looks={looks}
-                    activeIndex={activeIndex}
-                    onChangeIndex={goTo}
-                    maxHeight={maxCardHeight}
-                  />
+                <View style={[styles.focusContent, { paddingBottom: focusBottomPadding }]}>
+                  <View
+                    style={styles.focusCarousel}
+                    onLayout={(event) => setCarouselAreaHeight(event.nativeEvent.layout.height)}
+                  >
+                    <LookFocusCarousel
+                      looks={looks}
+                      activeIndex={activeIndex}
+                      onChangeIndex={goTo}
+                      maxHeight={carouselAreaHeight}
+                    />
+                  </View>
                   {activeLook && (
-                    <View
-                      style={styles.focusFooter}
-                      onLayout={(event) => setInfoHeight(event.nativeEvent.layout.height)}
-                    >
+                    <View style={styles.focusFooter}>
                       <LookFocusInfo look={activeLook} />
                       <LookFocusPagination count={looks.length} activeIndex={activeIndex} />
                     </View>
@@ -159,9 +155,12 @@ const styles = StyleSheet.create({
   },
   focusContent: {
     flex: 1,
-    justifyContent: 'center',
-    gap: Spacing.three,
+    justifyContent: 'space-between',
     paddingTop: Spacing.three,
+  },
+  focusCarousel: {
+    flex: 1,
+    justifyContent: 'center',
   },
   focusFooter: {
     gap: Spacing.two,
