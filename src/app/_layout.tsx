@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { WishlistProvider } from '@/hooks/UseWishlist';
 
 SplashScreen.preventAutoHideAsync();
@@ -23,10 +23,11 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isAuthenticated } = useAuth();
+  const isAuthenticated = true;
 
   return (
     <Stack
+      initialRouteName="screens/ClosetScreen"
       screenOptions={{
         headerShown: false,
       }}
@@ -39,7 +40,7 @@ function RootNavigator() {
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="screens/Storefront" />
-        <Stack.Screen name="screens/Closet" />
+        <Stack.Screen name="screens/ClosetScreen" />
         <Stack.Screen name="screens/Looks" />
       </Stack.Protected>
 
