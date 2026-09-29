@@ -55,7 +55,10 @@ export default function ClosetScreen() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scrollContent, status === 'empty' && styles.emptyContent]}
+      >
         {status === 'empty' ? (
           <View style={styles.centerContainer}>
             <Text style={styles.statusText}>O seu guarda-roupa está vazio.</Text>
@@ -128,6 +131,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingTop: 16,
     paddingBottom: 40,
+  },
+  emptyContent: {
+    flexGrow: 1,
   },
   centerContainer: {
     flex: 1,

@@ -141,6 +141,7 @@ export function createWardrobeStore(fetchWardrobe: WardrobeFetch) {
       state.status !== 'success' ||
       !row ||
       !row.hasNext ||
+      row.status === 'loadingMore' ||
       controllers.has(rowId) ||
       (row.status === 'error' && !retry)
     ) {
