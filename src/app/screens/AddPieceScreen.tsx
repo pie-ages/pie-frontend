@@ -1,7 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Modal,
+  Pressable,
   View,
   Text,
   StyleSheet,
@@ -13,17 +16,32 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { fetchTaxonomy, type TaxonomyTerm } from '@/api/taxonomy';
+import { AuthButton } from '@/components/AuthButton';
 import FormInput from '@/components/FormInput';
 import FormSelect from '@/components/FormSelect';
 import ImagePickerArea from '@/components/ImagePickerArea';
-import { mockCategories, mockStyles, mockColors } from '@/mocks/addPieceMocks';
+import { useAddPieceForm } from '@/hooks/UseAddPieceForm';
 
 export default function AddPieceScreen() {
-  const [imageUri, setImageUri] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [style, setStyle] = useState('');
-  const [color, setColor] = useState('');
+  const form = useAddPieceForm();
+  const [selection, setSelection] = useState<{
+    title: string;
+    options: TaxonomyTerm[];
+    onSelect: (value: string) => void;
+  } | null>(null);
+  const [taxonomy, setTaxonomy] = useState<{
+    categories: TaxonomyTerm[];
+    styles: TaxonomyTerm[];
+    colors: TaxonomyTerm[];
+  } | null>(null);
+  const [taxonomyError, setTaxonomyError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetchTaxonomy()
+      .then((result) => setTaxonomy(result))
+      .catch(() => setTaxonomyError('Não foi possível carregar as opções. Tente novamente.'));
+  }, []);
 
   const pickImageFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -34,7 +52,13 @@ export default function AddPieceScreen() {
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      const asset = result.assets[0];
+      form.setImage({
+        uri: asset.uri,
+        fileName: asset.fileName,
+        mimeType: asset.mimeType,
+        fileSize: asset.fileSize,
+      });
     }
   };
 
@@ -56,7 +80,13 @@ export default function AddPieceScreen() {
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
+      const asset = result.assets[0];
+      form.setImage({
+        uri: asset.uri,
+        fileName: asset.fileName,
+        mimeType: asset.mimeType,
+        fileSize: asset.fileSize,
+      });
     }
   };
 
@@ -73,14 +103,29 @@ export default function AddPieceScreen() {
     );
   };
 
-  // Simulação dos selects
-  const handleSelectMock = (type: 'category' | 'style' | 'color') => {
-    if (type === 'category') setCategory(mockCategories[0].label);
-    if (type === 'style') setStyle(mockStyles[1].label);
-    if (type === 'color') setColor(mockColors[0].label);
+  const handleSelect = (
+    title: string,
+    options: TaxonomyTerm[] | undefined,
+    onSelect: (value: string) => void,
+  ) => {
+    if (!options?.length) {
+      Alert.alert(
+        'Opções indisponíveis',
+        taxonomyError ?? 'Aguarde o carregamento e tente novamente.',
+      );
+      return;
+    }
+    setSelection({ title, options, onSelect });
   };
 
-  const isValid = imageUri !== null && name.trim() !== '' && category !== '';
+  const handleSubmit = async () => {
+    const saved = await form.submit();
+    if (saved) {
+      Alert.alert('Peça salva!', 'A peça foi adicionada ao seu guarda-roupa.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -91,7 +136,13 @@ export default function AddPieceScreen() {
         <View style={styles.header}>
           <View style={styles.dragIndicator} />
           <View style={styles.headerRow}>
-            <TouchableOpacity style={styles.closeButton} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              activeOpacity={0.7}
+              onPress={() => router.back()}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar"
+            >
               <Feather name="x" size={20} color="#7F1D1D" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Adicionar Peça</Text>
@@ -104,41 +155,88 @@ export default function AddPieceScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <ImagePickerArea imageUri={imageUri} onSelectImage={handleSelectImageOptions} />
+          <ImagePickerArea
+            imageUri={form.image?.uri ?? null}
+            onSelectImage={handleSelectImageOptions}
+          />
 
-          <FormInput label="Nome" placeholder="Ex: Vestido" value={name} onChangeText={setName} />
+          <FormInput
+            label="Nome"
+            placeholder="Ex: Vestido"
+            value={form.name}
+            onChangeText={form.setName}
+            editable={form.operation === null}
+          />
 
           <FormSelect
             label="Peça"
             placeholder="Selecione..."
-            value={category}
-            onPress={() => handleSelectMock('category')}
+            value={taxonomy?.categories.find((option) => option.id === form.category)?.name}
+            onPress={() => handleSelect('Peça', taxonomy?.categories, form.setCategory)}
           />
 
           <FormSelect
             label="Estilo"
             placeholder="Selecione..."
-            value={style}
-            onPress={() => handleSelectMock('style')}
+            value={taxonomy?.styles.find((option) => option.id === form.style)?.name}
+            onPress={() => handleSelect('Estilo', taxonomy?.styles, form.setStyle)}
           />
 
           <FormSelect
             label="Cor"
             placeholder="Selecione..."
-            value={color}
-            onPress={() => handleSelectMock('color')}
+            value={taxonomy?.colors.find((option) => option.id === form.color)?.name}
+            onPress={() => handleSelect('Cor', taxonomy?.colors, form.setColor)}
           />
         </ScrollView>
 
         <View style={styles.footer}>
-          <TouchableOpacity
-            style={[styles.submitButton, !isValid && styles.submitButtonDisabled]}
-            activeOpacity={0.8}
-            disabled={!isValid}
-          >
-            <Text style={styles.submitButtonText}>Salvar peça</Text>
-          </TouchableOpacity>
+          {taxonomyError ? <Text style={styles.errorText}>{taxonomyError}</Text> : null}
+          {form.error ? <Text style={styles.errorText}>{form.error}</Text> : null}
+          <AuthButton
+            title="Salvar peça"
+            onPress={handleSubmit}
+            isLoading={form.operation === 'submit'}
+            disabled={form.operation !== null}
+          />
         </View>
+
+        <Modal
+          visible={selection !== null}
+          transparent
+          animationType="none"
+          onRequestClose={() => setSelection(null)}
+        >
+          <Pressable style={styles.selectionBackdrop} onPress={() => setSelection(null)}>
+            <Pressable style={styles.selectionSheet} onPress={(event) => event.stopPropagation()}>
+              <View style={styles.selectionHeader}>
+                <Text style={styles.selectionTitle}>{selection?.title}</Text>
+                <Pressable
+                  onPress={() => setSelection(null)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Fechar opções"
+                  hitSlop={8}
+                >
+                  <Feather name="x" size={22} color="#111827" />
+                </Pressable>
+              </View>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {selection?.options.map((option) => (
+                  <Pressable
+                    key={option.id}
+                    style={({ pressed }) => [styles.selectionOption, pressed && styles.pressed]}
+                    onPress={() => {
+                      selection.onSelect(option.id);
+                      setSelection(null);
+                    }}
+                  >
+                    <Text style={styles.selectionOptionText}>{option.name}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </Pressable>
+          </Pressable>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -216,5 +314,53 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: '#B91C1C',
+    fontSize: 13,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  selectionBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(17, 24, 39, 0.4)',
+  },
+  selectionSheet: {
+    maxHeight: '75%',
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+  },
+  selectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  selectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  selectionOption: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  selectionOptionText: {
+    fontSize: 16,
+    color: '#111827',
+  },
+  pressed: {
+    opacity: 0.65,
   },
 });

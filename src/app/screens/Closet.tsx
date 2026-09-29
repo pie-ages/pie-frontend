@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useState, useEffect } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   ScrollView,
   Text,
@@ -10,25 +11,51 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { fetchWardrobeItems } from '@/api/wardrobe';
 import CategoryRow from '@/components/CategoryRow';
-import { mockClosetData, ClosetData } from '@/mocks/closetMocks';
+import type { ClosetData } from '@/mocks/closetMocks';
 
 export default function ClosetScreen() {
   const [data, setData] = useState<ClosetData | null>(null);
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'empty'>('loading');
 
-  useEffect(() => {
-    const loadData = setTimeout(() => {
-      if (mockClosetData.rows.length === 0) {
-        setStatus('empty');
-      } else {
-        setData(mockClosetData);
-        setStatus('success');
-      }
-    }, 1500);
+  const loadData = useCallback(() => {
+    let isActive = true;
+    setStatus('loading');
 
-    return () => clearTimeout(loadData);
+    fetchWardrobeItems()
+      .then((items) => {
+        if (!isActive) return;
+        const grouped = new Map<string, ClosetData['rows'][number]>();
+        items.forEach((item) => {
+          const category = item.category || 'Outros';
+          const current = grouped.get(category) ?? {
+            id: category,
+            title: category,
+            items: [],
+            hasNext: false,
+          };
+          current.items.push({
+            id: item.id,
+            name: item.name || 'Peça',
+            imageUrl: item.imageUrl ?? '',
+          });
+          grouped.set(category, current);
+        });
+        const rows = [...grouped.values()];
+        setData({ rows });
+        setStatus(rows.length === 0 ? 'empty' : 'success');
+      })
+      .catch(() => {
+        if (isActive) setStatus('error');
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
+
+  useFocusEffect(loadData);
 
   if (status === 'loading') {
     return (
@@ -43,6 +70,9 @@ export default function ClosetScreen() {
     return (
       <SafeAreaView style={styles.centerContainer}>
         <Text style={styles.statusText}>Ocorreu um erro ao carregar as peças.</Text>
+        <TouchableOpacity onPress={loadData} style={styles.retryButton}>
+          <Text style={styles.retryButtonText}>Tentar novamente</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -52,7 +82,13 @@ export default function ClosetScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Closet</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            activeOpacity={0.7}
+            onPress={() => router.push('/screens/AddPieceScreen')}
+            accessibilityRole="button"
+            accessibilityLabel="Adicionar peça"
+          >
             <Feather name="plus" size={22} color="#111827" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
@@ -138,5 +174,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 16,
     color: '#6B7280',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#5A2A2A',
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });

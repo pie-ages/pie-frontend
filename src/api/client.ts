@@ -19,7 +19,14 @@ async function authHeaders(): Promise<Record<string, string>> {
 
 async function parse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
+    let message: string | undefined;
+    try {
+      const body = (await response.json()) as { message?: string };
+      message = body.message;
+    } catch {
+      // Some proxy and multipart errors do not return JSON.
+    }
+    throw new Error(message ?? `API error: ${response.status} ${response.statusText}`);
   }
   if (response.status === 204) {
     return undefined as T;
