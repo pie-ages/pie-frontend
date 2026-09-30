@@ -7,19 +7,22 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CategoryRow from '@/components/CategoryRow';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
-import { Spacing } from '@/constants/Theme';
+import { BottomTabInset, Spacing } from '@/constants/Theme';
 import { useWardrobeRows } from '@/hooks/UseWardrobeRows';
 
 export default function ClosetScreen() {
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const { status, rows, retry, loadMore, retryRow } = useWardrobeRows();
   const isFirstFocus = useRef(true);
 
-  // Reload when returning (e.g. after adding a piece); the hook already loads on mount.
   useFocusEffect(
     useCallback(() => {
       if (isFirstFocus.current) {
@@ -32,16 +35,20 @@ export default function ClosetScreen() {
 
   if (status === 'loading') {
     return (
-      <SafeAreaView style={styles.centerContainer}>
+      <View
+        style={[styles.centerContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+      >
         <ActivityIndicator size="large" color="#000" />
         <Text style={styles.statusText}>A carregar o seu guarda-roupa...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (status === 'error') {
     return (
-      <SafeAreaView style={styles.centerContainer}>
+      <View
+        style={[styles.centerContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
+      >
         <Text style={styles.statusText}>Ocorreu um erro ao carregar as peças.</Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -51,45 +58,59 @@ export default function ClosetScreen() {
         >
           <Text style={styles.retryText}>Tentar novamente</Text>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <ScreenToolBar
-          title="Closet"
-          actions={[
-            {
-              icon: 'plus',
-              accessibilityLabel: 'Adicionar peça',
-              onPress: () => router.push('/screens/AddPieceScreen'),
-            },
-          ]}
-        />
-      </View>
+    <View
+      style={[
+        styles.safeArea,
+        { paddingTop: insets.top },
+        Platform.OS === 'web' && { maxHeight: windowHeight, overflow: 'hidden' },
+      ]}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <ScreenToolBar
+            title="Closet"
+            actions={[
+              {
+                icon: 'plus',
+                accessibilityLabel: 'Adicionar peça',
+                onPress: () => router.push('/screens/AddPieceScreen'),
+              },
+            ]}
+          />
+        </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, status === 'empty' && styles.emptyContent]}
-      >
-        {status === 'empty' ? (
-          <View style={styles.centerContainer}>
-            <Text style={styles.statusText}>O seu guarda-roupa está vazio.</Text>
-          </View>
-        ) : (
-          rows.map((row) => (
-            <CategoryRow
-              key={row.id}
-              data={row}
-              onEndReached={(rowId) => void loadMore(rowId)}
-              onRetry={(rowId) => void retryRow(rowId)}
-            />
-          ))
-        )}
-      </ScrollView>
-    </SafeAreaView>
+        <View style={styles.body}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.scrollContent,
+              status === 'empty' && styles.emptyContent,
+              { paddingBottom: insets.bottom + BottomTabInset + Spacing.three },
+            ]}
+          >
+            {status === 'empty' ? (
+              <View style={styles.centerFlex}>
+                <Text style={styles.statusText}>O seu guarda-roupa está vazio.</Text>
+              </View>
+            ) : (
+              rows.map((row) => (
+                <CategoryRow
+                  key={row.id}
+                  data={row}
+                  onEndReached={(rowId) => void loadMore(rowId)}
+                  onRetry={(rowId) => void retryRow(rowId)}
+                />
+              ))
+            )}
+          </ScrollView>
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -98,13 +119,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  container: {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+  },
   header: {
     paddingTop: Spacing.two,
     paddingHorizontal: Spacing.three,
   },
+  body: {
+    flex: 1,
+    minHeight: 0,
+    overflow: 'hidden',
+  },
   scrollContent: {
     paddingTop: 16,
-    paddingBottom: 40,
   },
   emptyContent: {
     flexGrow: 1,
@@ -114,6 +144,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
+  },
+  centerFlex: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   statusText: {
     marginTop: 12,
