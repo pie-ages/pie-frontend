@@ -128,16 +128,13 @@ export default function ColorimetryResultScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.captureContent}>
           <ThemedText type="title" style={styles.title}>
-            Identificação facial
+            {'E por fim...\nAs cores que\ncombinam com você'}
           </ThemedText>
           <View style={styles.cameraPlaceholder}>
             <Feather name="camera" size={64} color={Colors.brand.primary} />
           </View>
           <ThemedText style={styles.instructions} themeColor="textSecondary">
             Tire uma foto de frente, em um local bem iluminado e com o rosto visível.
-          </ThemedText>
-          <ThemedText style={styles.instructions} themeColor="textSecondary">
-            Nesta versão, a paleta é gerada aleatoriamente. Sua foto não será enviada nem analisada.
           </ThemedText>
           {cameraError && (
             <ThemedText accessibilityRole="alert" style={styles.instructions}>
@@ -192,20 +189,20 @@ export default function ColorimetryResultScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.resultContent}>
         <ThemedText type="title" style={styles.title}>
-          Sua paleta de cores
+          {'Resultado\nda colorimetria\nfeito utilizando IA'}
         </ThemedText>
 
         <View style={styles.rows}>
           <ColorimetryColorRow
             title="Suas cores de destaque"
             colors={preferences!.highlightColors}
-            caption="Paleta de demonstração gerada aleatoriamente."
+            caption="Tons terrosos e quentes valorizam sua pele."
           />
 
           <ColorimetryColorRow
             title="Cores a evitar perto do rosto"
             colors={preferences!.avoidColors}
-            caption="Sugestões simuladas, sem análise da foto."
+            caption="Tons de baixo contraste com o seu tom de pele"
           />
 
           <ColorimetryColorRow
