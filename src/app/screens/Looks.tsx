@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -38,9 +38,29 @@ export default function LooksScreen() {
     params.viewMode === 'grid' ? 'grid' : 'focus',
   );
   const [contentOpacity] = useState(() => new Animated.Value(1));
-  const { status, looks, retry, hasNext, loadingMore, pageError, loadMore, updateLookPhoto } =
-    useLooksCollection();
+  const {
+    status,
+    looks,
+    retry,
+    refresh,
+    hasNext,
+    loadingMore,
+    pageError,
+    loadMore,
+    updateLookPhoto,
+  } = useLooksCollection();
   const { activeIndex, activeLook, goTo } = useLookFocusNavigation(looks, params.lookId);
+  const isFirstFocus = useRef(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      refresh();
+    }, [refresh]),
+  );
 
   useEffect(() => {
     if (viewMode === 'focus' && hasNext && activeIndex === looks.length - 1 && !pageError) {
