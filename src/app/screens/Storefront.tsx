@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { StorefrontEmptyState } from '@/components/StorefrontEmptyState';
 import { StorefrontErrorState } from '@/components/StorefrontErrorState';
 import { StorefrontFilterChips } from '@/components/StorefrontFilterChips';
@@ -10,7 +11,6 @@ import { StorefrontFilterSheet } from '@/components/StorefrontFilterSheet';
 import { StorefrontLoadingState } from '@/components/StorefrontLoadingState';
 import { StorefrontProductGrid } from '@/components/StorefrontProductGrid';
 import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
-import { StorefrontToolBar } from '@/components/StorefrontToolBar';
 import { BottomTabInset, Spacing } from '@/constants/Theme';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
@@ -72,7 +72,17 @@ export default function StorefrontScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <View style={styles.paddedHeader}>
-            <StorefrontToolBar />
+            <ScreenToolBar
+              title="Vitrine"
+              actions={[
+                {
+                  icon: 'clipboard-text-outline',
+                  iconSet: 'material-community',
+                  onPress: () => router.push('/screens/Wishlist'),
+                  accessibilityLabel: 'Wishlist',
+                },
+              ]}
+            />
             <StorefrontSearchBar
               value={searchInput}
               onChangeText={setSearchInput}

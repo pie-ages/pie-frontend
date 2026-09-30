@@ -29,16 +29,6 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light;
 
-export const StyleBackgrounds: Record<Style, string> = {
-  romantico: '#F4D7DE',
-  criativo: '#FFD98E',
-  casual: '#CFE8E0',
-  classico: '#E4DED3',
-  refinado: '#D9C9A8',
-  dramatico: '#3A2E39',
-  sensual: '#6E263D',
-};
-
 export const StyleTextColors: Record<Style, { base: string; highlight: string }> = {
   romantico: { base: '#1F1F1F', highlight: '#661414' },
   criativo: { base: '#1F1F1F', highlight: '#661414' },

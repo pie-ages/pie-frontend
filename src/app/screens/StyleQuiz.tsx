@@ -1,39 +1,25 @@
 import { router } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useReducer, useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { submitStyleQuizAndIdentify, StyleSessionError } from '@/api/style';
+import { ProductActionButton } from '@/components/ProductActionButton';
 import { StyleQuizChoicePreview } from '@/components/StyleQuizChoicePreview';
 import { StyleQuizFooter } from '@/components/StyleQuizFooter';
 import { StyleQuizOptionCard } from '@/components/StyleQuizOptionCard';
 import { Colors, Spacing, SystemFonts } from '@/constants/Theme';
+import { useAuth } from '@/contexts/AuthContext';
 import { MAX_CONTENT_WIDTH, type ScaleFn, useLayoutScale } from '@/hooks/UseLayoutScale';
 import { useStyleQuiz } from '@/hooks/UseStyleQuiz';
 import { useUserStyle } from '@/hooks/UseUserStyle';
-import { resolveStyleFromQuizCodes } from '@/types/Style';
-import type { StyleQuizAnswer, StyleQuizQuestion } from '@/types/StyleQuiz';
-
-function answersToStyleCodes(
-  questions: StyleQuizQuestion[],
-  answers: Record<string, StyleQuizAnswer>,
-): string[] {
-  const codes: string[] = [];
-
-  for (const question of questions) {
-    const answer = answers[question.id];
-    if (!answer || answer.type === 'none') continue;
-
-    if (answer.type === 'both') {
-      for (const option of question.options) codes.push(option.style);
-      continue;
-    }
-
-    const option = question.options.find((o) => o.id === answer.optionId);
-    if (option) codes.push(option.style);
-  }
-
-  return codes;
-}
+import {
+  createStyleIdentificationRunner,
+  INITIAL_STYLE_IDENTIFICATION_STATE,
+  styleIdentificationReducer,
+} from '@/types/StyleIdentification';
+import type { StyleQuizAnswer } from '@/types/StyleQuiz';
+import { getStyleQuizSubmissions } from '@/utils/style-quiz-answers';
 
 const TITLE_TOP = 92;
 const MIN_TITLE_GAP = 8;
@@ -42,13 +28,48 @@ export default function StyleQuizScreen() {
   const insets = useSafeAreaInsets();
   const { s } = useLayoutScale();
   const scaledStyles = useMemo(() => createScaledStyles(s), [s]);
-  const { questions, isLoading, error } = useStyleQuiz();
-  const { setStyles } = useUserStyle();
+  const { questions, isLoading, error: quizError } = useStyleQuiz();
+  const { setIdentifiedStyle } = useUserStyle();
+  const { completeStyleQuiz, signOut } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, StyleQuizAnswer>>({});
   const [pendingAnswer, setPendingAnswer] = useState<StyleQuizAnswer | null>(null);
+  const [identification, dispatchIdentification] = useReducer(
+    styleIdentificationReducer,
+    INITIAL_STYLE_IDENTIFICATION_STATE,
+  );
+  const identificationRunner = useMemo(
+    () => createStyleIdentificationRunner(submitStyleQuizAndIdentify),
+    [],
+  );
 
   const closePreview = useCallback(() => setPendingAnswer(null), []);
+
+  async function runIdentification(selectedAnswers: Record<string, StyleQuizAnswer> = answers) {
+    try {
+      const run = identificationRunner(getStyleQuizSubmissions(questions, selectedAnswers));
+      if (!run.started) return;
+      dispatchIdentification({ type: 'start' });
+      const identifiedStyle = await run.promise;
+      setIdentifiedStyle(identifiedStyle);
+      completeStyleQuiz();
+      dispatchIdentification({ type: 'success' });
+      router.replace('/screens/MyStyle');
+    } catch (requestError) {
+      if (requestError instanceof StyleSessionError) {
+        await signOut();
+        router.replace('/screens/Login');
+        return;
+      }
+      dispatchIdentification({
+        type: 'error',
+        error:
+          requestError instanceof Error
+            ? requestError.message
+            : 'Não foi possível identificar seu estilo. Tente novamente.',
+      });
+    }
+  }
 
   if (isLoading) {
     return (
@@ -60,14 +81,48 @@ export default function StyleQuizScreen() {
     );
   }
 
+  if (identification.status === 'loading') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={Colors.brand.primary} />
+          <Text style={styles.statusText}>Identificando seu estilo...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (identification.status === 'error') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>{identification.error}</Text>
+          <ProductActionButton
+            title="Tentar novamente"
+            style={styles.retryButton}
+            onPress={() => void runIdentification()}
+          />
+          <ProductActionButton
+            title="Alterar respostas"
+            style={styles.retryButton}
+            onPress={() => {
+              setCurrentIndex(0);
+              dispatchIdentification({ type: 'success' });
+            }}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   const currentQuestion = questions[currentIndex];
 
-  if (error || !currentQuestion) {
+  if (quizError || !currentQuestion) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.centered}>
           <Text style={styles.errorText}>
-            {error ?? 'Não foi possível carregar o questionário.'}
+            {quizError ?? 'Não foi possível carregar o questionário.'}
           </Text>
         </View>
       </SafeAreaView>
@@ -92,9 +147,7 @@ export default function StyleQuizScreen() {
       return;
     }
 
-    const codes = answersToStyleCodes(questions, updatedAnswers);
-    setStyles([resolveStyleFromQuizCodes(codes)]);
-    router.replace('/screens/MyStyle');
+    void runIdentification(updatedAnswers);
   }
 
   return (
@@ -164,6 +217,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.textSecondary,
     textAlign: 'center',
+  },
+  statusText: {
+    marginTop: Spacing.three,
+    fontSize: 16,
+    color: Colors.light.text,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: Spacing.four,
   },
   scrollView: {
     flex: 1,

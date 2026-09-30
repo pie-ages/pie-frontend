@@ -26,6 +26,8 @@ export function useRegisterForm() {
     setIsConfirmPasswordVisible((previousValue) => !previousValue);
   };
 
+  const setSubmissionError = (message: string) => setError(message);
+
   const validateForm = () => {
     if (!name.trim() || !email.trim() || !password || !confirmPassword) {
       setError('Preencha todos os campos obrigatórios.');
@@ -93,6 +95,7 @@ export function useRegisterForm() {
     setConfirmPassword,
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
+    setSubmissionError,
     handleRegister,
   };
 }

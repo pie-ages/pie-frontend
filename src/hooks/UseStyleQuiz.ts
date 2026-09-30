@@ -1,9 +1,10 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-import { MOCK_STYLE_QUIZ } from '@/mocks/styleQuiz';
-import type { StyleQuizQuestion } from '@/types/StyleQuiz';
+import type { StyleQuizQuestion, StyleQuizResponse } from '@/types/StyleQuiz';
 
 const ERROR_MESSAGE = 'Não foi possível carregar o questionário.';
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 export function useStyleQuiz() {
   const [questions, setQuestions] = useState<StyleQuizQuestion[]>([]);
@@ -18,11 +19,11 @@ export function useStyleQuiz() {
       setError(null);
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        const response = await axios.get<StyleQuizResponse>(`${API_URL}/api/style/questions`);
 
         if (!isActive) return;
 
-        const sorted = [...MOCK_STYLE_QUIZ.questions].sort((a, b) => a.order - b.order);
+        const sorted = [...response.data.questions].sort((a, b) => a.order - b.order);
 
         if (sorted.length === 0) {
           setError(ERROR_MESSAGE);

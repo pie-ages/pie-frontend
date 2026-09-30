@@ -23,7 +23,8 @@ type AuthContextValue = {
   isInitializing: boolean;
   pendingStyleQuiz: boolean;
   signIn: (payload: LoginPayload) => Promise<void>;
-  completeMockSignUp: () => Promise<void>;
+  completeMockSignUp: (payload: LoginPayload) => Promise<void>;
+  completeStyleQuiz: () => void;
   signOut: () => Promise<void>;
 };
 
@@ -38,8 +39,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     let isActive = true;
 
     getStoredToken()
-      .then((storedToken) => {
-        if (isActive) setToken(storedToken);
+      .then(async (storedToken) => {
+        if (storedToken?.startsWith('mock-signup-')) {
+          await removeStoredToken();
+        }
+        if (isActive) setToken(storedToken?.startsWith('mock-signup-') ? null : storedToken);
       })
       .catch(() => {
         if (isActive) setToken(null);
@@ -78,11 +82,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setToken(response.data.token);
   }
 
-  async function completeMockSignUp() {
-    const mockToken = `mock-signup-${Date.now()}`;
-    await storeToken(mockToken);
+  async function completeMockSignUp(payload: LoginPayload) {
+    await signIn(payload);
     setPendingStyleQuiz(true);
-    setToken(mockToken);
   }
 
   async function signOut() {
@@ -91,12 +93,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setToken(null);
   }
 
+  function completeStyleQuiz() {
+    setPendingStyleQuiz(false);
+  }
+
   const value: AuthContextValue = {
     isAuthenticated: token !== null,
     isInitializing,
     pendingStyleQuiz,
     signIn,
     completeMockSignUp,
+    completeStyleQuiz,
     signOut,
   };
 

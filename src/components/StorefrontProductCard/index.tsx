@@ -6,6 +6,7 @@ import { Pressable, Text, View } from 'react-native';
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/hooks/UseWishlist';
 import type { CatalogItem } from '@/types/Product';
+import { formatColor } from '@/utils/FormatColor';
 import { formatPrice } from '@/utils/FormatPrice';
 
 import { styles, CARD_WIDTH } from './styles';
@@ -56,7 +57,7 @@ export function StorefrontProductCard({ product, onPress }: StorefrontProductCar
         <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
           {product.name}
         </Text>
-        {product.color ? <Text style={styles.color}>{product.color}</Text> : null}
+        {product.color ? <Text style={styles.color}>{formatColor(product.color)}</Text> : null}
         <Text style={styles.price}>{formatPrice(product.price)}</Text>
       </View>
     </Pressable>
