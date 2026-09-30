@@ -83,12 +83,12 @@ export default function StorefrontScreen() {
                 },
               ]}
             />
-            <StorefrontSearchBar
-              value={searchInput}
-              onChangeText={setSearchInput}
-              onClear={clearSearch}
-            />
           </View>
+          <StorefrontSearchBar
+            value={searchInput}
+            onChangeText={setSearchInput}
+            onClear={clearSearch}
+          />
           <StorefrontFilterChips
             groups={filterGroups}
             selectedIds={appliedFilterIds}
@@ -139,13 +139,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   header: {
-    gap: 16,
-    paddingTop: 8,
+    gap: 12,
     paddingBottom: 12,
   },
   paddedHeader: {
-    gap: 16,
-    paddingHorizontal: 8,
+    paddingTop: Spacing.two,
+    paddingHorizontal: Spacing.three,
   },
   body: {
     flex: 1,
