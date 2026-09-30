@@ -1,6 +1,16 @@
+import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -13,8 +23,21 @@ import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 const FAVORITE_SLOTS = 4;
 
 export default function ColorimetryResultScreen() {
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const capturingRef = useRef(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
-    useColorimetryPreferences();
+    useColorimetryPreferences(photoUri !== null, 4000);
 
   const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
@@ -60,12 +83,88 @@ export default function ColorimetryResultScreen() {
     }
   }
 
-  function handleRedoColorimetry() {}
+  async function handleTakePhoto() {
+    if (capturingRef.current) return;
+    capturingRef.current = true;
+    setIsCapturing(true);
+    setCameraError(null);
+
+    try {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+      if (!mountedRef.current) return;
+      if (!permission.granted) {
+        setCameraError('Permita o acesso à câmera para tirar sua foto.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        cameraType: ImagePicker.CameraType.front,
+        mediaTypes: ['images'],
+        quality: 0.8,
+      });
+      if (!mountedRef.current || result.canceled) return;
+      retry();
+      setPhotoUri(result.assets[0].uri);
+    } catch {
+      if (mountedRef.current) {
+        setCameraError('Não foi possível abrir a câmera. Tente novamente.');
+      }
+    } finally {
+      capturingRef.current = false;
+      if (mountedRef.current) setIsCapturing(false);
+    }
+  }
+
+  function handleRedoColorimetry() {
+    if (isSaving) return;
+    setPhotoUri(null);
+    setColorOverrides({});
+    setActiveSlot(null);
+    setSaved(false);
+    setCameraError(null);
+  }
+
+  if (photoUri === null) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.captureContent}>
+          <ThemedText type="title" style={styles.title}>
+            {'E por fim...\nAs cores que\ncombinam com você'}
+          </ThemedText>
+          <View style={styles.cameraPlaceholder}>
+            <Feather name="camera" size={64} color={Colors.brand.primary} />
+          </View>
+          <ThemedText style={styles.instructions} themeColor="textSecondary">
+            Tire uma foto de frente, em um local bem iluminado e com o rosto visível.
+          </ThemedText>
+          {cameraError && (
+            <ThemedText accessibilityRole="alert" style={styles.instructions}>
+              {cameraError}
+            </ThemedText>
+          )}
+          <View style={styles.footer}>
+            <AuthButton
+              title="Tirar foto"
+              onPress={handleTakePhoto}
+              isLoading={isCapturing}
+              accessibilityRole="button"
+              accessibilityLabel="Tirar foto para iniciar a colorimetria"
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   if (status === 'loading') {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
+        <Image
+          source={{ uri: photoUri }}
+          style={styles.photo}
+          accessibilityLabel="Foto capturada"
+        />
         <ActivityIndicator size="large" color={Colors.brand.primary} />
+        <ThemedText accessibilityLiveRegion="polite">Preparando sua paleta de cores...</ThemedText>
       </SafeAreaView>
     );
   }
@@ -79,59 +178,69 @@ export default function ColorimetryResultScreen() {
         <Pressable onPress={retry} hitSlop={8} style={styles.retryButton}>
           <Text style={styles.redoLink}>Tentar novamente</Text>
         </Pressable>
+        <Pressable onPress={handleRedoColorimetry} hitSlop={8} accessibilityRole="button">
+          <Text style={styles.redoLink}>Tirar outra foto</Text>
+        </Pressable>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ThemedText type="title" style={styles.title}>
-        Resultado da colorimetria feito utilizando IA
-      </ThemedText>
-
-      <View style={styles.rows}>
-        <ColorimetryColorRow
-          title="Suas cores de destaque"
-          colors={preferences!.highlightColors}
-          caption="Tons terrosos e quentes valorizam sua pele."
-        />
-
-        <ColorimetryColorRow
-          title="Cores a evitar perto do rosto"
-          colors={preferences!.avoidColors}
-          caption="Tons de baixo contraste com o seu tom de pele"
-        />
-
-        <ColorimetryColorRow
-          title="Escolha suas Cores Favoritas"
-          colors={favoriteColors}
-          disabled={isSaving}
-          onSlotPress={setActiveSlot}
-        />
-      </View>
-
-      {saveError && (
-        <ThemedText style={styles.saveError} themeColor="textSecondary">
-          {saveError}
+      <ScrollView contentContainerStyle={styles.resultContent}>
+        <ThemedText type="title" style={styles.title}>
+          {'Resultado\nda colorimetria\nfeito utilizando IA'}
         </ThemedText>
-      )}
-      {saved && (
-        <ThemedText style={styles.saveError} themeColor="textSecondary">
-          Cores favoritas salvas com sucesso.
-        </ThemedText>
-      )}
 
-      <View style={styles.footer}>
-        <AuthButton
-          title={hasChanges ? 'Salvar favoritas' : 'Entrar'}
-          onPress={handleEnter}
-          isLoading={isSaving}
-        />
+        <View style={styles.rows}>
+          <ColorimetryColorRow
+            title="Suas cores de destaque"
+            colors={preferences!.highlightColors}
+            caption="Tons terrosos e quentes valorizam sua pele."
+          />
 
-        <Pressable onPress={handleRedoColorimetry} hitSlop={8}>
-          <Text style={styles.redoLink}>Refazer colorimetria</Text>
-        </Pressable>
-      </View>
+          <ColorimetryColorRow
+            title="Cores a evitar perto do rosto"
+            colors={preferences!.avoidColors}
+            caption="Tons de baixo contraste com o seu tom de pele"
+          />
+
+          <ColorimetryColorRow
+            title="Escolha suas Cores Favoritas"
+            colors={favoriteColors}
+            disabled={isSaving}
+            onSlotPress={setActiveSlot}
+          />
+        </View>
+
+        {saveError && (
+          <ThemedText style={styles.saveError} themeColor="textSecondary">
+            {saveError}
+          </ThemedText>
+        )}
+        {saved && (
+          <ThemedText style={styles.saveError} themeColor="textSecondary">
+            Cores favoritas salvas com sucesso.
+          </ThemedText>
+        )}
+
+        <View style={styles.footer}>
+          <AuthButton
+            title={hasChanges ? 'Salvar favoritas' : 'Entrar'}
+            onPress={handleEnter}
+            isLoading={isSaving}
+          />
+
+          <Pressable
+            onPress={handleRedoColorimetry}
+            disabled={isSaving}
+            accessibilityRole="button"
+            hitSlop={8}
+          >
+            <Text style={styles.redoLink}>Refazer colorimetria</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
 
       <ColorPickerModal
         visible={activeSlot !== null && !isSaving}
@@ -145,6 +254,31 @@ export default function ColorimetryResultScreen() {
 }
 
 const styles = StyleSheet.create({
+  captureContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.three,
+    paddingBottom: Spacing.four,
+    gap: Spacing.four,
+  },
+  resultContent: {
+    flexGrow: 1,
+    paddingBottom: Spacing.four,
+  },
+  cameraPlaceholder: {
+    minHeight: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.brand.tertiary,
+    borderRadius: 16,
+  },
+  instructions: {
+    textAlign: 'center',
+  },
+  photo: {
+    width: 160,
+    height: 200,
+    borderRadius: 16,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: Colors.white,

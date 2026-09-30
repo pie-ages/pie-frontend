@@ -80,8 +80,12 @@ export function useLookForm() {
         await uploadLookImage(lookId, image);
       }
       onSuccess();
-    } catch {
-      setError('Não foi possível salvar o look. Tente novamente.');
+    } catch (cause) {
+      const message = createdLookId.current
+        ? 'O look foi criado, mas não foi possível enviar a foto.'
+        : 'Não foi possível criar o look.';
+      const detail = cause instanceof Error ? cause.message : 'Tente novamente.';
+      setError(`${message} ${detail}`);
     } finally {
       setOperation(null);
       busyRef.current = false;
