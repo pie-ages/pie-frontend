@@ -7,14 +7,28 @@ interface FormSelectProps {
   value?: string;
   placeholder: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 
-export default function FormSelect({ label, value, placeholder, onPress }: FormSelectProps) {
+export default function FormSelect({
+  label,
+  value,
+  placeholder,
+  onPress,
+  disabled,
+}: FormSelectProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
 
-      <TouchableOpacity style={styles.inputBox} activeOpacity={0.7} onPress={onPress}>
+      <TouchableOpacity
+        style={styles.inputBox}
+        activeOpacity={0.7}
+        onPress={onPress}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+      >
         <Text style={[styles.text, !value && styles.placeholderText]}>{value || placeholder}</Text>
         <Feather name="chevron-down" size={20} color="#9CA3AF" />
       </TouchableOpacity>

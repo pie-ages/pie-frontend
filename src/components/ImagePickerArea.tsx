@@ -5,12 +5,24 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 interface ImagePickerAreaProps {
   imageUri: string | null;
   onSelectImage: () => void;
+  disabled?: boolean;
 }
 
-export default function ImagePickerArea({ imageUri, onSelectImage }: ImagePickerAreaProps) {
+export default function ImagePickerArea({
+  imageUri,
+  onSelectImage,
+  disabled,
+}: ImagePickerAreaProps) {
   return (
     <View style={styles.wrapper}>
-      <TouchableOpacity style={styles.container} activeOpacity={0.8} onPress={onSelectImage}>
+      <TouchableOpacity
+        style={styles.container}
+        activeOpacity={0.8}
+        onPress={onSelectImage}
+        disabled={disabled}
+        accessibilityRole="button"
+        accessibilityLabel="Selecionar foto da peça"
+      >
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.image} />
         ) : (

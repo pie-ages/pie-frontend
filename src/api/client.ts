@@ -60,11 +60,27 @@ export async function apiPutAuth<T>(path: string, body: unknown): Promise<T> {
   return parse<T>(response);
 }
 
-export async function apiUploadAuth<T>(path: string, formData: FormData): Promise<T> {
+export async function apiUploadAuth<T>(
+  path: string,
+  formData: FormData,
+  signal?: AbortSignal,
+): Promise<T> {
+  const body = new FormData();
+  for (const [name, part] of formData.entries()) {
+    if (typeof part === 'object' && 'uri' in part && typeof part.uri === 'string') {
+      const fileResponse = await fetch(part.uri, { signal });
+      if (!fileResponse.ok) throw new Error('Não foi possível ler a foto selecionada.');
+      const blob = await fileResponse.blob();
+      body.append(name, blob.slice(0, blob.size, part.type || blob.type), part.name);
+    } else {
+      body.append(name, part);
+    }
+  }
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
     headers: await authHeaders(),
-    body: formData,
+    body,
+    signal,
   });
   return parse<T>(response);
 }
