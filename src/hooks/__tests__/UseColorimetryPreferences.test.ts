@@ -1,12 +1,16 @@
 /**
  * @jest-environment jsdom
  */
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, renderHook, waitFor } from '@testing-library/react';
 
 import * as preferencesApi from '@/api/preferences';
 import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 
-jest.mock('@/api/preferences');
+jest.mock('@/api/preferences', () => ({
+  fetchPreferences: jest.fn(),
+  updateFavoriteColors: jest.fn(),
+}));
 
 const mockFetchPreferences = preferencesApi.fetchPreferences as jest.MockedFunction<
   typeof preferencesApi.fetchPreferences
@@ -38,7 +42,7 @@ describe('useColorimetryPreferences', () => {
     expect(result.current.preferences).toEqual(MOCK_PREFERENCES);
   });
 
-  it('normaliza favoriteColors vazio para 4 slots placeholder', async () => {
+  it('preserves empty favorite colors from the backend', async () => {
     mockFetchPreferences.mockResolvedValueOnce({
       ...MOCK_PREFERENCES,
       favoriteColors: [],
@@ -48,12 +52,7 @@ describe('useColorimetryPreferences', () => {
 
     await waitFor(() => expect(result.current.status).toBe('success'));
 
-    expect(result.current.preferences!.favoriteColors).toEqual([
-      '#999999',
-      '#999999',
-      '#999999',
-      '#999999',
-    ]);
+    expect(result.current.preferences!.favoriteColors).toEqual([]);
   });
 
   it('expõe exatamente highlightColors e avoidColors retornados pelo backend', async () => {
@@ -175,5 +174,83 @@ describe('useColorimetryPreferences', () => {
 
     expect(result.current.saveError).not.toBeNull();
     expect(result.current.preferences!.favoriteColors).toEqual(MOCK_PREFERENCES.favoriteColors);
+  });
+});
+
+describe('photo-triggered colorimetry', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('fetches only after capture and keeps loading for four seconds', async () => {
+    mockFetchPreferences.mockResolvedValue(MOCK_PREFERENCES);
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useColorimetryPreferences(enabled, 4000),
+      { initialProps: { enabled: false } },
+    );
+    expect(mockFetchPreferences).not.toHaveBeenCalled();
+    rerender({ enabled: true });
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(3999);
+    });
+    expect(result.current.status).toBe('loading');
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(1);
+    });
+    expect(result.current.preferences).toEqual(MOCK_PREFERENCES);
+    expect(result.current.status).toBe('success');
+  });
+
+  it('waits for a slow backend and fetches a new palette after another photo', async () => {
+    let resolveRequest!: (value: typeof MOCK_PREFERENCES) => void;
+    mockFetchPreferences.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        }),
+    );
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useColorimetryPreferences(enabled, 4000),
+      { initialProps: { enabled: true } },
+    );
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(4000);
+    });
+    expect(result.current.status).toBe('loading');
+    await act(async () => resolveRequest(MOCK_PREFERENCES));
+    expect(result.current.status).toBe('success');
+    rerender({ enabled: false });
+    const nextPalette = { ...MOCK_PREFERENCES, highlightColors: ['#123456'] };
+    mockFetchPreferences.mockResolvedValueOnce(nextPalette);
+    act(() => result.current.retry());
+    rerender({ enabled: true });
+    expect(result.current.status).toBe('loading');
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(4000);
+    });
+    expect(result.current.preferences).toEqual(nextPalette);
+  });
+
+  it('allows retry after an API error and ignores responses after unmount', async () => {
+    mockFetchPreferences.mockRejectedValueOnce(new Error('Offline'));
+    const { result, unmount } = renderHook(() => useColorimetryPreferences(true, 4000));
+    await act(async () => {});
+    expect(result.current.status).toBe('error');
+    mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
+    act(() => result.current.retry());
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(4000);
+    });
+    expect(result.current.status).toBe('success');
+    act(() => result.current.retry());
+    unmount();
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(4000);
+    });
   });
 });
