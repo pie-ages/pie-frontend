@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 
-const EMPTY_FAVORITE_COLOR = '#999999';
+const FAVORITE_SLOTS = 4;
 
 export default function ColorimetryResultScreen() {
   const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
@@ -18,25 +18,45 @@ export default function ColorimetryResultScreen() {
 
   const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
+  const [saved, setSaved] = useState(false);
+  const hasChanges = Object.keys(colorOverrides).length > 0;
 
   const favoriteColors = preferences
-    ? preferences.favoriteColors.map((c, i) => colorOverrides[i] ?? c)
+    ? Array.from(
+        { length: Math.max(FAVORITE_SLOTS, preferences.favoriteColors.length) },
+        (_, i) => colorOverrides[i] ?? preferences.favoriteColors[i] ?? null,
+      )
     : [];
 
   const pickerColors = preferences
-    ? Array.from(new Set([...preferences.highlightColors, ...preferences.avoidColors]))
+    ? Array.from(
+        new Set([
+          ...preferences.highlightColors,
+          ...preferences.avoidColors,
+          ...preferences.favoriteColors,
+        ]),
+      )
     : [];
 
   function handleSelectFavorite(color: string) {
-    if (activeSlot === null) return;
+    if (activeSlot === null || isSaving) return;
+    setSaved(false);
     setColorOverrides((prev) => ({ ...prev, [activeSlot]: color }));
     setActiveSlot(null);
   }
 
   async function handleEnter() {
-    const success = await saveFavoriteColors(favoriteColors);
-    if (success) {
+    if (isSaving) return;
+    if (!hasChanges) {
       router.replace('/(tabs)/Storefront');
+      return;
+    }
+    const success = await saveFavoriteColors(
+      favoriteColors.filter((color): color is string => color !== null),
+    );
+    if (success) {
+      setColorOverrides({});
+      setSaved(true);
     }
   }
 
@@ -85,7 +105,7 @@ export default function ColorimetryResultScreen() {
         <ColorimetryColorRow
           title="Escolha suas Cores Favoritas"
           colors={favoriteColors}
-          emptyColor={EMPTY_FAVORITE_COLOR}
+          disabled={isSaving}
           onSlotPress={setActiveSlot}
         />
       </View>
@@ -95,9 +115,18 @@ export default function ColorimetryResultScreen() {
           {saveError}
         </ThemedText>
       )}
+      {saved && (
+        <ThemedText style={styles.saveError} themeColor="textSecondary">
+          Cores favoritas salvas com sucesso.
+        </ThemedText>
+      )}
 
       <View style={styles.footer}>
-        <AuthButton title="Entrar" onPress={handleEnter} isLoading={isSaving} />
+        <AuthButton
+          title={hasChanges ? 'Salvar favoritas' : 'Entrar'}
+          onPress={handleEnter}
+          isLoading={isSaving}
+        />
 
         <Pressable onPress={handleRedoColorimetry} hitSlop={8}>
           <Text style={styles.redoLink}>Refazer colorimetria</Text>
@@ -105,9 +134,9 @@ export default function ColorimetryResultScreen() {
       </View>
 
       <ColorPickerModal
-        visible={activeSlot !== null}
+        visible={activeSlot !== null && !isSaving}
         colors={pickerColors}
-        selectedColor={activeSlot !== null ? favoriteColors[activeSlot] : undefined}
+        selectedColor={activeSlot !== null ? (favoriteColors[activeSlot] ?? undefined) : undefined}
         onSelect={handleSelectFavorite}
         onClose={() => setActiveSlot(null)}
       />

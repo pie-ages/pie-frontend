@@ -8,8 +8,9 @@ import { styles } from './styles';
 type ColorimetryColorRowProps = {
   title: string;
   caption?: string;
-  colors: string[];
+  colors: (string | null)[];
   emptyColor?: string;
+  disabled?: boolean;
   onSlotPress?: (index: number) => void;
 };
 
@@ -17,7 +18,8 @@ export function ColorimetryColorRow({
   title,
   caption,
   colors,
-  emptyColor,
+  emptyColor = '#999999',
+  disabled = false,
   onSlotPress,
 }: ColorimetryColorRowProps) {
   return (
@@ -30,9 +32,9 @@ export function ColorimetryColorRow({
         {colors.map((color, index) => (
           <ColorSwatch
             key={`${color}-${index}`}
-            color={color}
-            selected={!!onSlotPress && color !== emptyColor}
-            onPress={onSlotPress ? () => onSlotPress(index) : undefined}
+            color={color ?? emptyColor}
+            selected={!!onSlotPress && color !== null}
+            onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
           />
         ))}
       </View>

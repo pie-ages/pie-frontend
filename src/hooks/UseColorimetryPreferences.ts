@@ -1,17 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { fetchPreferences, updateFavoriteColors } from '@/api/preferences';
 import type { ColorimetryPreferences } from '@/types/colorimetry';
 
 export type ColorimetryStatus = 'loading' | 'success' | 'error';
-
-const EMPTY_FAVORITE_COLOR = '#999999';
-const FAVORITE_SLOTS = 4;
-
-function normalizeFavorites(colors: string[]): string[] {
-  if (colors.length === 0) return Array(FAVORITE_SLOTS).fill(EMPTY_FAVORITE_COLOR);
-  return colors;
-}
 
 export function useColorimetryPreferences() {
   const [preferences, setPreferences] = useState<ColorimetryPreferences | null>(null);
@@ -19,6 +11,7 @@ export function useColorimetryPreferences() {
   const [attempt, setAttempt] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     let isActive = true;
@@ -26,10 +19,7 @@ export function useColorimetryPreferences() {
     fetchPreferences()
       .then((data) => {
         if (!isActive) return;
-        setPreferences({
-          ...data,
-          favoriteColors: normalizeFavorites(data.favoriteColors),
-        });
+        setPreferences(data);
         setStatus('success');
       })
       .catch(() => {
@@ -46,29 +36,28 @@ export function useColorimetryPreferences() {
     setAttempt((v) => v + 1);
   }, []);
 
-  const saveFavoriteColors = useCallback(
-    async (colors: string[]): Promise<boolean> => {
-      if (isSaving) return false;
-      setIsSaving(true);
-      setSaveError(null);
+  const saveFavoriteColors = useCallback(async (colors: string[]): Promise<boolean> => {
+    if (savingRef.current) return false;
+    savingRef.current = true;
+    setIsSaving(true);
+    setSaveError(null);
 
-      try {
-        const updated = await updateFavoriteColors(colors);
-        if (updated) {
-          setPreferences(updated);
-        } else {
-          setPreferences((prev) => (prev ? { ...prev, favoriteColors: colors } : prev));
-        }
-        return true;
-      } catch {
-        setSaveError('Não foi possível salvar. Tente novamente.');
-        return false;
-      } finally {
-        setIsSaving(false);
+    try {
+      const updated = await updateFavoriteColors(colors);
+      if (updated) {
+        setPreferences(updated);
+      } else {
+        setPreferences((prev) => (prev ? { ...prev, favoriteColors: colors } : prev));
       }
-    },
-    [isSaving],
-  );
+      return true;
+    } catch {
+      setSaveError('Não foi possível salvar. Tente novamente.');
+      return false;
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
+  }, []);
 
   return { preferences, status, retry, isSaving, saveError, saveFavoriteColors };
 }
