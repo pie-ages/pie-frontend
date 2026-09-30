@@ -13,7 +13,7 @@ export default function StyleSelectionScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <ScreenToolBar title={'Caso\nvocê queira\npersonalizar seu estilo'} />
+        <ScreenToolBar title={'Caso\nvocê queira\npersonalizar seu estilo'} showProfile={false} />
         <Text style={styles.subtitle}>
           Escolha um estilo para começar. Você pode ajustar os detalhes depois.
         </Text>
