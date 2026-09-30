@@ -6,7 +6,7 @@ import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
 import { Colors } from '@/constants/Theme';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthApiError, useAuth } from '@/contexts/AuthContext';
 import { useRegisterForm } from '@/hooks/UseRegisterForm';
 
 export default function RegisterScreen() {
@@ -27,6 +27,7 @@ export default function RegisterScreen() {
     setConfirmPassword,
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
+    setSubmissionError,
     handleRegister,
   } = useRegisterForm();
 
@@ -34,7 +35,15 @@ export default function RegisterScreen() {
     const success = await handleRegister();
 
     if (success) {
-      await completeMockSignUp();
+      try {
+        await completeMockSignUp({ email: email.trim(), password });
+      } catch (registerError) {
+        setSubmissionError(
+          registerError instanceof AuthApiError
+            ? registerError.message
+            : 'Não foi possível iniciar sua sessão. Tente novamente.',
+        );
+      }
     }
   }
 

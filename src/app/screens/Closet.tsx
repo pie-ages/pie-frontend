@@ -1,4 +1,3 @@
-import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import {
   ScrollView,
@@ -11,6 +10,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CategoryRow from '@/components/CategoryRow';
+import { ScreenToolBar } from '@/components/ScreenToolBar';
+import { Spacing } from '@/constants/Theme';
 import { useWardrobeRows } from '@/hooks/UseWardrobeRows';
 
 export default function ClosetScreen() {
@@ -44,15 +45,10 @@ export default function ClosetScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Closet</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-            <Feather name="plus" size={22} color="#111827" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.profileButton} activeOpacity={0.7}>
-            <Feather name="user" size={20} color="#111827" />
-          </TouchableOpacity>
-        </View>
+        <ScreenToolBar
+          title="Closet"
+          actions={[{ icon: 'plus', accessibilityLabel: 'Adicionar peça' }]}
+        />
       </View>
 
       <ScrollView
@@ -84,49 +80,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 12,
-  },
-  profileButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FEE2E2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 12,
-  },
-  iconText: {
-    fontSize: 18,
+    paddingTop: Spacing.two,
+    paddingHorizontal: Spacing.three,
   },
   scrollContent: {
     paddingTop: 16,

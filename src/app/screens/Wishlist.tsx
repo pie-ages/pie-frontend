@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/hooks/UseWishlist';
 import type { CatalogItem } from '@/types/Product';
+import { formatColor } from '@/utils/FormatColor';
 import { formatPrice } from '@/utils/FormatPrice';
 
 export default function WishlistScreen() {
@@ -107,7 +108,7 @@ function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: (
         <Text style={styles.cardName} numberOfLines={1} ellipsizeMode="tail">
           {product.name}
         </Text>
-        {product.color ? <Text style={styles.cardColor}>{product.color}</Text> : null}
+        {product.color ? <Text style={styles.cardColor}>{formatColor(product.color)}</Text> : null}
         <Text style={styles.cardPrice}>{formatPrice(product.price)}</Text>
 
         {product.status === 'PUBLISHED' ? (
