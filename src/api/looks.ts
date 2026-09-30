@@ -103,7 +103,6 @@ export async function uploadLookImage(
       fileName,
     );
   } else {
-    // React Native envia arquivos locais usando uri, name e type no multipart.
     formData.append('file', {
       uri: image.uri,
       name: fileName,

@@ -80,5 +80,25 @@ export function useLooksCollection() {
     setAttempt((value) => value + 1);
   }, []);
 
-  return { status, looks, retry, hasNext, loadingMore, pageError, loadMore };
+  const refresh = useCallback(() => {
+    setAttempt((value) => value + 1);
+  }, []);
+
+  const updateLookPhoto = useCallback((lookId: string, photoUrl: string | null) => {
+    setLooks((previous) =>
+      previous.map((look) => (look.id === lookId ? { ...look, imageUrl: photoUrl } : look)),
+    );
+  }, []);
+
+  return {
+    status,
+    looks,
+    retry,
+    refresh,
+    hasNext,
+    loadingMore,
+    pageError,
+    loadMore,
+    updateLookPhoto,
+  };
 }
