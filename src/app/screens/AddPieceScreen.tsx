@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   Modal,
   Pressable,
   View,
@@ -53,7 +54,7 @@ export default function AddPieceScreen() {
 
     if (!result.canceled) {
       const asset = result.assets[0];
-      form.setImage({
+      void form.selectImage({
         uri: asset.uri,
         fileName: asset.fileName,
         mimeType: asset.mimeType,
@@ -81,7 +82,7 @@ export default function AddPieceScreen() {
 
     if (!result.canceled) {
       const asset = result.assets[0];
-      form.setImage({
+      void form.selectImage({
         uri: asset.uri,
         fileName: asset.fileName,
         mimeType: asset.mimeType,
@@ -91,6 +92,11 @@ export default function AddPieceScreen() {
   };
 
   const handleSelectImageOptions = () => {
+    if (form.operation !== null) return;
+    if (Platform.OS === 'web') {
+      void pickImageFromGallery();
+      return;
+    }
     Alert.alert(
       'Adicionar Foto',
       'Como deseja adicionar a imagem da peça?',
@@ -108,6 +114,7 @@ export default function AddPieceScreen() {
     options: TaxonomyTerm[] | undefined,
     onSelect: (value: string) => void,
   ) => {
+    if (form.operation !== null) return;
     if (!options?.length) {
       Alert.alert(
         'Opções indisponíveis',
@@ -158,7 +165,37 @@ export default function AddPieceScreen() {
           <ImagePickerArea
             imageUri={form.image?.uri ?? null}
             onSelectImage={handleSelectImageOptions}
+            disabled={form.operation !== null}
           />
+
+          {form.operation === 'analyze' && (
+            <View style={styles.analysisStatus}>
+              <ActivityIndicator color="#661414" />
+              <Text accessibilityLiveRegion="polite" style={styles.analysisText}>
+                Identificando tipo, estilo e cor da peça...
+              </Text>
+            </View>
+          )}
+          {form.analysisError && (
+            <View style={styles.analysisStatus}>
+              <Text accessibilityRole="alert" style={styles.errorText}>
+                {form.analysisError}
+              </Text>
+              <Text style={styles.analysisText}>
+                Envie outra foto com boa iluminação ou preencha os campos manualmente.
+              </Text>
+              <AuthButton
+                title="Enviar outra foto"
+                variant="secondary"
+                onPress={pickImageFromGallery}
+                disabled={form.operation !== null}
+                accessibilityRole="button"
+              />
+            </View>
+          )}
+          {form.isAnalyzed && (
+            <Text style={styles.analysisText}>Confira os dados identificados antes de salvar.</Text>
+          )}
 
           <FormInput
             label="Nome"
@@ -170,6 +207,7 @@ export default function AddPieceScreen() {
 
           <FormSelect
             label="Peça"
+            disabled={form.operation !== null}
             placeholder="Selecione..."
             value={taxonomy?.categories.find((option) => option.id === form.category)?.name}
             onPress={() => handleSelect('Peça', taxonomy?.categories, form.setCategory)}
@@ -177,6 +215,7 @@ export default function AddPieceScreen() {
 
           <FormSelect
             label="Estilo"
+            disabled={form.operation !== null}
             placeholder="Selecione..."
             value={taxonomy?.styles.find((option) => option.id === form.style)?.name}
             onPress={() => handleSelect('Estilo', taxonomy?.styles, form.setStyle)}
@@ -184,6 +223,7 @@ export default function AddPieceScreen() {
 
           <FormSelect
             label="Cor"
+            disabled={form.operation !== null}
             placeholder="Selecione..."
             value={taxonomy?.colors.find((option) => option.id === form.color)?.name}
             onPress={() => handleSelect('Cor', taxonomy?.colors, form.setColor)}
@@ -314,6 +354,17 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  analysisStatus: {
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  analysisText: {
+    fontSize: 13,
+    color: '#60646C',
+    textAlign: 'center',
+    marginBottom: 12,
   },
   errorText: {
     color: '#B91C1C',

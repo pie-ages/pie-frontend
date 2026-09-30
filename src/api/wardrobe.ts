@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 import { apiGetAuth, apiUploadAuth } from '@/api/client';
 import type { WardrobePiece } from '@/types/look';
 import { groupWardrobePieces, type WardrobeFetch } from '@/utils/wardrobe-rows';
@@ -18,6 +20,12 @@ export type CreateWardrobeItemPayload = {
   category: string;
   style?: string | null;
   color?: string | null;
+};
+
+export type WardrobeImageAnalysis = {
+  category: string;
+  style: string;
+  color: string;
 };
 
 export type WardrobeImageAsset = {
@@ -53,18 +61,43 @@ export async function createWardrobeItem(
   payload: CreateWardrobeItemPayload,
   image: WardrobeImageAsset,
 ): Promise<WardrobeItemDTO> {
-  const imageResponse = await fetch(image.uri);
+  const formData = await imageFormData(image);
+  formData.append('item', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+  return apiUploadAuth<WardrobeItemDTO>('/api/users/me/wardrobe/items', formData);
+}
+
+export async function analyzeWardrobeImage(
+  image: WardrobeImageAsset,
+  signal?: AbortSignal,
+): Promise<WardrobeImageAnalysis> {
+  const formData = await imageFormData(image, signal);
+  return apiUploadAuth<WardrobeImageAnalysis>(
+    '/api/users/me/wardrobe/items/analyze',
+    formData,
+    signal,
+  );
+}
+
+async function imageFormData(image: WardrobeImageAsset, signal?: AbortSignal): Promise<FormData> {
+  const formData = new FormData();
+  const fileName = image.fileName ?? `wardrobe-${Date.now()}.jpg`;
+  if (Platform.OS !== 'web') {
+    formData.append('file', {
+      uri: image.uri,
+      name: fileName,
+      type: image.mimeType ?? 'image/jpeg',
+    } as unknown as Blob);
+    return formData;
+  }
+  const imageResponse = await fetch(image.uri, { signal });
   if (!imageResponse.ok) throw new Error('Não foi possível ler a foto selecionada.');
   const imageBlob = await imageResponse.blob();
-  const formData = new FormData();
-  formData.append('item', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
   formData.append(
     'file',
     imageBlob.slice(0, imageBlob.size, image.mimeType ?? (imageBlob.type || 'image/jpeg')),
-    image.fileName ?? `wardrobe-${Date.now()}.jpg`,
+    fileName,
   );
-
-  return apiUploadAuth<WardrobeItemDTO>('/api/users/me/wardrobe/items', formData);
+  return formData;
 }
 
 export const fetchWardrobe: WardrobeFetch = async ({ signal }) =>

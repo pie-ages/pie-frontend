@@ -60,11 +60,16 @@ export async function apiPutAuth<T>(path: string, body: unknown): Promise<T> {
   return parse<T>(response);
 }
 
-export async function apiUploadAuth<T>(path: string, formData: FormData): Promise<T> {
+export async function apiUploadAuth<T>(
+  path: string,
+  formData: FormData,
+  signal?: AbortSignal,
+): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
     headers: await authHeaders(),
     body: formData,
+    signal,
   });
   return parse<T>(response);
 }
