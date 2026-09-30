@@ -8,37 +8,61 @@ import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
 import { ColorPickerModal } from '@/components/ColorPickerModal';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
-import { MOCK_COLORIMETRY_PREFERENCES } from '@/mocks/colorimetry';
+import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 
-const EMPTY_FAVORITE_COLOR = '#999999';
+const FAVORITE_SLOTS = 4;
 
 export default function ColorimetryResultScreen() {
-  const { highlightColors, avoidColors } = MOCK_COLORIMETRY_PREFERENCES;
+  const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
+    useColorimetryPreferences();
 
-  const [favoriteColors, setFavoriteColors] = useState<string[]>(
-    MOCK_COLORIMETRY_PREFERENCES.favoriteColors,
-  );
+  const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const hasChanges = Object.keys(colorOverrides).length > 0;
 
-  const pickerColors = Array.from(new Set([...highlightColors, ...avoidColors]));
+  const favoriteColors = preferences
+    ? Array.from(
+        { length: Math.max(FAVORITE_SLOTS, preferences.favoriteColors.length) },
+        (_, i) => colorOverrides[i] ?? preferences.favoriteColors[i] ?? null,
+      )
+    : [];
+
+  const pickerColors = preferences
+    ? Array.from(
+        new Set([
+          ...preferences.highlightColors,
+          ...preferences.avoidColors,
+          ...preferences.favoriteColors,
+        ]),
+      )
+    : [];
 
   function handleSelectFavorite(color: string) {
-    if (activeSlot === null) return;
-
-    setFavoriteColors((prev) => prev.map((c, i) => (i === activeSlot ? color : c)));
+    if (activeSlot === null || isSaving) return;
+    setSaved(false);
+    setColorOverrides((prev) => ({ ...prev, [activeSlot]: color }));
     setActiveSlot(null);
   }
 
-  function handleEnter() {
-    router.replace('/(tabs)/Storefront');
+  async function handleEnter() {
+    if (isSaving) return;
+    if (!hasChanges) {
+      router.replace('/(tabs)/Storefront');
+      return;
+    }
+    const success = await saveFavoriteColors(
+      favoriteColors.filter((color): color is string => color !== null),
+    );
+    if (success) {
+      setColorOverrides({});
+      setSaved(true);
+    }
   }
 
   function handleRedoColorimetry() {}
 
-  if (isLoading) {
+  if (status === 'loading') {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
         <ActivityIndicator size="large" color={Colors.brand.primary} />
@@ -46,11 +70,13 @@ export default function ColorimetryResultScreen() {
     );
   }
 
-  if (error) {
+  if (status === 'error') {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
-        <ThemedText themeColor="textSecondary">{error}</ThemedText>
-        <Pressable onPress={() => setError(null)} hitSlop={8} style={styles.retryButton}>
+        <ThemedText themeColor="textSecondary">
+          Não foi possível carregar sua colorimetria.
+        </ThemedText>
+        <Pressable onPress={retry} hitSlop={8} style={styles.retryButton}>
           <Text style={styles.redoLink}>Tentar novamente</Text>
         </Pressable>
       </SafeAreaView>
@@ -66,26 +92,41 @@ export default function ColorimetryResultScreen() {
       <View style={styles.rows}>
         <ColorimetryColorRow
           title="Suas cores de destaque"
-          colors={highlightColors}
+          colors={preferences!.highlightColors}
           caption="Tons terrosos e quentes valorizam sua pele."
         />
 
         <ColorimetryColorRow
           title="Cores a evitar perto do rosto"
-          colors={avoidColors}
+          colors={preferences!.avoidColors}
           caption="Tons de baixo contraste com o seu tom de pele"
         />
 
         <ColorimetryColorRow
           title="Escolha suas Cores Favoritas"
           colors={favoriteColors}
-          emptyColor={EMPTY_FAVORITE_COLOR}
+          disabled={isSaving}
           onSlotPress={setActiveSlot}
         />
       </View>
 
+      {saveError && (
+        <ThemedText style={styles.saveError} themeColor="textSecondary">
+          {saveError}
+        </ThemedText>
+      )}
+      {saved && (
+        <ThemedText style={styles.saveError} themeColor="textSecondary">
+          Cores favoritas salvas com sucesso.
+        </ThemedText>
+      )}
+
       <View style={styles.footer}>
-        <AuthButton title="Entrar" onPress={handleEnter} isLoading={isSaving} />
+        <AuthButton
+          title={hasChanges ? 'Salvar favoritas' : 'Entrar'}
+          onPress={handleEnter}
+          isLoading={isSaving}
+        />
 
         <Pressable onPress={handleRedoColorimetry} hitSlop={8}>
           <Text style={styles.redoLink}>Refazer colorimetria</Text>
@@ -93,9 +134,9 @@ export default function ColorimetryResultScreen() {
       </View>
 
       <ColorPickerModal
-        visible={activeSlot !== null}
+        visible={activeSlot !== null && !isSaving}
         colors={pickerColors}
-        selectedColor={activeSlot !== null ? favoriteColors[activeSlot] : undefined}
+        selectedColor={activeSlot !== null ? (favoriteColors[activeSlot] ?? undefined) : undefined}
         onSelect={handleSelectFavorite}
         onClose={() => setActiveSlot(null)}
       />
@@ -114,12 +155,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
   },
-  content: {
-    flexGrow: 1,
-    paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.three,
-    gap: Spacing.five,
-  },
   title: {
     paddingTop: Spacing.fortyFour,
     paddingBottom: Spacing.five,
@@ -131,6 +166,10 @@ const styles = StyleSheet.create({
   },
   rows: {
     gap: Spacing.three,
+  },
+  saveError: {
+    marginTop: Spacing.two,
+    textAlign: 'center',
   },
   footer: {
     marginTop: 'auto',

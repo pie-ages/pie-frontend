@@ -51,6 +51,15 @@ export async function apiPostAuth<T>(path: string, body: unknown): Promise<T> {
   return parse<T>(response);
 }
 
+export async function apiPutAuth<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${API_URL}${path}`, {
+    method: 'PUT',
+    headers: { ...(await authHeaders()), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return parse<T>(response);
+}
+
 export async function apiUploadAuth<T>(path: string, formData: FormData): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
