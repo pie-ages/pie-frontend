@@ -104,7 +104,7 @@ function ProductDetails({ id }: { id?: string }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.imageWrapper}>
-          <ProductImageCarousel images={product.images.map((img) => img.url)} />
+          <ProductImageCarousel images={product.imageUrl ? [product.imageUrl] : []} />
         </View>
 
         <View style={styles.sectionsWrapper}>
