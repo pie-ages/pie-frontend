@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
 
-import { ClothingItem } from '@/mocks/closetMocks';
+import type { WardrobePiece } from '@/types/look';
 
 interface ClothingCardProps {
-  item: ClothingItem;
+  item: WardrobePiece;
 }
 
 export default function ClothingCard({ item }: ClothingCardProps) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(item.imageUrl));
   const [hasError, setHasError] = useState(false);
 
   return (
@@ -17,15 +17,17 @@ export default function ClothingCard({ item }: ClothingCardProps) {
 
       <View style={styles.imageContainer}>
         {isLoading && !hasError && <ActivityIndicator style={styles.loader} color="#000" />}
-        <Image
-          source={{ uri: item.imageUrl }}
-          style={styles.image}
-          onLoad={() => setIsLoading(false)}
-          onError={() => {
-            setIsLoading(false);
-            setHasError(true);
-          }}
-        />
+        {item.imageUrl ? (
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.image}
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setHasError(true);
+            }}
+          />
+        ) : null}
       </View>
 
       <Text style={styles.name} numberOfLines={2}>
