@@ -7,6 +7,19 @@ export type WardrobeRowPage = {
   hasNext: boolean;
 };
 
+export function groupWardrobePieces(pieces: WardrobePiece[]): WardrobeRowPage[] {
+  const rows = new Map<string, WardrobeRowPage>();
+  for (const piece of pieces) {
+    let row = rows.get(piece.category);
+    if (!row) {
+      row = { id: piece.category, title: piece.category, items: [], hasNext: false };
+      rows.set(piece.category, row);
+    }
+    row.items.push(piece);
+  }
+  return [...rows.values()];
+}
+
 export type WardrobeFetch = (params: {
   category?: string;
   page: number;
