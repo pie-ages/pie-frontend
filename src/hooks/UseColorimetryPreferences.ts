@@ -5,7 +5,7 @@ import type { ColorimetryPreferences } from '@/types/colorimetry';
 
 export type ColorimetryStatus = 'loading' | 'success' | 'error';
 
-export function useColorimetryPreferences() {
+export function useColorimetryPreferences(enabled = true, minimumLoadingMs = 0) {
   const [preferences, setPreferences] = useState<ColorimetryPreferences | null>(null);
   const [status, setStatus] = useState<ColorimetryStatus>('loading');
   const [attempt, setAttempt] = useState(0);
@@ -14,10 +14,16 @@ export function useColorimetryPreferences() {
   const savingRef = useRef(false);
 
   useEffect(() => {
-    let isActive = true;
+    if (!enabled) return;
 
-    fetchPreferences()
-      .then((data) => {
+    let isActive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    const delay = new Promise<void>((resolve) => {
+      timer = setTimeout(resolve, minimumLoadingMs);
+    });
+
+    Promise.all([fetchPreferences(), delay])
+      .then(([data]) => {
         if (!isActive) return;
         setPreferences(data);
         setStatus('success');
@@ -28,10 +34,12 @@ export function useColorimetryPreferences() {
 
     return () => {
       isActive = false;
+      clearTimeout(timer);
     };
-  }, [attempt]);
+  }, [attempt, enabled, minimumLoadingMs]);
 
   const retry = useCallback(() => {
+    setSaveError(null);
     setStatus('loading');
     setAttempt((v) => v + 1);
   }, []);
