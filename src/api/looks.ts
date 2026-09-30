@@ -6,66 +6,6 @@ import type { WardrobeImageAsset } from '@/api/wardrobe';
 import { mapLook, type LookResponse, type LooksPage, type WardrobePiece } from '@/types/look';
 import { getStoredToken } from '@/utils/auth-storage';
 
-export type LookImageAsset = {
-  uri: string;
-  type?: string;
-  fileName?: string;
-};
-
-type LookItemResponse = {
-  wardrobeItemId: string | null;
-  productId: string | null;
-  name: string | null;
-  category: string;
-  imageUrl: string | null;
-};
-
-export async function createLook(dto: {
-  title: string;
-  description: string;
-  wardrobeItemIds: string[];
-  productIds: string[];
-}): Promise<{ id: string }> {
-  return apiPostAuth<{ id: string }>('/api/users/me/looks', dto);
-}
-
-export async function uploadLookImage(
-  lookId: string,
-  image: LookImageAsset,
-): Promise<{ photoUrl: string | null }> {
-  const formData = new FormData();
-  if (Platform.OS === 'web') {
-    const response = await fetch(image.uri);
-    const blob = await response.blob();
-    const file = new File([blob], image.fileName ?? 'look.jpg', {
-      type: image.type ?? blob.type ?? 'image/jpeg',
-    });
-    formData.append('file', file);
-  } else {
-    formData.append('file', {
-      uri: image.uri,
-      type: image.type ?? 'image/jpeg',
-      name: image.fileName ?? 'look.jpg',
-    } as unknown as Blob);
-  }
-  return apiUploadAuth<{ photoUrl: string | null }>(
-    `/api/users/me/looks/${lookId}/image`,
-    formData,
-  );
-}
-
-export async function fetchLookSuggestion(): Promise<WardrobePiece[]> {
-  const data = await apiGetAuth<{ items: LookItemResponse[] }>('/api/users/me/looks/suggestion');
-  return data.items.map((item) => ({
-    id: item.wardrobeItemId ?? item.productId ?? '',
-    name: item.name ?? undefined,
-    imageUrl: item.imageUrl,
-    category: item.category,
-    wardrobeItemId: item.wardrobeItemId,
-    productId: item.productId,
-  }));
-}
-
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 export type LookImageAsset = WardrobeImageAsset;
@@ -163,7 +103,6 @@ export async function uploadLookImage(
       fileName,
     );
   } else {
-    // React Native envia arquivos locais usando uri, name e type no multipart.
     formData.append('file', {
       uri: image.uri,
       name: fileName,

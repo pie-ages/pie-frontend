@@ -74,12 +74,12 @@ export default function LooksScreen() {
     if (result.canceled) return;
     const asset = result.assets[0];
     try {
-      const { photoUrl } = await uploadLookImage(lookId, {
+      const result = await uploadLookImage(lookId, {
         uri: asset.uri,
-        type: asset.mimeType,
+        mimeType: asset.mimeType,
         fileName: asset.fileName,
       });
-      updateLookPhoto(lookId, photoUrl);
+      updateLookPhoto(lookId, result.photoUrl);
     } catch {
       // upload silently fails; user can retry by pressing the button again
     }

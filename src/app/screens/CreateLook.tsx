@@ -66,7 +66,7 @@ export default function CreateLookScreen() {
     });
     if (!result.canceled) {
       const asset = result.assets[0];
-      setImage({ uri: asset.uri, fileName: asset.fileName, type: asset.mimeType });
+      setImage({ uri: asset.uri, fileName: asset.fileName, mimeType: asset.mimeType });
     }
   };
 
