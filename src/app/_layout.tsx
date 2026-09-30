@@ -68,6 +68,8 @@ function RootNavigator() {
         <Stack.Screen name="screens/MyStyle" />
         <Stack.Screen name="screens/StyleQuiz" />
         <Stack.Screen name="screens/StyleSelection" />
+        <Stack.Screen name="screens/CreateLook" />
+        <Stack.Screen name="screens/ColorimetryResult" />
       </Stack.Protected>
 
       <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />

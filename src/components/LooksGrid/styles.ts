@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { Spacing } from '@/constants/Theme';
+import { Colors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   list: {
@@ -14,5 +14,13 @@ export const styles = StyleSheet.create({
   },
   row: {
     gap: 12,
+  },
+  footer: {
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+  },
+  retryText: {
+    color: Colors.brand.primary,
+    textAlign: 'center',
   },
 });

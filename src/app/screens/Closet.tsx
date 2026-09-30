@@ -1,45 +1,116 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React from 'react';
+import {
+  ScrollView,
+  Text,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
+import CategoryRow from '@/components/CategoryRow';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
-import { Colors, Spacing } from '@/constants/Theme';
+import { Spacing } from '@/constants/Theme';
+import { useWardrobeRows } from '@/hooks/UseWardrobeRows';
 
 export default function ClosetScreen() {
-  const insets = useSafeAreaInsets();
+  const { status, rows, retry, loadMore, retryRow } = useWardrobeRows();
+
+  if (status === 'loading') {
+    return (
+      <SafeAreaView style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text style={styles.statusText}>A carregar o seu guarda-roupa...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <SafeAreaView style={styles.centerContainer}>
+        <Text style={styles.statusText}>Ocorreu um erro ao carregar as peças.</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          activeOpacity={0.7}
+          onPress={() => void retry()}
+          accessibilityRole="button"
+        >
+          <Text style={styles.retryText}>Tentar novamente</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <View style={[styles.safeArea, { paddingTop: insets.top }]}>
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <ScreenToolBar title="Closet" />
+        <ScreenToolBar
+          title="Closet"
+          actions={[{ icon: 'plus', accessibilityLabel: 'Adicionar peça' }]}
+        />
       </View>
-      <View style={styles.container}>
-        <MaterialCommunityIcons name="wardrobe-outline" size={48} color={Colors.icon} />
-        <Text style={styles.description}>Em breve você vai poder organizar suas roupas aqui.</Text>
-      </View>
-    </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scrollContent, status === 'empty' && styles.emptyContent]}
+      >
+        {status === 'empty' ? (
+          <View style={styles.centerContainer}>
+            <Text style={styles.statusText}>O seu guarda-roupa está vazio.</Text>
+          </View>
+        ) : (
+          rows.map((row) => (
+            <CategoryRow
+              key={row.id}
+              data={row}
+              onEndReached={(rowId) => void loadMore(rowId)}
+              onRetry={(rowId) => void retryRow(rowId)}
+            />
+          ))
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     paddingTop: Spacing.two,
     paddingHorizontal: Spacing.three,
   },
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.four,
+  scrollContent: {
+    paddingTop: 16,
+    paddingBottom: 40,
   },
-  description: {
+  emptyContent: {
+    flexGrow: 1,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  statusText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 22,
+    backgroundColor: '#111827',
+  },
+  retryText: {
+    color: '#FFFFFF',
     fontSize: 14,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
+    fontWeight: '600',
   },
 });

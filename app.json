@@ -41,7 +41,13 @@
       "expo-status-bar",
       "expo-web-browser",
       "expo-secure-store",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app acessa suas fotos para adicionar uma imagem ao look."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,7 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Animated, Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
@@ -16,7 +25,6 @@ import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useLookFocusNavigation } from '@/hooks/UseLookFocusNavigation';
 import { useLooksCollection } from '@/hooks/UseLooksCollection';
-import { MOCK_INITIAL_LOOK_ID } from '@/mocks/looks';
 import type { LooksViewMode } from '@/types/look';
 
 export default function LooksScreen() {
@@ -28,11 +36,14 @@ export default function LooksScreen() {
     params.viewMode === 'grid' ? 'grid' : 'focus',
   );
   const [contentOpacity] = useState(() => new Animated.Value(1));
-  const { status, looks, retry } = useLooksCollection();
-  const { activeIndex, activeLook, goTo } = useLookFocusNavigation(
-    looks,
-    params.lookId ?? MOCK_INITIAL_LOOK_ID,
-  );
+  const { status, looks, retry, hasNext, loadingMore, pageError, loadMore } = useLooksCollection();
+  const { activeIndex, activeLook, goTo } = useLookFocusNavigation(looks, params.lookId);
+
+  useEffect(() => {
+    if (viewMode === 'focus' && hasNext && activeIndex === looks.length - 1 && !pageError) {
+      void loadMore();
+    }
+  }, [activeIndex, hasNext, loadMore, looks.length, pageError, viewMode]);
 
   useEffect(() => {
     contentOpacity.setValue(0);
@@ -69,7 +80,13 @@ export default function LooksScreen() {
         <View style={styles.header}>
           <ScreenToolBar
             title="Meus Looks"
-            actions={[{ icon: 'plus', accessibilityLabel: 'Criar look' }]}
+            actions={[
+              {
+                icon: 'plus',
+                accessibilityLabel: 'Criar look',
+                onPress: () => router.push('/screens/CreateLook'),
+              },
+            ]}
           />
           <LooksViewModeToggle value={viewMode} onChange={handleChangeViewMode} />
         </View>
@@ -109,6 +126,12 @@ export default function LooksScreen() {
                     <View style={styles.focusFooter}>
                       <LookFocusInfo look={activeLook} />
                       <LookFocusPagination count={looks.length} activeIndex={activeIndex} />
+                      {loadingMore && <ActivityIndicator color={Colors.brand.primary} />}
+                      {pageError && (
+                        <Pressable onPress={() => loadMore(true)} accessibilityRole="button">
+                          <Text style={styles.retryText}>Tentar carregar mais looks</Text>
+                        </Pressable>
+                      )}
                     </View>
                   )}
                 </View>
@@ -118,6 +141,9 @@ export default function LooksScreen() {
                   looks={looks}
                   onLookPress={handleLookPress}
                   contentBottomInset={insets.bottom + BottomTabInset + Spacing.three}
+                  loadingMore={loadingMore}
+                  pageError={pageError}
+                  onLoadMore={loadMore}
                 />
               )}
             </Animated.View>
@@ -155,14 +181,20 @@ const styles = StyleSheet.create({
   },
   focusContent: {
     flex: 1,
+    minHeight: 0,
     justifyContent: 'space-between',
     paddingTop: Spacing.three,
   },
   focusCarousel: {
     flex: 1,
+    minHeight: 0,
     justifyContent: 'center',
   },
   focusFooter: {
     gap: Spacing.two,
+  },
+  retryText: {
+    color: Colors.brand.primary,
+    textAlign: 'center',
   },
 });
