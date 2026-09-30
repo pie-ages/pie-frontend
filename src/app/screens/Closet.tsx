@@ -1,4 +1,5 @@
-import React from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useRef } from 'react';
 import {
   ScrollView,
   Text,
@@ -16,6 +17,18 @@ import { useWardrobeRows } from '@/hooks/UseWardrobeRows';
 
 export default function ClosetScreen() {
   const { status, rows, retry, loadMore, retryRow } = useWardrobeRows();
+  const isFirstFocus = useRef(true);
+
+  // Reload when returning (e.g. after adding a piece); the hook already loads on mount.
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      void retry();
+    }, [retry]),
+  );
 
   if (status === 'loading') {
     return (
@@ -47,7 +60,13 @@ export default function ClosetScreen() {
       <View style={styles.header}>
         <ScreenToolBar
           title="Closet"
-          actions={[{ icon: 'plus', accessibilityLabel: 'Adicionar peça' }]}
+          actions={[
+            {
+              icon: 'plus',
+              accessibilityLabel: 'Adicionar peça',
+              onPress: () => router.push('/screens/AddPieceScreen'),
+            },
+          ]}
         />
       </View>
 
