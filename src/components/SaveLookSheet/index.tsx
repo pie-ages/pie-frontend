@@ -20,12 +20,12 @@ import { styles } from './styles';
 type SaveLookSheetProps = {
   visible: boolean;
   name: string;
-  description: string;
+  occasion: string;
   imageUri: string | null;
   error: string | null;
   saving: boolean;
   onChangeName: (value: string) => void;
-  onChangeDescription: (value: string) => void;
+  onChangeOccasion: (value: string) => void;
   onPickImage: () => void;
   onCancel: () => void;
   onConfirm: () => void;
@@ -34,12 +34,12 @@ type SaveLookSheetProps = {
 export function SaveLookSheet({
   visible,
   name,
-  description,
+  occasion,
   imageUri,
   error,
   saving,
   onChangeName,
-  onChangeDescription,
+  onChangeOccasion,
   onPickImage,
   onCancel,
   onConfirm,
@@ -164,16 +164,16 @@ export function SaveLookSheet({
                 style={styles.input}
                 accessibilityLabel="Nome do look"
               />
-              <Text style={styles.label}>Descrição do Look</Text>
+              <Text style={styles.label}>Ocasião</Text>
               <TextInput
-                value={description}
-                onChangeText={onChangeDescription}
+                value={occasion}
+                onChangeText={onChangeOccasion}
                 editable={!saving}
                 maxLength={120}
-                placeholder="Ex.: Ir para faculdade"
+                placeholder="Ex.: Trabalho, Casual, Festa"
                 placeholderTextColor={Colors.placeholder}
                 style={styles.input}
-                accessibilityLabel="Descrição do look"
+                accessibilityLabel="Ocasião do look"
               />
             </View>
 

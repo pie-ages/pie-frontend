@@ -185,12 +185,12 @@ export default function CreateLookScreen() {
       <SaveLookSheet
         visible={isSaving}
         name={form.name}
-        description={form.description}
+        occasion={form.occasion}
         imageUri={image?.uri ?? null}
         error={form.error}
         saving={form.operation === 'save'}
         onChangeName={form.updateName}
-        onChangeDescription={form.updateDescription}
+        onChangeOccasion={form.updateOccasion}
         onPickImage={pickImage}
         onCancel={() => setIsSaving(false)}
         onConfirm={handleConfirmSave}

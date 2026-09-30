@@ -5,7 +5,7 @@ import { MAX_LOOK_PIECES, type WardrobePiece } from '@/types/look';
 
 export function useLookForm() {
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [occasion, setOccasion] = useState('');
   const [items, setItems] = useState<WardrobePiece[]>([]);
   const [suggestion, setSuggestion] = useState<WardrobePiece[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +65,7 @@ export function useLookForm() {
       if (!lookId) {
         const look = await createLook({
           title: name.trim(),
-          description: description.trim(),
+          occasion: occasion.trim() || undefined,
           wardrobeItemIds: items
             .map((item) => item.wardrobeItemId)
             .filter((id): id is string => Boolean(id)),
@@ -94,7 +94,7 @@ export function useLookForm() {
 
   return {
     name,
-    description,
+    occasion,
     items,
     suggestion,
     error,
@@ -103,7 +103,7 @@ export function useLookForm() {
       setName(value);
       setError(null);
     },
-    updateDescription: setDescription,
+    updateOccasion: setOccasion,
     togglePiece,
     requestSuggestion,
     acceptSuggestion,
