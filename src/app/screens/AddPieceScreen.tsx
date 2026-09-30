@@ -47,6 +47,8 @@ export default function AddPieceScreen() {
   const pickImageFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
+      preferredAssetRepresentationMode:
+        ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
