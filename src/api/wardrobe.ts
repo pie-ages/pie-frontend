@@ -1,12 +1,6 @@
-import axios from 'axios';
-
 import { apiGetAuth, apiUploadAuth } from '@/api/client';
 import type { WardrobePiece } from '@/types/look';
-import { getStoredToken } from '@/utils/auth-storage';
-import type { WardrobeFetch } from '@/utils/wardrobe-rows';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
-const WARDROBE_PAGE_SIZE = 20;
+import { groupWardrobePieces, type WardrobeFetch } from '@/utils/wardrobe-rows';
 
 export type WardrobeItemDTO = {
   id: string;
@@ -33,10 +27,6 @@ export type WardrobeImageAsset = {
   fileSize?: number | null;
 };
 
-type WardrobeResponse = {
-  rows: { id: string; title: string; items: WardrobeItemDTO[]; hasNext: boolean }[];
-};
-
 function toPiece(item: WardrobeItemDTO): WardrobePiece {
   const category = item.category?.trim() || 'Outros';
   const name =
@@ -51,50 +41,31 @@ function toPiece(item: WardrobeItemDTO): WardrobePiece {
   };
 }
 
-export function fetchWardrobeItems(): Promise<WardrobePiece[]> {
-  return apiGetAuth<WardrobeItemDTO[]>('/api/users/me/wardrobe/items').then((items) =>
-    items.map(toPiece),
-  );
+export async function fetchWardrobeItems(signal?: AbortSignal): Promise<WardrobePiece[]> {
+  const items = await apiGetAuth<WardrobeItemDTO[]>('/api/users/me/wardrobe/items', signal);
+  if (!Array.isArray(items) || !items.every((item) => typeof item?.id === 'string')) {
+    throw new Error('Resposta inválida ao carregar o guarda-roupa.');
+  }
+  return items.map(toPiece);
 }
 
-export function createWardrobeItem(
+export async function createWardrobeItem(
   payload: CreateWardrobeItemPayload,
   image: WardrobeImageAsset,
 ): Promise<WardrobeItemDTO> {
+  const imageResponse = await fetch(image.uri);
+  if (!imageResponse.ok) throw new Error('Não foi possível ler a foto selecionada.');
+  const imageBlob = await imageResponse.blob();
   const formData = new FormData();
   formData.append('item', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-  formData.append('file', {
-    uri: image.uri,
-    name: image.fileName ?? `wardrobe-${Date.now()}.jpg`,
-    type: image.mimeType ?? 'image/jpeg',
-  } as unknown as Blob);
+  formData.append(
+    'file',
+    imageBlob.slice(0, imageBlob.size, image.mimeType ?? (imageBlob.type || 'image/jpeg')),
+    image.fileName ?? `wardrobe-${Date.now()}.jpg`,
+  );
 
   return apiUploadAuth<WardrobeItemDTO>('/api/users/me/wardrobe/items', formData);
 }
 
-export const fetchWardrobe: WardrobeFetch = async ({ category, page, signal }) => {
-  const token = await getStoredToken();
-  if (!token) throw new Error('Sua sessão expirou. Entre novamente para continuar.');
-
-  const response = await axios.get<WardrobeResponse>(`${API_URL}/api/users/me/wardrobe`, {
-    headers: { Authorization: `Bearer ${token}` },
-    params: { category, page, size: WARDROBE_PAGE_SIZE },
-    signal,
-  });
-  const rows = response.data?.rows;
-  if (
-    !Array.isArray(rows) ||
-    !rows.every(
-      (row) =>
-        typeof row?.id === 'string' &&
-        typeof row.title === 'string' &&
-        typeof row.hasNext === 'boolean' &&
-        Array.isArray(row.items) &&
-        row.items.every((item) => typeof item?.id === 'string'),
-    )
-  ) {
-    throw new Error('Resposta inválida ao carregar o guarda-roupa.');
-  }
-
-  return rows.map((row) => ({ ...row, items: row.items.map(toPiece) }));
-};
+export const fetchWardrobe: WardrobeFetch = async ({ signal }) =>
+  groupWardrobePieces(await fetchWardrobeItems(signal));

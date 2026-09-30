@@ -34,9 +34,10 @@ async function parse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export async function apiGetAuth<T>(path: string): Promise<T> {
+export async function apiGetAuth<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     headers: await authHeaders(),
+    signal,
   });
   return parse<T>(response);
 }
