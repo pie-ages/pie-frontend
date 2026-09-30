@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
 import { apiGetAuth, apiPostAuth, apiUploadAuth } from '@/api/client';
 import { mapLook, type LookResponse, type LooksPage, type WardrobePiece } from '@/types/look';
@@ -27,14 +28,29 @@ export async function createLook(dto: {
   return apiPostAuth<{ id: string }>('/api/users/me/looks', dto);
 }
 
-export async function uploadLookImage(lookId: string, image: LookImageAsset): Promise<void> {
+export async function uploadLookImage(
+  lookId: string,
+  image: LookImageAsset,
+): Promise<{ photoUrl: string | null }> {
   const formData = new FormData();
-  formData.append('file', {
-    uri: image.uri,
-    type: image.type ?? 'image/jpeg',
-    name: image.fileName ?? 'look.jpg',
-  } as unknown as Blob);
-  return apiUploadAuth<void>(`/api/users/me/looks/${lookId}/image`, formData);
+  if (Platform.OS === 'web') {
+    const response = await fetch(image.uri);
+    const blob = await response.blob();
+    const file = new File([blob], image.fileName ?? 'look.jpg', {
+      type: image.type ?? blob.type ?? 'image/jpeg',
+    });
+    formData.append('file', file);
+  } else {
+    formData.append('file', {
+      uri: image.uri,
+      type: image.type ?? 'image/jpeg',
+      name: image.fileName ?? 'look.jpg',
+    } as unknown as Blob);
+  }
+  return apiUploadAuth<{ photoUrl: string | null }>(
+    `/api/users/me/looks/${lookId}/image`,
+    formData,
+  );
 }
 
 export async function fetchLookSuggestion(): Promise<WardrobePiece[]> {

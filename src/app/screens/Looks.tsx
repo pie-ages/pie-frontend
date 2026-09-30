@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { uploadLookImage } from '@/api/looks';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -36,7 +38,8 @@ export default function LooksScreen() {
     params.viewMode === 'grid' ? 'grid' : 'focus',
   );
   const [contentOpacity] = useState(() => new Animated.Value(1));
-  const { status, looks, retry, hasNext, loadingMore, pageError, loadMore } = useLooksCollection();
+  const { status, looks, retry, hasNext, loadingMore, pageError, loadMore, updateLookPhoto } =
+    useLooksCollection();
   const { activeIndex, activeLook, goTo } = useLookFocusNavigation(looks, params.lookId);
 
   useEffect(() => {
@@ -59,6 +62,27 @@ export default function LooksScreen() {
   const handleChangeViewMode = (mode: LooksViewMode) => {
     setViewMode(mode);
     router.setParams({ viewMode: mode, lookId: activeLook?.id ?? undefined });
+  };
+
+  const handleAddPhoto = async (lookId: string) => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    try {
+      const { photoUrl } = await uploadLookImage(lookId, {
+        uri: asset.uri,
+        type: asset.mimeType,
+        fileName: asset.fileName,
+      });
+      updateLookPhoto(lookId, photoUrl);
+    } catch {
+      // upload silently fails; user can retry by pressing the button again
+    }
   };
 
   const handleLookPress = (id: string) => {
@@ -119,6 +143,7 @@ export default function LooksScreen() {
                       looks={looks}
                       activeIndex={activeIndex}
                       onChangeIndex={goTo}
+                      onAddPhoto={handleAddPhoto}
                       maxHeight={carouselAreaHeight}
                     />
                   </View>
