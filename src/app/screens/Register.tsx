@@ -2,11 +2,12 @@ import { Image } from 'expo-image';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ApiError } from '@/api/client';
 import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
 import { Colors } from '@/constants/Theme';
-import { AuthApiError, useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRegisterForm } from '@/hooks/UseRegisterForm';
 
 export default function RegisterScreen() {
@@ -39,7 +40,7 @@ export default function RegisterScreen() {
         await completeMockSignUp({ email: email.trim(), password });
       } catch (registerError) {
         setSubmissionError(
-          registerError instanceof AuthApiError
+          registerError instanceof ApiError
             ? registerError.message
             : 'Não foi possível iniciar sua sessão. Tente novamente.',
         );

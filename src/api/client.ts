@@ -1,20 +1,44 @@
 import { getStoredToken } from '@/utils/auth-storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 
-export async function apiFetch<T>(path: string, params?: URLSearchParams): Promise<T> {
-  const qs = params?.toString();
-  const url = qs ? `${API_URL}${path}?${qs}` : `${API_URL}${path}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly serverMessage?: string,
+  ) {
+    super(message);
+    this.name = 'ApiError';
   }
-  return response.json() as Promise<T>;
 }
 
-async function authHeaders(): Promise<Record<string, string>> {
-  const token = await getStoredToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+type RequestOptions = {
+  method?: 'GET' | 'POST' | 'PUT';
+  body?: unknown;
+  auth?: boolean;
+  signal?: AbortSignal;
+};
+
+async function request<T>(
+  path: string,
+  { method = 'GET', body, auth = false, signal }: RequestOptions = {},
+): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (auth) {
+    const token = await getStoredToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+  const isJson = body !== undefined && !(body instanceof FormData);
+  if (isJson) headers['Content-Type'] = 'application/json';
+
+  const response = await fetch(`${API_URL}${path}`, {
+    method,
+    headers,
+    body: isJson ? JSON.stringify(body) : (body as FormData | undefined),
+    signal,
+  });
+  return parse<T>(response);
 }
 
 async function parse<T>(response: Response): Promise<T> {
@@ -26,7 +50,11 @@ async function parse<T>(response: Response): Promise<T> {
     } catch {
       // Some proxy and multipart errors do not return JSON.
     }
-    throw new Error(message ?? `API error: ${response.status} ${response.statusText}`);
+    throw new ApiError(
+      message ?? `API error: ${response.status} ${response.statusText}`,
+      response.status,
+      message,
+    );
   }
   if (response.status === 204) {
     return undefined as T;
@@ -34,30 +62,25 @@ async function parse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export async function apiGetAuth<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    headers: await authHeaders(),
-    signal,
-  });
-  return parse<T>(response);
+export function apiFetch<T>(path: string, params?: URLSearchParams): Promise<T> {
+  const qs = params?.toString();
+  return request<T>(qs ? `${path}?${qs}` : path);
 }
 
-export async function apiPostAuth<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: 'POST',
-    headers: { ...(await authHeaders()), 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return parse<T>(response);
+export function apiPost<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: 'POST', body });
 }
 
-export async function apiPutAuth<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: 'PUT',
-    headers: { ...(await authHeaders()), 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return parse<T>(response);
+export function apiGetAuth<T>(path: string, signal?: AbortSignal): Promise<T> {
+  return request<T>(path, { auth: true, signal });
+}
+
+export function apiPostAuth<T>(path: string, body?: unknown): Promise<T> {
+  return request<T>(path, { method: 'POST', body, auth: true });
+}
+
+export function apiPutAuth<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: 'PUT', body, auth: true });
 }
 
 export async function apiUploadAuth<T>(
@@ -76,11 +99,5 @@ export async function apiUploadAuth<T>(
       body.append(name, part);
     }
   }
-  const response = await fetch(`${API_URL}${path}`, {
-    method: 'POST',
-    headers: await authHeaders(),
-    body,
-    signal,
-  });
-  return parse<T>(response);
+  return request<T>(path, { method: 'POST', body, auth: true, signal });
 }

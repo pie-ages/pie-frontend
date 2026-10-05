@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 
-import { AuthApiError, useAuth } from '@/contexts/AuthContext';
+import { ApiError } from '@/api/client';
+import { useAuth } from '@/contexts/AuthContext';
 import type { LoginPayload } from '@/shared/Login';
 
 export function useLoginForm() {
@@ -38,7 +39,7 @@ export function useLoginForm() {
       await signIn(payload);
     } catch (loginError) {
       setError(
-        loginError instanceof AuthApiError
+        loginError instanceof ApiError
           ? loginError.message
           : 'Não foi possível conectar. Verifique sua conexão e tente novamente.',
       );

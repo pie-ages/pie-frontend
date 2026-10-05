@@ -78,9 +78,13 @@ export async function analyzeWardrobeImage(
   );
 }
 
-async function imageFormData(image: WardrobeImageAsset, signal?: AbortSignal): Promise<FormData> {
+export async function imageFormData(
+  image: WardrobeImageAsset,
+  signal?: AbortSignal,
+  fallbackName = `wardrobe-${Date.now()}.jpg`,
+): Promise<FormData> {
   const formData = new FormData();
-  const fileName = image.fileName ?? `wardrobe-${Date.now()}.jpg`;
+  const fileName = image.fileName ?? fallbackName;
   if (Platform.OS !== 'web') {
     formData.append('file', {
       uri: image.uri,

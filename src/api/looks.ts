@@ -1,12 +1,6 @@
-import axios from 'axios';
-import { Platform } from 'react-native';
-
 import { apiGetAuth, apiPostAuth, apiUploadAuth } from '@/api/client';
-import type { WardrobeImageAsset } from '@/api/wardrobe';
+import { imageFormData, type WardrobeImageAsset } from '@/api/wardrobe';
 import { mapLook, type LookResponse, type LooksPage, type WardrobePiece } from '@/types/look';
-import { getStoredToken } from '@/utils/auth-storage';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 export type LookImageAsset = WardrobeImageAsset;
 
@@ -31,15 +25,8 @@ type LooksResponse = {
 };
 
 export async function fetchLooks(page: number, signal?: AbortSignal): Promise<LooksPage> {
-  const token = await getStoredToken();
-  if (!token) throw new Error('Sua sessão expirou. Entre novamente para continuar.');
-
-  const response = await axios.get<LooksResponse>(`${API_URL}/api/users/me/looks`, {
-    headers: { Authorization: `Bearer ${token}` },
-    params: { page, size: 20, sort: 'createdAt,DESC' },
-    signal,
-  });
-  const data = response.data;
+  const qs = new URLSearchParams({ page: String(page), size: '20', sort: 'createdAt,DESC' });
+  const data = await apiGetAuth<LooksResponse>(`/api/users/me/looks?${qs}`, signal);
   if (
     !Array.isArray(data?.items) ||
     typeof data.page !== 'number' ||
@@ -90,26 +77,7 @@ export async function uploadLookImage(
   lookId: string,
   image: LookImageAsset,
 ): Promise<LookResponse> {
-  const formData = new FormData();
-  const fileName = image.fileName ?? 'look.jpg';
-
-  if (Platform.OS === 'web') {
-    const response = await fetch(image.uri);
-    if (!response.ok) throw new Error('Não foi possível ler a foto selecionada.');
-    const blob = await response.blob();
-    formData.append(
-      'file',
-      blob.slice(0, blob.size, image.mimeType ?? (blob.type || 'image/jpeg')),
-      fileName,
-    );
-  } else {
-    formData.append('file', {
-      uri: image.uri,
-      name: fileName,
-      type: image.mimeType ?? 'image/jpeg',
-    } as unknown as Blob);
-  }
-
+  const formData = await imageFormData(image, undefined, 'look.jpg');
   return apiUploadAuth<LookResponse>(
     `/api/users/me/looks/${encodeURIComponent(lookId)}/image`,
     formData,

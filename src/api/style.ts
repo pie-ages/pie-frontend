@@ -1,86 +1,65 @@
-import axios, { isAxiosError } from 'axios';
-
+import { ApiError, apiFetch, apiGetAuth, apiPostAuth } from '@/api/client';
 import { resolveIdentifiedStyle, type IdentifiedStyle } from '@/types/IdentifiedStyle';
-import type { StyleQuizSubmission } from '@/types/StyleQuiz';
-import { getStoredToken } from '@/utils/auth-storage';
+import type { StyleQuizQuestion, StyleQuizResponse, StyleQuizSubmission } from '@/types/StyleQuiz';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 const ERROR_MESSAGE = 'Não foi possível identificar seu estilo. Tente novamente.';
-type ErrorResponse = { message?: string };
+const INVALID_STYLE_MESSAGE = 'A API retornou um estilo inválido. Tente novamente.';
+const SESSION_MESSAGE = 'Sua sessão expirou. Entre novamente para continuar.';
 
 export class StyleSessionError extends Error {}
+
+function toStyleError(error: unknown): unknown {
+  if (!(error instanceof ApiError)) return error;
+  if (
+    error.status === 401 ||
+    (error.status === 404 && error.serverMessage?.startsWith('Usuário não encontrado'))
+  ) {
+    return new StyleSessionError(SESSION_MESSAGE);
+  }
+  return new Error(error.serverMessage ?? ERROR_MESSAGE);
+}
+
+function readStyles(data: unknown): unknown[] | null {
+  if (typeof data !== 'object' || data === null || !('styles' in data)) return null;
+  return Array.isArray(data.styles) ? data.styles : null;
+}
+
+export async function fetchStyleQuestions(): Promise<StyleQuizQuestion[]> {
+  const data = await apiFetch<StyleQuizResponse>('/api/style/questions');
+  return [...data.questions].sort((a, b) => a.order - b.order);
+}
 
 export async function submitStyleQuizAndIdentify(
   answers: StyleQuizSubmission[],
 ): Promise<IdentifiedStyle> {
-  const token = await getStoredToken();
-  if (!token) throw new StyleSessionError('Sua sessão expirou. Entre novamente para continuar.');
-
+  let data: unknown;
   try {
-    const headers = { Authorization: `Bearer ${token}` };
-    await axios.post(`${API_URL}/api/users/me/style/answers`, { answers }, { headers });
-    const response = await axios.post<unknown>(
-      `${API_URL}/api/users/me/style/identify`,
-      undefined,
-      { headers },
-    );
-    if (
-      typeof response.data === 'object' &&
-      response.data !== null &&
-      'styles' in response.data &&
-      Array.isArray(response.data.styles) &&
-      response.data.styles.length === 0
-    ) {
-      throw new Error('Não há respostas ou preferências suficientes para identificar seu estilo.');
-    }
-    const style =
-      typeof response.data === 'object' && response.data !== null && 'styles' in response.data
-        ? resolveIdentifiedStyle(response.data.styles)
-        : null;
-
-    if (!style) throw new Error('A API retornou um estilo inválido. Tente novamente.');
-    return style;
+    await apiPostAuth('/api/users/me/style/answers', { answers });
+    data = await apiPostAuth<unknown>('/api/users/me/style/identify');
   } catch (error) {
-    if (isAxiosError<ErrorResponse>(error)) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message;
-      if (status === 401 || (status === 404 && message?.startsWith('Usuário não encontrado'))) {
-        throw new StyleSessionError('Sua sessão expirou. Entre novamente para continuar.');
-      }
-      throw new Error(message ?? ERROR_MESSAGE);
-    }
-    throw error;
+    throw toStyleError(error);
   }
+
+  const styles = readStyles(data);
+  if (styles?.length === 0) {
+    throw new Error('Não há respostas ou preferências suficientes para identificar seu estilo.');
+  }
+  const style = resolveIdentifiedStyle(styles);
+  if (!style) throw new Error(INVALID_STYLE_MESSAGE);
+  return style;
 }
 
 export async function getIdentifiedStyle(): Promise<IdentifiedStyle | null> {
-  const token = await getStoredToken();
-  if (!token) throw new StyleSessionError('Sua sessão expirou. Entre novamente para continuar.');
-
+  let data: unknown;
   try {
-    const response = await axios.get<unknown>(`${API_URL}/api/users/me/style/identified`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (
-      typeof response.data !== 'object' ||
-      response.data === null ||
-      !('styles' in response.data)
-    ) {
-      throw new Error('A API retornou um estilo inválido. Tente novamente.');
-    }
-    if (Array.isArray(response.data.styles) && response.data.styles.length === 0) return null;
-    const style = resolveIdentifiedStyle(response.data.styles);
-    if (!style) throw new Error('A API retornou um estilo inválido. Tente novamente.');
-    return style;
+    data = await apiGetAuth<unknown>('/api/users/me/style/identified');
   } catch (error) {
-    if (isAxiosError<ErrorResponse>(error)) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message;
-      if (status === 401 || (status === 404 && message?.startsWith('Usuário não encontrado'))) {
-        throw new StyleSessionError('Sua sessão expirou. Entre novamente para continuar.');
-      }
-      throw new Error(message ?? ERROR_MESSAGE);
-    }
-    throw error;
+    throw toStyleError(error);
   }
+
+  const styles = readStyles(data);
+  if (styles?.length === 0) return null;
+  const style = resolveIdentifiedStyle(styles);
+  if (!style) throw new Error(INVALID_STYLE_MESSAGE);
+  return style;
 }
