@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react-native';
 
 import { analyzeWardrobeImage, createWardrobeItem } from '@/api/wardrobe';
 import { useAddPieceForm } from '@/hooks/UseAddPieceForm';
@@ -21,7 +21,7 @@ describe('wardrobe photo analysis', () => {
 
   it('sends one selected photo and fills editable fields without saving', async () => {
     analyze.mockResolvedValueOnce(result);
-    const { result: hook } = renderHook(() => useAddPieceForm());
+    const { result: hook } = await renderHook(() => useAddPieceForm());
     await act(async () => {
       await hook.current.selectImage(image);
     });
@@ -33,7 +33,7 @@ describe('wardrobe photo analysis', () => {
     expect(hook.current.isAnalyzed).toBe(true);
     expect(hook.current.operation).toBeNull();
     expect(create).not.toHaveBeenCalled();
-    act(() => hook.current.setStyle('casual'));
+    await act(() => hook.current.setStyle('casual'));
     expect(hook.current.style).toBe('casual');
   });
 
@@ -46,7 +46,7 @@ describe('wardrobe photo analysis', () => {
       photoUrl: null,
       ...result,
     });
-    const { result: hook } = renderHook(() => useAddPieceForm());
+    const { result: hook } = await renderHook(() => useAddPieceForm());
     await act(async () => {
       await hook.current.selectImage(image);
     });
@@ -54,7 +54,7 @@ describe('wardrobe photo analysis', () => {
     expect(hook.current.image).toEqual(image);
     expect(hook.current.operation).toBeNull();
     expect(analyze).toHaveBeenCalledTimes(1);
-    act(() => {
+    await act(() => {
       hook.current.setName('Vestido');
       hook.current.setCategory('vestido');
       hook.current.setStyle('casual');
@@ -72,7 +72,7 @@ describe('wardrobe photo analysis', () => {
 
   it('starts a new analysis only when another photo is selected', async () => {
     analyze.mockRejectedValueOnce(new Error('Envie outra foto.')).mockResolvedValueOnce(result);
-    const { result: hook } = renderHook(() => useAddPieceForm());
+    const { result: hook } = await renderHook(() => useAddPieceForm());
     await act(async () => {
       await hook.current.selectImage(image);
     });
@@ -95,8 +95,8 @@ describe('wardrobe photo analysis', () => {
         }),
     );
     analyze.mockResolvedValueOnce({ category: 'camisa', style: 'classico', color: 'branco' });
-    const { result: hook } = renderHook(() => useAddPieceForm());
-    act(() => {
+    const { result: hook } = await renderHook(() => useAddPieceForm());
+    await act(() => {
       void hook.current.selectImage(image);
     });
     expect(hook.current.operation).toBe('analyze');
@@ -115,7 +115,7 @@ describe('wardrobe photo analysis', () => {
   });
 
   it('rejects unsupported or oversized photos without a paid inference', async () => {
-    const { result: hook } = renderHook(() => useAddPieceForm());
+    const { result: hook } = await renderHook(() => useAddPieceForm());
     await act(async () => {
       await hook.current.selectImage({ ...image, mimeType: 'image/heic' });
     });
@@ -129,12 +129,12 @@ describe('wardrobe photo analysis', () => {
 
   it('aborts analysis on unmount', async () => {
     analyze.mockImplementationOnce(() => new Promise(() => {}));
-    const { result: hook, unmount } = renderHook(() => useAddPieceForm());
-    act(() => {
+    const { result: hook, unmount } = await renderHook(() => useAddPieceForm());
+    await act(() => {
       void hook.current.selectImage(image);
     });
     const signal = analyze.mock.calls[0][1];
-    unmount();
+    await unmount();
     expect(signal?.aborted).toBe(true);
   });
 });

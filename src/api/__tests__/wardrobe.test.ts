@@ -17,7 +17,7 @@ const originalFetch = globalThis.fetch;
 describe('wardrobe image upload', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    globalThis.fetch = fetchMock;
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
     Platform.OS = 'web';
     upload.mockResolvedValue(palette);
   });
@@ -50,7 +50,7 @@ describe('wardrobe image upload', () => {
       uri: 'file:///dress.png',
       name: 'dress.png',
       type: 'image/png',
-    });
+    } as unknown as Blob);
     expect(fetchMock).not.toHaveBeenCalled();
     expect(upload).toHaveBeenCalledTimes(1);
   });

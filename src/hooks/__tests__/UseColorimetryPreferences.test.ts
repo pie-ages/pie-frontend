@@ -1,8 +1,5 @@
-/**
- * @jest-environment jsdom
- */
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 
 import * as preferencesApi from '@/api/preferences';
 import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
@@ -33,7 +30,7 @@ describe('useColorimetryPreferences', () => {
   it('carrega preferências com resposta válida', async () => {
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
 
     expect(result.current.status).toBe('loading');
 
@@ -48,7 +45,7 @@ describe('useColorimetryPreferences', () => {
       favoriteColors: [],
     });
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
 
     await waitFor(() => expect(result.current.status).toBe('success'));
 
@@ -58,7 +55,7 @@ describe('useColorimetryPreferences', () => {
   it('expõe exatamente highlightColors e avoidColors retornados pelo backend', async () => {
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
 
     await waitFor(() => expect(result.current.status).toBe('success'));
 
@@ -69,7 +66,7 @@ describe('useColorimetryPreferences', () => {
   it('highlightColors e avoidColors não possuem função de edição no hook', async () => {
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
 
     await waitFor(() => expect(result.current.status).toBe('success'));
 
@@ -83,7 +80,7 @@ describe('useColorimetryPreferences', () => {
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
     mockUpdateFavoriteColors.mockResolvedValueOnce(undefined);
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
     await waitFor(() => expect(result.current.status).toBe('success'));
 
     const newFavorites = ['#111111', '#222222', '#333333', '#444444'];
@@ -99,7 +96,7 @@ describe('useColorimetryPreferences', () => {
   it('retorna status error quando o GET falha', async () => {
     mockFetchPreferences.mockRejectedValueOnce(new Error('Network error'));
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
 
     await waitFor(() => expect(result.current.status).toBe('error'));
 
@@ -110,7 +107,7 @@ describe('useColorimetryPreferences', () => {
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
     mockUpdateFavoriteColors.mockRejectedValueOnce(new Error('Save error'));
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
     await waitFor(() => expect(result.current.status).toBe('success'));
 
     await act(async () => {
@@ -127,7 +124,7 @@ describe('useColorimetryPreferences', () => {
       () => new Promise((resolve) => setTimeout(resolve, 50)),
     );
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
     await waitFor(() => expect(result.current.status).toBe('success'));
 
     const favorites = ['#111111', '#222222', '#333333', '#444444'];
@@ -149,7 +146,7 @@ describe('useColorimetryPreferences', () => {
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
     mockUpdateFavoriteColors.mockResolvedValueOnce(updatedPreferences);
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
     await waitFor(() => expect(result.current.status).toBe('success'));
 
     await act(async () => {
@@ -163,7 +160,7 @@ describe('useColorimetryPreferences', () => {
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
     mockUpdateFavoriteColors.mockRejectedValueOnce(new Error('Save error'));
 
-    const { result } = renderHook(() => useColorimetryPreferences());
+    const { result } = await renderHook(() => useColorimetryPreferences());
     await waitFor(() => expect(result.current.status).toBe('success'));
 
     const localFavorites = ['#AAAAAA', '#BBBBBB', '#CCCCCC', '#DDDDDD'];
@@ -189,12 +186,12 @@ describe('photo-triggered colorimetry', () => {
 
   it('fetches only after capture and keeps loading for four seconds', async () => {
     mockFetchPreferences.mockResolvedValue(MOCK_PREFERENCES);
-    const { result, rerender } = renderHook(
-      ({ enabled }) => useColorimetryPreferences(enabled, 4000),
+    const { result, rerender } = await renderHook(
+      ({ enabled }: { enabled: boolean }) => useColorimetryPreferences(enabled, 4000),
       { initialProps: { enabled: false } },
     );
     expect(mockFetchPreferences).not.toHaveBeenCalled();
-    rerender({ enabled: true });
+    await rerender({ enabled: true });
     await act(async () => {
       await jest.advanceTimersByTimeAsync(3999);
     });
@@ -214,8 +211,8 @@ describe('photo-triggered colorimetry', () => {
           resolveRequest = resolve;
         }),
     );
-    const { result, rerender } = renderHook(
-      ({ enabled }) => useColorimetryPreferences(enabled, 4000),
+    const { result, rerender } = await renderHook(
+      ({ enabled }: { enabled: boolean }) => useColorimetryPreferences(enabled, 4000),
       { initialProps: { enabled: true } },
     );
     await act(async () => {
@@ -224,11 +221,11 @@ describe('photo-triggered colorimetry', () => {
     expect(result.current.status).toBe('loading');
     await act(async () => resolveRequest(MOCK_PREFERENCES));
     expect(result.current.status).toBe('success');
-    rerender({ enabled: false });
+    await rerender({ enabled: false });
     const nextPalette = { ...MOCK_PREFERENCES, highlightColors: ['#123456'] };
     mockFetchPreferences.mockResolvedValueOnce(nextPalette);
-    act(() => result.current.retry());
-    rerender({ enabled: true });
+    await act(() => result.current.retry());
+    await rerender({ enabled: true });
     expect(result.current.status).toBe('loading');
     await act(async () => {
       await jest.advanceTimersByTimeAsync(4000);
@@ -238,17 +235,17 @@ describe('photo-triggered colorimetry', () => {
 
   it('allows retry after an API error and ignores responses after unmount', async () => {
     mockFetchPreferences.mockRejectedValueOnce(new Error('Offline'));
-    const { result, unmount } = renderHook(() => useColorimetryPreferences(true, 4000));
+    const { result, unmount } = await renderHook(() => useColorimetryPreferences(true, 4000));
     await act(async () => {});
     expect(result.current.status).toBe('error');
     mockFetchPreferences.mockResolvedValueOnce(MOCK_PREFERENCES);
-    act(() => result.current.retry());
+    await act(() => result.current.retry());
     await act(async () => {
       await jest.advanceTimersByTimeAsync(4000);
     });
     expect(result.current.status).toBe('success');
-    act(() => result.current.retry());
-    unmount();
+    await act(() => result.current.retry());
+    await unmount();
     await act(async () => {
       await jest.advanceTimersByTimeAsync(4000);
     });
