@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { useLayoutScale } from '@/hooks/UseLayoutScale';
-import type { StyleQuizOption } from '@/types/StyleQuiz';
+import type { StyleQuizOption } from '@/schemas/styleSchema';
 
 import { createStyles } from './styles';
 
@@ -29,7 +29,7 @@ export function StyleQuizOptionCard({
       onPress={onSelect}
       accessibilityRole="radio"
       accessibilityState={{ checked: isSelected }}
-      accessibilityLabel={[badgeLabel, option.label, option.description].filter(Boolean).join(', ')}
+      accessibilityLabel={[badgeLabel, option.label].filter(Boolean).join(', ')}
       style={({ pressed }) => [
         styles.card,
         isSelected && styles.cardSelected,
@@ -54,11 +54,6 @@ export function StyleQuizOptionCard({
         <Text style={styles.label} numberOfLines={2} allowFontScaling={false}>
           {option.label}
         </Text>
-        {option.description ? (
-          <Text style={styles.description} numberOfLines={2} allowFontScaling={false}>
-            {option.description}
-          </Text>
-        ) : null}
       </View>
     </Pressable>
   );

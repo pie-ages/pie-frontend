@@ -13,7 +13,7 @@ import { BrandColors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useProductDetails } from '@/hooks/UseProductDetails';
 import { useTheme } from '@/hooks/UseTheme';
-import type { CatalogItem, ProductPublicDetail } from '@/types/Product';
+import type { CatalogItem, ProductPublicDetail } from '@/schemas/productSchema';
 
 function toWishlistItem(detail: ProductPublicDetail): CatalogItem {
   return {

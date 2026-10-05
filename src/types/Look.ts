@@ -1,3 +1,5 @@
+import type { LookResponse } from '@/schemas/lookSchema';
+
 export type LookItem = {
   id: string;
   name?: string;
@@ -11,19 +13,6 @@ export type Look = {
   style?: string;
   occasion?: string;
   items: LookItem[];
-};
-
-export type LookResponse = {
-  id: string;
-  title: string;
-  occasion: string | null;
-  photoUrl: string | null;
-  items: {
-    wardrobeItemId: string | null;
-    productId: string | null;
-    name: string | null;
-    imageUrl: string | null;
-  }[];
 };
 
 export function mapLook(look: LookResponse): Look {

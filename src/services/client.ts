@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+
 import { getStoredToken } from '@/utils/auth-storage';
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
@@ -11,6 +13,16 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+export function parseResponse<T>(
+  schema: z.ZodType<T>,
+  data: unknown,
+  message = 'Resposta inválida do servidor.',
+): T {
+  const result = schema.safeParse(data);
+  if (!result.success) throw new Error(message);
+  return result.data;
 }
 
 type RequestOptions = {

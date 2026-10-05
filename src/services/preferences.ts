@@ -1,14 +1,18 @@
-import { apiGetAuth, apiPutAuth } from '@/services/client';
-import type { ColorimetryPreferences } from '@/types/Colorimetry';
+import {
+  colorimetryPreferencesSchema,
+  type ColorimetryPreferences,
+} from '@/schemas/colorimetrySchema';
+import { apiGetAuth, apiPutAuth, parseResponse } from '@/services/client';
 
-export function fetchPreferences(): Promise<ColorimetryPreferences> {
-  return apiGetAuth<ColorimetryPreferences>('/api/users/me/preferences');
+export async function fetchPreferences(): Promise<ColorimetryPreferences> {
+  return parseResponse(colorimetryPreferencesSchema, await apiGetAuth('/api/users/me/preferences'));
 }
 
-export function updateFavoriteColors(
+export async function updateFavoriteColors(
   favoriteColors: string[],
 ): Promise<ColorimetryPreferences | undefined> {
-  return apiPutAuth<ColorimetryPreferences | undefined>('/api/users/me/preferences', {
-    favoriteColors,
-  });
+  return parseResponse(
+    colorimetryPreferencesSchema.optional(),
+    await apiPutAuth('/api/users/me/preferences', { favoriteColors }),
+  );
 }

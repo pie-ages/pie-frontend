@@ -1,23 +1,18 @@
-import { apiFetch } from './client';
+import {
+  taxonomyResponseSchema,
+  type TaxonomyResponse,
+  type TaxonomyTerm,
+} from '@/schemas/taxonomySchema';
 
-export type TaxonomyTerm = {
-  id: string;
-  name: string;
-};
+import { apiFetch, parseResponse } from './client';
 
-export type TaxonomyResponse = {
-  categories: TaxonomyTerm[];
-  colors: TaxonomyTerm[];
-  styles: TaxonomyTerm[];
-  sizes: TaxonomyTerm[];
-  materials: TaxonomyTerm[];
-};
+export type { TaxonomyResponse, TaxonomyTerm };
 
 let cached: TaxonomyResponse | null = null;
 
 export async function fetchTaxonomy(): Promise<TaxonomyResponse> {
   if (cached) return cached;
-  const data = await apiFetch<TaxonomyResponse>('/api/taxonomy');
+  const data = parseResponse(taxonomyResponseSchema, await apiFetch('/api/taxonomy'));
   cached = data;
   return data;
 }

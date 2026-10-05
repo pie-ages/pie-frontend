@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import type { StyleQuizQuestion } from '@/schemas/styleSchema';
 import { fetchStyleQuestions } from '@/services/style';
-import type { StyleQuizQuestion } from '@/types/StyleQuiz';
 
 const ERROR_MESSAGE = 'Não foi possível carregar o questionário.';
 

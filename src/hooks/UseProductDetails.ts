@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import type { ProductPublicDetail } from '@/schemas/productSchema';
 import { fetchProductDetail } from '@/services/products';
-import type { ProductPublicDetail } from '@/types/Product';
 
 export function useProductDetails(id: string | undefined) {
   const [product, setProduct] = useState<ProductPublicDetail | null>(null);

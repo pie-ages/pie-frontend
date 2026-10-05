@@ -9,13 +9,6 @@ export const IDENTIFIED_STYLES = [
 
 export type IdentifiedStyle = (typeof IDENTIFIED_STYLES)[number];
 
-export function resolveIdentifiedStyle(styles: unknown): IdentifiedStyle | null {
-  if (!Array.isArray(styles) || styles.length !== 1) return null;
-  return IDENTIFIED_STYLES.includes(styles[0] as IdentifiedStyle)
-    ? (styles[0] as IdentifiedStyle)
-    : null;
-}
-
 export const IDENTIFIED_STYLE_INFO: Record<
   IdentifiedStyle,
   { label: string; description: string; background: string; highlight: string }

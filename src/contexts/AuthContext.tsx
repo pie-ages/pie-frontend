@@ -1,15 +1,15 @@
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
+import { loginResponseSchema, type LoginFormData } from '@/schemas/authSchema';
 import { ApiError, apiPost } from '@/services/client';
-import type { LoginPayload, LoginResponse } from '@/types/Auth';
 import { getStoredToken, removeStoredToken, storeToken } from '@/utils/auth-storage';
 
 type AuthContextValue = {
   isAuthenticated: boolean;
   isInitializing: boolean;
   pendingStyleQuiz: boolean;
-  signIn: (payload: LoginPayload) => Promise<void>;
-  completeMockSignUp: (payload: LoginPayload) => Promise<void>;
+  signIn: (payload: LoginFormData) => Promise<void>;
+  completeMockSignUp: (payload: LoginFormData) => Promise<void>;
   completeStyleQuiz: () => void;
   signOut: () => Promise<void>;
 };
@@ -43,23 +43,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  async function signIn(payload: LoginPayload) {
-    const data = await apiPost<LoginResponse>('/api/auth/login', payload).catch((error) => {
+  async function signIn(payload: LoginFormData) {
+    const response = await apiPost('/api/auth/login', payload).catch((error) => {
       if (error instanceof ApiError && !error.serverMessage) {
         throw new ApiError('Não foi possível entrar.', error.status);
       }
       throw error;
     });
 
-    if (!data?.token || !data.user) {
+    const result = loginResponseSchema.safeParse(response);
+    if (!result.success) {
       throw new ApiError('A API retornou uma resposta de autenticação inválida.', 200);
     }
+    const data = result.data;
 
     await storeToken(data.token);
     setToken(data.token);
   }
 
-  async function completeMockSignUp(payload: LoginPayload) {
+  async function completeMockSignUp(payload: LoginFormData) {
     await signIn(payload);
     setPendingStyleQuiz(true);
   }

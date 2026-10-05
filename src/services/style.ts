@@ -1,6 +1,11 @@
-import { ApiError, apiFetch, apiGetAuth, apiPostAuth } from '@/services/client';
-import { resolveIdentifiedStyle, type IdentifiedStyle } from '@/types/IdentifiedStyle';
-import type { StyleQuizQuestion, StyleQuizResponse, StyleQuizSubmission } from '@/types/StyleQuiz';
+import {
+  styleIdentificationSchema,
+  styleQuizResponseSchema,
+  type StyleQuizQuestion,
+} from '@/schemas/styleSchema';
+import { ApiError, apiFetch, apiGetAuth, apiPostAuth, parseResponse } from '@/services/client';
+import type { IdentifiedStyle } from '@/types/IdentifiedStyle';
+import type { StyleQuizSubmission } from '@/types/StyleQuiz';
 
 const ERROR_MESSAGE = 'Não foi possível identificar seu estilo. Tente novamente.';
 const INVALID_STYLE_MESSAGE = 'A API retornou um estilo inválido. Tente novamente.';
@@ -19,13 +24,12 @@ function toStyleError(error: unknown): unknown {
   return new Error(error.serverMessage ?? ERROR_MESSAGE);
 }
 
-function readStyles(data: unknown): unknown[] | null {
-  if (typeof data !== 'object' || data === null || !('styles' in data)) return null;
-  return Array.isArray(data.styles) ? data.styles : null;
+function readStyles(data: unknown): IdentifiedStyle[] {
+  return parseResponse(styleIdentificationSchema, data, INVALID_STYLE_MESSAGE).styles;
 }
 
 export async function fetchStyleQuestions(): Promise<StyleQuizQuestion[]> {
-  const data = await apiFetch<StyleQuizResponse>('/api/style/questions');
+  const data = parseResponse(styleQuizResponseSchema, await apiFetch('/api/style/questions'));
   return [...data.questions].sort((a, b) => a.order - b.order);
 }
 
@@ -40,12 +44,10 @@ export async function submitStyleQuizAndIdentify(
     throw toStyleError(error);
   }
 
-  const styles = readStyles(data);
-  if (styles?.length === 0) {
+  const [style] = readStyles(data);
+  if (!style) {
     throw new Error('Não há respostas ou preferências suficientes para identificar seu estilo.');
   }
-  const style = resolveIdentifiedStyle(styles);
-  if (!style) throw new Error(INVALID_STYLE_MESSAGE);
   return style;
 }
 
@@ -57,9 +59,5 @@ export async function getIdentifiedStyle(): Promise<IdentifiedStyle | null> {
     throw toStyleError(error);
   }
 
-  const styles = readStyles(data);
-  if (styles?.length === 0) return null;
-  const style = resolveIdentifiedStyle(styles);
-  if (!style) throw new Error(INVALID_STYLE_MESSAGE);
-  return style;
+  return readStyles(data)[0] ?? null;
 }

@@ -1,18 +1,17 @@
 import { Platform } from 'react-native';
+import { z } from 'zod';
 
-import { apiGetAuth, apiUploadAuth } from '@/services/client';
+import {
+  wardrobeImageAnalysisSchema,
+  wardrobeItemSchema,
+  type WardrobeImageAnalysis,
+  type WardrobeItemDTO,
+} from '@/schemas/wardrobeSchema';
+import { apiGetAuth, apiUploadAuth, parseResponse } from '@/services/client';
 import type { WardrobePiece } from '@/types/Look';
 import { groupWardrobePieces, type WardrobeFetch } from '@/utils/wardrobe-rows';
 
-export type WardrobeItemDTO = {
-  id: string;
-  name: string;
-  productId: string | null;
-  category: string | null;
-  style: string | null;
-  color: string | null;
-  photoUrl: string | null;
-};
+export type { WardrobeImageAnalysis, WardrobeItemDTO };
 
 export type CreateWardrobeItemPayload = {
   productId?: string | null;
@@ -20,12 +19,6 @@ export type CreateWardrobeItemPayload = {
   category: string;
   style?: string | null;
   color?: string | null;
-};
-
-export type WardrobeImageAnalysis = {
-  category: string;
-  style: string;
-  color: string;
 };
 
 export type WardrobeImageAsset = {
@@ -50,10 +43,11 @@ function toPiece(item: WardrobeItemDTO): WardrobePiece {
 }
 
 export async function fetchWardrobeItems(signal?: AbortSignal): Promise<WardrobePiece[]> {
-  const items = await apiGetAuth<WardrobeItemDTO[]>('/api/users/me/wardrobe/items', signal);
-  if (!Array.isArray(items) || !items.every((item) => typeof item?.id === 'string')) {
-    throw new Error('Resposta inválida ao carregar o guarda-roupa.');
-  }
+  const items = parseResponse(
+    z.array(wardrobeItemSchema),
+    await apiGetAuth('/api/users/me/wardrobe/items', signal),
+    'Resposta inválida ao carregar o guarda-roupa.',
+  );
   return items.map(toPiece);
 }
 
@@ -63,7 +57,10 @@ export async function createWardrobeItem(
 ): Promise<WardrobeItemDTO> {
   const formData = await imageFormData(image);
   formData.append('item', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-  return apiUploadAuth<WardrobeItemDTO>('/api/users/me/wardrobe/items', formData);
+  return parseResponse(
+    wardrobeItemSchema,
+    await apiUploadAuth('/api/users/me/wardrobe/items', formData),
+  );
 }
 
 export async function analyzeWardrobeImage(
@@ -71,10 +68,10 @@ export async function analyzeWardrobeImage(
   signal?: AbortSignal,
 ): Promise<WardrobeImageAnalysis> {
   const formData = await imageFormData(image, signal);
-  return apiUploadAuth<WardrobeImageAnalysis>(
-    '/api/users/me/wardrobe/items/analyze',
-    formData,
-    signal,
+  return parseResponse(
+    wardrobeImageAnalysisSchema,
+    await apiUploadAuth('/api/users/me/wardrobe/items/analyze', formData, signal),
+    'Não foi possível identificar a peça. Preencha os campos manualmente.',
   );
 }
 

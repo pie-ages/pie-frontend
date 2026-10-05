@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 
-import type { CatalogItem } from '@/types/Product';
+import type { CatalogItem } from '@/schemas/productSchema';
 
 type WishlistContextValue = {
   items: CatalogItem[];

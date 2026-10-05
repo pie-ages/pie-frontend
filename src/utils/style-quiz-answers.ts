@@ -1,4 +1,5 @@
-import type { StyleQuizAnswer, StyleQuizQuestion, StyleQuizSubmission } from '../types/StyleQuiz';
+import type { StyleQuizQuestion } from '@/schemas/styleSchema';
+import type { StyleQuizAnswer, StyleQuizSubmission } from '@/types/StyleQuiz';
 
 export function getStyleQuizSubmissions(
   questions: StyleQuizQuestion[],

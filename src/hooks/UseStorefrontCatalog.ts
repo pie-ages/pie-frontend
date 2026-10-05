@@ -1,8 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { CatalogItem } from '@/schemas/productSchema';
 import { fetchCatalog } from '@/services/products';
-import type { CatalogItem, CatalogParams } from '@/types/Product';
+import type { CatalogParams } from '@/types/Product';
 
 export type StorefrontStatus = 'loading' | 'success' | 'error' | 'empty';
 

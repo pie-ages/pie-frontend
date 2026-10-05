@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
-import type { CatalogItem } from '@/types/Product';
+import type { CatalogItem } from '@/schemas/productSchema';
 import { formatColor } from '@/utils/format-color';
 import { formatPrice } from '@/utils/format-price';
 
