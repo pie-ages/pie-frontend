@@ -1,6 +1,6 @@
 import { apiGetAuth, apiPostAuth, apiUploadAuth } from '@/api/client';
 import { imageFormData, type WardrobeImageAsset } from '@/api/wardrobe';
-import { mapLook, type LookResponse, type LooksPage, type WardrobePiece } from '@/types/look';
+import { mapLook, type LookResponse, type LooksPage, type WardrobePiece } from '@/types/Look';
 
 export type LookImageAsset = WardrobeImageAsset;
 

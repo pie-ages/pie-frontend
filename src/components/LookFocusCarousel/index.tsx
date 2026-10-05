@@ -15,7 +15,7 @@ import {
   LOOK_PIECE_GAP,
 } from '@/components/LookPiecesStack/styles';
 import { Spacing } from '@/constants/Theme';
-import type { Look } from '@/types/look';
+import type { Look } from '@/types/Look';
 
 import { styles } from './styles';
 

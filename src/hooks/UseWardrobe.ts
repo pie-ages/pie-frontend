@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { fetchWardrobeItems } from '@/api/wardrobe';
-import type { WardrobePiece } from '@/types/look';
+import type { WardrobePiece } from '@/types/Look';
 
 type WardrobeStatus = 'loading' | 'success' | 'error' | 'empty';
 

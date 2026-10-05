@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 import { apiGetAuth, apiUploadAuth } from '@/api/client';
-import type { WardrobePiece } from '@/types/look';
+import type { WardrobePiece } from '@/types/Look';
 import { groupWardrobePieces, type WardrobeFetch } from '@/utils/wardrobe-rows';
 
 export type WardrobeItemDTO = {

@@ -4,7 +4,7 @@ import { Animated, Pressable, Text, View } from 'react-native';
 
 import { LookImage } from '@/components/LookImage';
 import { Colors } from '@/constants/Theme';
-import type { Look } from '@/types/look';
+import type { Look } from '@/types/Look';
 
 import { styles } from './styles';
 

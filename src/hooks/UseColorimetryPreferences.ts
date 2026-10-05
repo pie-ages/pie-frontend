@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { fetchPreferences, updateFavoriteColors } from '@/api/preferences';
-import type { ColorimetryPreferences } from '@/types/colorimetry';
+import type { ColorimetryPreferences } from '@/types/Colorimetry';
 
 export type ColorimetryStatus = 'loading' | 'success' | 'error';
 

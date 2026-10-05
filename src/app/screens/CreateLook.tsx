@@ -24,7 +24,7 @@ import { WardrobePickerModal } from '@/components/WardrobePickerModal';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useLookForm } from '@/hooks/UseLookForm';
 import { useWardrobe } from '@/hooks/UseWardrobe';
-import { MAX_LOOK_PIECES } from '@/types/look';
+import { MAX_LOOK_PIECES } from '@/types/Look';
 
 export default function CreateLookScreen() {
   const insets = useSafeAreaInsets();

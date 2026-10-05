@@ -1,5 +1,5 @@
 import { apiGetAuth, apiPutAuth } from '@/api/client';
-import type { ColorimetryPreferences } from '@/types/colorimetry';
+import type { ColorimetryPreferences } from '@/types/Colorimetry';
 
 export function fetchPreferences(): Promise<ColorimetryPreferences> {
   return apiGetAuth<ColorimetryPreferences>('/api/users/me/preferences');

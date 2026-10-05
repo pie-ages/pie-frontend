@@ -1,4 +1,4 @@
-import type { ColorimetryPreferences } from '@/types/colorimetry';
+import type { ColorimetryPreferences } from '@/types/Colorimetry';
 
 export const MOCK_COLORIMETRY_PREFERENCES: ColorimetryPreferences = {
   highlightColors: ['#B18462', '#7A1111', '#D0AB95', '#684A36'],

@@ -11,7 +11,7 @@ import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
 import { BrandColors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useProductDetails } from '@/hooks/use-product-details';
+import { useProductDetails } from '@/hooks/UseProductDetails';
 import { useTheme } from '@/hooks/UseTheme';
 import type { CatalogItem, ProductPublicDetail } from '@/types/Product';
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, ActivityIndicator } from 'react-native';
 
-import type { WardrobePiece } from '@/types/look';
+import type { WardrobePiece } from '@/types/Look';
 
 import { styles } from './styles';
 

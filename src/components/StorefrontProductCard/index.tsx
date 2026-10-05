@@ -6,8 +6,8 @@ import { Pressable, Text, View } from 'react-native';
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/types/Product';
-import { formatColor } from '@/utils/FormatColor';
-import { formatPrice } from '@/utils/FormatPrice';
+import { formatColor } from '@/utils/format-color';
+import { formatPrice } from '@/utils/format-price';
 
 import { styles, CARD_WIDTH } from './styles';
 

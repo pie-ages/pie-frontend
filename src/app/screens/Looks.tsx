@@ -27,7 +27,7 @@ import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useLookFocusNavigation } from '@/hooks/UseLookFocusNavigation';
 import { useLooksCollection } from '@/hooks/UseLooksCollection';
-import type { LooksViewMode } from '@/types/look';
+import type { LooksViewMode } from '@/types/Look';
 
 export default function LooksScreen() {
   const insets = useSafeAreaInsets();

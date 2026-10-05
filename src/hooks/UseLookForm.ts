@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 
 import { createLook, fetchLookSuggestion, uploadLookImage, type LookImageAsset } from '@/api/looks';
-import { MAX_LOOK_PIECES, type WardrobePiece } from '@/types/look';
+import { MAX_LOOK_PIECES, type WardrobePiece } from '@/types/Look';
 
 export function useLookForm() {
   const [name, setName] = useState('');
