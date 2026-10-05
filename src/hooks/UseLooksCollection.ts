@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { fetchLooks } from '@/api/looks';
+import { fetchLooks } from '@/services/looks';
 import { appendLookPage, type Look } from '@/types/Look';
 
 export type LooksStatus = 'loading' | 'success' | 'error' | 'empty';

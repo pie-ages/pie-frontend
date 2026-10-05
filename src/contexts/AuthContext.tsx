@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
-import { ApiError, apiPost } from '@/api/client';
+import { ApiError, apiPost } from '@/services/client';
 import type { LoginPayload, LoginResponse } from '@/types/Auth';
 import { getStoredToken, removeStoredToken, storeToken } from '@/utils/auth-storage';
 

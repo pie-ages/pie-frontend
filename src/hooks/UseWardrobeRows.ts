@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import { fetchWardrobe } from '@/api/wardrobe';
+import { fetchWardrobe } from '@/services/wardrobe';
 import { createWardrobeStore } from '@/utils/wardrobe-rows';
 
 export function useWardrobeRows() {

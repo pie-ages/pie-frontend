@@ -5,7 +5,7 @@ import {
   createWardrobeItem,
   type CreateWardrobeItemPayload,
   type WardrobeImageAsset,
-} from '@/api/wardrobe';
+} from '@/services/wardrobe';
 
 const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);

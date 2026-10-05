@@ -17,14 +17,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchTaxonomy, type TaxonomyTerm } from '@/api/taxonomy';
 import { AuthButton } from '@/components/AuthButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import { ImagePickerArea } from '@/components/ImagePickerArea';
 import { useAddPieceForm } from '@/hooks/UseAddPieceForm';
+import { fetchTaxonomy, type TaxonomyTerm } from '@/services/taxonomy';
 
-export default function AddPiece() {
+export default function AddPieceScreen() {
   const form = useAddPieceForm();
   const [selection, setSelection] = useState<{
     title: string;

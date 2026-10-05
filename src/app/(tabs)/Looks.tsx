@@ -14,7 +14,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { uploadLookImage } from '@/api/looks';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -27,6 +26,7 @@ import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useLookFocusNavigation } from '@/hooks/UseLookFocusNavigation';
 import { useLooksCollection } from '@/hooks/UseLooksCollection';
+import { uploadLookImage } from '@/services/looks';
 import type { LooksViewMode } from '@/types/Look';
 
 export default function LooksScreen() {

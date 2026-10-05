@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import type { LookImageAsset } from '@/api/looks';
 import { AuthButton } from '@/components/AuthButton';
 import { LookPieceCard } from '@/components/LookPieceCard';
 import { LOOK_PIECE_ASPECT_RATIO } from '@/components/LookPiecesStack/styles';
@@ -24,6 +23,7 @@ import { WardrobePickerModal } from '@/components/WardrobePickerModal';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useLookForm } from '@/hooks/UseLookForm';
 import { useWardrobe } from '@/hooks/UseWardrobe';
+import type { LookImageAsset } from '@/services/looks';
 import { MAX_LOOK_PIECES } from '@/types/Look';
 
 export default function CreateLookScreen() {
@@ -53,7 +53,7 @@ export default function CreateLookScreen() {
     if (router.canGoBack()) {
       router.back();
     } else {
-      router.replace('/(tabs)/Looks');
+      router.replace('/Looks');
     }
   };
 

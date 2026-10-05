@@ -1,4 +1,4 @@
-import { apiGetAuth, apiPutAuth } from '@/api/client';
+import { apiGetAuth, apiPutAuth } from '@/services/client';
 import type { ColorimetryPreferences } from '@/types/Colorimetry';
 
 export function fetchPreferences(): Promise<ColorimetryPreferences> {

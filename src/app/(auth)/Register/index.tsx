@@ -2,13 +2,13 @@ import { Image } from 'expo-image';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ApiError } from '@/api/client';
 import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
 import { Colors } from '@/constants/Theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRegisterForm } from '@/hooks/UseRegisterForm';
+import { ApiError } from '@/services/client';
 
 export default function RegisterScreen() {
   const { completeMockSignUp } = useAuth();

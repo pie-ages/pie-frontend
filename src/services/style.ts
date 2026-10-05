@@ -1,4 +1,4 @@
-import { ApiError, apiFetch, apiGetAuth, apiPostAuth } from '@/api/client';
+import { ApiError, apiFetch, apiGetAuth, apiPostAuth } from '@/services/client';
 import { resolveIdentifiedStyle, type IdentifiedStyle } from '@/types/IdentifiedStyle';
 import type { StyleQuizQuestion, StyleQuizResponse, StyleQuizSubmission } from '@/types/StyleQuiz';
 

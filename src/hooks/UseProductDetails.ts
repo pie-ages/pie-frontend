@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { fetchProductDetail } from '@/api/products';
+import { fetchProductDetail } from '@/services/products';
 import type { ProductPublicDetail } from '@/types/Product';
 
 export function useProductDetails(id: string | undefined) {

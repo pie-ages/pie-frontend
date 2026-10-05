@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 
-import { ApiError } from '@/api/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { ApiError } from '@/services/client';
 import type { LoginPayload } from '@/types/Auth';
 
 export function useLoginForm() {

@@ -13,15 +13,15 @@ export default function TabsLayout() {
 
       <TabList asChild>
         <BottomTabBar>
-          <TabTrigger name="Storefront" href="/(tabs)/Storefront" asChild>
+          <TabTrigger name="Storefront" href="/Storefront" asChild>
             <TabBarButton label="Vitrine" icon="hanger" iconSet="material-community" />
           </TabTrigger>
 
-          <TabTrigger name="Closet" href="/(tabs)/Closet" asChild>
+          <TabTrigger name="Closet" href="/Closet" asChild>
             <TabBarButton label="Closet" icon="wardrobe-outline" iconSet="material-community" />
           </TabTrigger>
 
-          <TabTrigger name="Looks" href="/(tabs)/Looks" asChild>
+          <TabTrigger name="Looks" href="/Looks" asChild>
             <TabBarButton label="Looks" icon="sparkles-outline" iconSet="ionicons" />
           </TabTrigger>
         </BottomTabBar>

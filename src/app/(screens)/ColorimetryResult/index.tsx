@@ -71,7 +71,7 @@ export default function ColorimetryResultScreen() {
   async function handleEnter() {
     if (isSaving) return;
     if (!hasChanges) {
-      router.replace('/(tabs)/Storefront');
+      router.replace('/Storefront');
       return;
     }
     const success = await saveFavoriteColors(

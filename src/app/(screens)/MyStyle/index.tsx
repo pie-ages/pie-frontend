@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { getIdentifiedStyle, StyleSessionError } from '@/api/style';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { Spacing } from '@/constants/Theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserStyle } from '@/contexts/UserStyleContext';
+import { getIdentifiedStyle, StyleSessionError } from '@/services/style';
 import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 
 export default function MyStyleScreen() {

@@ -3,7 +3,6 @@ import { useCallback, useMemo, useReducer, useState } from 'react';
 import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { submitStyleQuizAndIdentify, StyleSessionError } from '@/api/style';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { StyleQuizChoicePreview } from '@/components/StyleQuizChoicePreview';
 import { StyleQuizFooter } from '@/components/StyleQuizFooter';
@@ -13,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserStyle } from '@/contexts/UserStyleContext';
 import { MAX_CONTENT_WIDTH, type ScaleFn, useLayoutScale } from '@/hooks/UseLayoutScale';
 import { useStyleQuiz } from '@/hooks/UseStyleQuiz';
+import { submitStyleQuizAndIdentify, StyleSessionError } from '@/services/style';
 import type { StyleQuizAnswer } from '@/types/StyleQuiz';
 import {
   createStyleIdentificationRunner,
