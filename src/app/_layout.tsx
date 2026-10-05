@@ -56,12 +56,20 @@ function RootNavigator() {
       }}
     >
       <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(screens)/Login/index" />
+        <Stack.Screen name="(screens)/Register/index" />
       </Stack.Protected>
 
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(screens)" />
+        <Stack.Screen name="(screens)/MyStyle/index" />
+        <Stack.Screen name="(screens)/StyleQuiz/index" />
+        <Stack.Screen name="(screens)/StyleSelection/index" />
+        <Stack.Screen name="(screens)/ColorimetryResult/index" />
+        <Stack.Screen name="(screens)/CreateLook/index" />
+        <Stack.Screen name="(screens)/AddPiece/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(screens)/ProductDetails/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(screens)/Wishlist/index" options={{ presentation: 'modal' }} />
       </Stack.Protected>
     </Stack>
   );
