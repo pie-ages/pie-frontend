@@ -13,12 +13,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserStyle } from '@/contexts/UserStyleContext';
 import { MAX_CONTENT_WIDTH, type ScaleFn, useLayoutScale } from '@/hooks/UseLayoutScale';
 import { useStyleQuiz } from '@/hooks/UseStyleQuiz';
+import type { StyleQuizAnswer } from '@/types/StyleQuiz';
 import {
   createStyleIdentificationRunner,
   INITIAL_STYLE_IDENTIFICATION_STATE,
   styleIdentificationReducer,
-} from '@/types/StyleIdentification';
-import type { StyleQuizAnswer } from '@/types/StyleQuiz';
+} from '@/utils/style-identification';
 import { getStyleQuizSubmissions } from '@/utils/style-quiz-answers';
 
 const TITLE_TOP = 92;

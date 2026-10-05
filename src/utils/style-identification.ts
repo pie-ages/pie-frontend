@@ -1,5 +1,5 @@
-import type { IdentifiedStyle } from './IdentifiedStyle';
-import type { StyleQuizSubmission } from './StyleQuiz';
+import type { IdentifiedStyle } from '@/types/IdentifiedStyle';
+import type { StyleQuizSubmission } from '@/types/StyleQuiz';
 
 export type StyleIdentificationState =
   | { status: 'idle'; error: null }
