@@ -32,7 +32,10 @@ jobs:
         run: npm run lint
 
       - name: Typecheck
-        run: npm run typecheck
+        # expo-env.d.ts é gerado pelo expo start e fica fora do git
+        run: |
+          echo '/// <reference types="expo/types" />' > expo-env.d.ts
+          npm run typecheck
 
       - name: Test
         run: npm test
