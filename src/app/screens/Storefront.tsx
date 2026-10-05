@@ -1,17 +1,18 @@
+import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { LoadingState } from '@/components/LoadingState';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
-import { StorefrontEmptyState } from '@/components/StorefrontEmptyState';
-import { StorefrontErrorState } from '@/components/StorefrontErrorState';
 import { StorefrontFilterChips } from '@/components/StorefrontFilterChips';
 import { StorefrontFilterSheet } from '@/components/StorefrontFilterSheet';
-import { StorefrontLoadingState } from '@/components/StorefrontLoadingState';
 import { StorefrontProductGrid } from '@/components/StorefrontProductGrid';
 import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
-import { BottomTabInset, Spacing } from '@/constants/Theme';
+import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
@@ -98,9 +99,21 @@ export default function StorefrontScreen() {
         </View>
 
         <View style={styles.body}>
-          {isLoading && <StorefrontLoadingState />}
-          {!isLoading && status === 'error' && <StorefrontErrorState onRetry={retry} />}
-          {!isLoading && status === 'empty' && <StorefrontEmptyState />}
+          {isLoading && <LoadingState text="Carregando produtos..." />}
+          {!isLoading && status === 'error' && (
+            <ErrorState
+              title="Não foi possível carregar a storefront"
+              subtitle="Verifique sua conexão e tente novamente."
+              onRetry={retry}
+            />
+          )}
+          {!isLoading && status === 'empty' && (
+            <EmptyState
+              icon={<Feather name="shopping-bag" size={32} color={Colors.iconMuted} />}
+              title="Nenhum produto encontrado"
+              subtitle="Tente ajustar os filtros ou volte mais tarde."
+            />
+          )}
           {!isLoading && status === 'success' && (
             <StorefrontProductGrid
               products={products}
