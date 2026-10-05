@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
+import { Controller } from 'react-hook-form';
 import {
   ActivityIndicator,
   Modal,
@@ -169,6 +170,9 @@ export default function AddPieceScreen() {
             onSelectImage={handleSelectImageOptions}
             disabled={form.operation !== null}
           />
+          {form.errors.image ? (
+            <Text style={styles.errorText}>{form.errors.image.message}</Text>
+          ) : null}
 
           {form.operation === 'analyze' && (
             <View style={styles.analysisStatus}>
@@ -199,36 +203,65 @@ export default function AddPieceScreen() {
             <Text style={styles.analysisText}>Confira os dados identificados antes de salvar.</Text>
           )}
 
-          <FormInput
-            label="Nome"
-            placeholder="Ex: Vestido"
-            value={form.name}
-            onChangeText={form.setName}
-            editable={form.operation === null}
+          <Controller
+            name="name"
+            control={form.control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <FormInput
+                label="Nome"
+                placeholder="Ex: Vestido"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                editable={form.operation === null}
+                error={form.errors.name?.message}
+              />
+            )}
           />
 
-          <FormSelect
-            label="Peça"
-            disabled={form.operation !== null}
-            placeholder="Selecione..."
-            value={taxonomy?.categories.find((option) => option.id === form.category)?.name}
-            onPress={() => handleSelect('Peça', taxonomy?.categories, form.setCategory)}
+          <Controller
+            name="category"
+            control={form.control}
+            render={({ field: { onChange, value } }) => (
+              <FormSelect
+                label="Peça"
+                disabled={form.operation !== null}
+                placeholder="Selecione..."
+                value={taxonomy?.categories.find((option) => option.id === value)?.name}
+                onPress={() => handleSelect('Peça', taxonomy?.categories, onChange)}
+                error={form.errors.category?.message}
+              />
+            )}
           />
 
-          <FormSelect
-            label="Estilo"
-            disabled={form.operation !== null}
-            placeholder="Selecione..."
-            value={taxonomy?.styles.find((option) => option.id === form.style)?.name}
-            onPress={() => handleSelect('Estilo', taxonomy?.styles, form.setStyle)}
+          <Controller
+            name="style"
+            control={form.control}
+            render={({ field: { onChange, value } }) => (
+              <FormSelect
+                label="Estilo"
+                disabled={form.operation !== null}
+                placeholder="Selecione..."
+                value={taxonomy?.styles.find((option) => option.id === value)?.name}
+                onPress={() => handleSelect('Estilo', taxonomy?.styles, onChange)}
+                error={form.errors.style?.message}
+              />
+            )}
           />
 
-          <FormSelect
-            label="Cor"
-            disabled={form.operation !== null}
-            placeholder="Selecione..."
-            value={taxonomy?.colors.find((option) => option.id === form.color)?.name}
-            onPress={() => handleSelect('Cor', taxonomy?.colors, form.setColor)}
+          <Controller
+            name="color"
+            control={form.control}
+            render={({ field: { onChange, value } }) => (
+              <FormSelect
+                label="Cor"
+                disabled={form.operation !== null}
+                placeholder="Selecione..."
+                value={taxonomy?.colors.find((option) => option.id === value)?.name}
+                onPress={() => handleSelect('Cor', taxonomy?.colors, onChange)}
+                error={form.errors.color?.message}
+              />
+            )}
           />
         </ScrollView>
 

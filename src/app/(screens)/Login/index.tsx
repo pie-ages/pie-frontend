@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { Controller } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,13 +14,11 @@ export default function LoginScreen() {
   const router = useRouter();
 
   const {
-    email,
-    password,
+    control,
+    errors,
     isPasswordVisible,
     isLoading,
     error,
-    setEmail,
-    setPassword,
     togglePasswordVisibility,
     handleLogin,
   } = useLoginForm();
@@ -52,25 +51,41 @@ export default function LoginScreen() {
 
             <View style={styles.bottomContent}>
               <View style={styles.form}>
-                <AuthInput
-                  label="E-mail"
-                  placeholder="anna@pie.com.br"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  value={email}
-                  onChangeText={setEmail}
-                  editable={!isLoading}
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AuthInput
+                      label="E-mail"
+                      placeholder="anna@pie.com.br"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      editable={!isLoading}
+                      error={errors.email?.message}
+                    />
+                  )}
                 />
 
-                <AuthPasswordInput
-                  label="Senha"
-                  placeholder="**********"
-                  value={password}
-                  onChangeText={setPassword}
-                  isVisible={isPasswordVisible}
-                  onToggleVisibility={togglePasswordVisibility}
-                  editable={!isLoading}
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <AuthPasswordInput
+                      label="Senha"
+                      placeholder="**********"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      isVisible={isPasswordVisible}
+                      onToggleVisibility={togglePasswordVisibility}
+                      editable={!isLoading}
+                      error={errors.password?.message}
+                    />
+                  )}
                 />
 
                 {error && <Text style={styles.errorText}>{error}</Text>}

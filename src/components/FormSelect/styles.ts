@@ -1,6 +1,16 @@
 import { StyleSheet } from 'react-native';
 
+import { Colors } from '@/constants/Theme';
+
 export const styles = StyleSheet.create({
+  inputError: {
+    borderColor: Colors.error,
+  },
+  errorText: {
+    marginTop: 6,
+    fontSize: 13,
+    color: Colors.error,
+  },
   container: {
     marginBottom: 16,
   },
