@@ -10,9 +10,9 @@ import { StyleQuizFooter } from '@/components/StyleQuizFooter';
 import { StyleQuizOptionCard } from '@/components/StyleQuizOptionCard';
 import { Colors, Spacing, SystemFonts } from '@/constants/Theme';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserStyle } from '@/contexts/UserStyleContext';
 import { MAX_CONTENT_WIDTH, type ScaleFn, useLayoutScale } from '@/hooks/UseLayoutScale';
 import { useStyleQuiz } from '@/hooks/UseStyleQuiz';
-import { useUserStyle } from '@/hooks/UseUserStyle';
 import {
   createStyleIdentificationRunner,
   INITIAL_STYLE_IDENTIFICATION_STATE,

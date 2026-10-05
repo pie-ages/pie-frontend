@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 
-import { useUserStyle } from '@/hooks/UseUserStyle';
+import { useUserStyle } from '@/contexts/UserStyleContext';
 import { STYLE_LABELS, STYLES } from '@/types/Style';
 
 export function useStyleSelection() {

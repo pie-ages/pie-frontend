@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, Pressable } from 'react-native';
 
+import { ClothingCard } from '@/components/ClothingCard';
 import type { WardrobeRow } from '@/utils/wardrobe-rows';
 
-import ClothingCard from './ClothingCard';
+import { styles } from './styles';
 
 interface CategoryRowProps {
   data: WardrobeRow;
@@ -11,7 +12,7 @@ interface CategoryRowProps {
   onRetry: (rowId: string) => void;
 }
 
-export default function CategoryRow({ data, onEndReached, onRetry }: CategoryRowProps) {
+export function CategoryRow({ data, onEndReached, onRetry }: CategoryRowProps) {
   const footer =
     data.status === 'loadingMore' ? (
       <View style={styles.footer}>
@@ -51,46 +52,3 @@ export default function CategoryRow({ data, onEndReached, onRetry }: CategoryRow
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-    marginLeft: 16,
-    marginBottom: 4,
-  },
-  rackLine: {
-    height: 2,
-    backgroundColor: '#E5E7EB',
-    width: '100%',
-    position: 'absolute',
-    top: 30,
-    zIndex: -1,
-  },
-  listContent: {
-    paddingLeft: 16,
-    paddingRight: 16,
-  },
-  footer: {
-    width: 110,
-    height: 140,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  footerText: {
-    color: '#6B7280',
-    fontSize: 12,
-    textAlign: 'center',
-  },
-  retryText: {
-    color: '#111827',
-    fontSize: 12,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-});

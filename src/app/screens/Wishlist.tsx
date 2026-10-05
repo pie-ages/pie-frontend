@@ -7,7 +7,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
-import { useWishlist } from '@/hooks/UseWishlist';
+import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/types/Product';
 import { formatColor } from '@/utils/FormatColor';
 import { formatPrice } from '@/utils/FormatPrice';

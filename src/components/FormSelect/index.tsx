@@ -1,6 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+
+import { styles } from './styles';
 
 interface FormSelectProps {
   label: string;
@@ -10,13 +12,7 @@ interface FormSelectProps {
   disabled?: boolean;
 }
 
-export default function FormSelect({
-  label,
-  value,
-  placeholder,
-  onPress,
-  disabled,
-}: FormSelectProps) {
+export function FormSelect({ label, value, placeholder, onPress, disabled }: FormSelectProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
@@ -35,33 +31,3 @@ export default function FormSelect({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  inputBox: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-  },
-  text: {
-    fontSize: 16,
-    color: '#111827',
-  },
-  placeholderText: {
-    color: '#D1D5DB',
-  },
-});

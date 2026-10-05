@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/Theme';
-import { useWishlist } from '@/hooks/UseWishlist';
+import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/types/Product';
 import { formatColor } from '@/utils/FormatColor';
 import { formatPrice } from '@/utils/FormatPrice';

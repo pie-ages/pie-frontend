@@ -14,3 +14,8 @@ export type LoginResponse = {
   token: string;
   user: AuthenticatedUser;
 };
+export type RegisterPayload = {
+  name: string;
+  email: string;
+  password: string;
+};

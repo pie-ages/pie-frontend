@@ -7,7 +7,7 @@ import { getIdentifiedStyle, StyleSessionError } from '@/api/style';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { Spacing } from '@/constants/Theme';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserStyle } from '@/hooks/UseUserStyle';
+import { useUserStyle } from '@/contexts/UserStyleContext';
 import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 
 export default function MyStyleScreen() {

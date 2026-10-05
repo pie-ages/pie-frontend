@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 
 import { ApiError } from '@/api/client';
 import { useAuth } from '@/contexts/AuthContext';
-import type { LoginPayload } from '@/shared/Login';
+import type { LoginPayload } from '@/types/Auth';
 
 export function useLoginForm() {
   const { signIn } = useAuth();

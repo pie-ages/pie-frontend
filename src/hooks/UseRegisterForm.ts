@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import type { RegisterPayload } from '@/shared/Register';
+import type { RegisterPayload } from '@/types/Auth';
 
 async function simulateRegisterRequest(_payload: RegisterPayload) {
   await new Promise((resolve) => setTimeout(resolve, 1500));

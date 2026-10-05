@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import CategoryRow from '@/components/CategoryRow';
+import { CategoryRow } from '@/components/CategoryRow';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { BottomTabInset, Spacing } from '@/constants/Theme';
 import { useWardrobeRows } from '@/hooks/UseWardrobeRows';

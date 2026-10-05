@@ -11,8 +11,8 @@ import { useEffect } from 'react';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { UserStyleProvider } from '@/hooks/UseUserStyle';
-import { WishlistProvider } from '@/hooks/UseWishlist';
+import { UserStyleProvider } from '@/contexts/UserStyleContext';
+import { WishlistProvider } from '@/contexts/WishlistContext';
 
 SplashScreen.preventAutoHideAsync();
 

@@ -10,9 +10,9 @@ import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
 import { BrandColors, Spacing } from '@/constants/Theme';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { useTheme } from '@/hooks/UseTheme';
-import { useWishlist } from '@/hooks/UseWishlist';
 import type { CatalogItem, ProductPublicDetail } from '@/types/Product';
 
 function toWishlistItem(detail: ProductPublicDetail): CatalogItem {

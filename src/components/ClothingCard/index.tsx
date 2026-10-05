@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Image, ActivityIndicator } from 'react-native';
 
 import type { WardrobePiece } from '@/types/look';
+
+import { styles } from './styles';
 
 interface ClothingCardProps {
   item: WardrobePiece;
 }
 
-export default function ClothingCard({ item }: ClothingCardProps) {
+export function ClothingCard({ item }: ClothingCardProps) {
   const [isLoading, setIsLoading] = useState(Boolean(item.imageUrl));
   const [hasError, setHasError] = useState(false);
 
@@ -36,41 +38,3 @@ export default function ClothingCard({ item }: ClothingCardProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    width: 110,
-    marginRight: 16,
-    alignItems: 'center',
-  },
-  hangerHook: {
-    width: 2,
-    height: 12,
-    backgroundColor: '#E5E7EB',
-  },
-  imageContainer: {
-    width: 100,
-    height: 120,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#F3F4F6',
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
-  loader: {
-    position: 'absolute',
-  },
-  name: {
-    marginTop: 8,
-    fontSize: 12,
-    color: '#374151',
-    textAlign: 'center',
-  },
-});
