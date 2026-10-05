@@ -54,11 +54,11 @@ export default function StyleQuizScreen() {
       setIdentifiedStyle(identifiedStyle);
       completeStyleQuiz();
       dispatchIdentification({ type: 'success' });
-      router.replace('/screens/MyStyle');
+      router.replace('/MyStyle');
     } catch (requestError) {
       if (requestError instanceof StyleSessionError) {
         await signOut();
-        router.replace('/screens/Login');
+        router.replace('/Login');
         return;
       }
       dispatchIdentification({

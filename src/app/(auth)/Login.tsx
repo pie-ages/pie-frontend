@@ -25,7 +25,7 @@ export default function LoginScreen() {
   } = useLoginForm();
 
   function handleCreateAccount() {
-    router.push('/screens/Register');
+    router.push('/Register');
   }
 
   return (

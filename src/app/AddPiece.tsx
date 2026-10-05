@@ -24,7 +24,7 @@ import { FormSelect } from '@/components/FormSelect';
 import { ImagePickerArea } from '@/components/ImagePickerArea';
 import { useAddPieceForm } from '@/hooks/UseAddPieceForm';
 
-export default function AddPieceScreen() {
+export default function AddPiece() {
   const form = useAddPieceForm();
   const [selection, setSelection] = useState<{
     title: string;

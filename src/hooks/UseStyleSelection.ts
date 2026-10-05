@@ -24,7 +24,7 @@ export function useStyleSelection() {
 
   const confirm = useCallback(() => {
     setStyles(STYLES.filter((id) => selected.has(id)));
-    router.replace('/screens/ColorimetryResult');
+    router.replace('/ColorimetryResult');
   }, [selected, setStyles]);
 
   return {

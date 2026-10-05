@@ -21,7 +21,7 @@ export function StorefrontToolBar() {
 
       <View style={styles.actions}>
         <Pressable
-          onPress={() => router.push('/screens/Wishlist')}
+          onPress={() => router.push('/Wishlist')}
           style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
         >
           <MaterialCommunityIcons

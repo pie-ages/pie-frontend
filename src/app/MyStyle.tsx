@@ -27,14 +27,14 @@ export default function MyStyleScreen() {
         if (style) setIdentifiedStyle(style);
         else {
           setIdentifiedStyle(null);
-          router.replace('/screens/StyleQuiz');
+          router.replace('/StyleQuiz');
         }
       })
       .catch(async (error: unknown) => {
         if (!active) return;
         if (error instanceof StyleSessionError) {
           await signOut();
-          router.replace('/screens/Login');
+          router.replace('/Login');
           return;
         }
         setLoadError(
@@ -94,7 +94,7 @@ export default function MyStyleScreen() {
       <ProductActionButton
         title="Continuar"
         style={styles.button}
-        onPress={() => router.push('/screens/StyleSelection')}
+        onPress={() => router.push('/StyleSelection')}
       />
     </View>
   );

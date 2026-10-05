@@ -43,7 +43,7 @@ function RootNavigator() {
 
   useEffect(() => {
     if (isAuthenticated && pendingStyleQuiz) {
-      router.replace('/screens/StyleQuiz');
+      router.replace('/StyleQuiz');
     }
   }, [isAuthenticated, pendingStyleQuiz]);
 
@@ -56,25 +56,22 @@ function RootNavigator() {
       }}
     >
       <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen name="screens/Login" />
-        <Stack.Screen name="screens/Register" />
+        <Stack.Screen name="(auth)/Login" />
+        <Stack.Screen name="(auth)/Register" />
       </Stack.Protected>
 
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="screens/Storefront" />
-        <Stack.Screen name="screens/Closet" />
-        <Stack.Screen name="screens/Looks" />
-        <Stack.Screen name="screens/MyStyle" />
-        <Stack.Screen name="screens/StyleQuiz" />
-        <Stack.Screen name="screens/StyleSelection" />
-        <Stack.Screen name="screens/CreateLook" />
-        <Stack.Screen name="screens/AddPieceScreen" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="screens/ColorimetryResult" />
+        <Stack.Screen name="MyStyle" />
+        <Stack.Screen name="StyleQuiz" />
+        <Stack.Screen name="StyleSelection" />
+        <Stack.Screen name="CreateLook" />
+        <Stack.Screen name="AddPiece" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="ColorimetryResult" />
       </Stack.Protected>
 
-      <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="screens/Wishlist" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="ProductDetails" options={{ presentation: 'modal' }} />
+      <Stack.Screen name="Wishlist" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
