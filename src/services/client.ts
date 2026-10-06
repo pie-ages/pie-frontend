@@ -60,7 +60,6 @@ async function parse<T>(response: Response): Promise<T> {
       const body = (await response.json()) as { message?: string };
       message = body.message;
     } catch {
-      // Some proxy and multipart errors do not return JSON.
     }
     throw new ApiError(
       message ?? `API error: ${response.status} ${response.statusText}`,
