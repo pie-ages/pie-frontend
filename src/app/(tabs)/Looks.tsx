@@ -101,7 +101,6 @@ export default function LooksScreen() {
       });
       updateLookPhoto(lookId, result.photoUrl);
     } catch {
-      // upload silently fails; user can retry by pressing the button again
     }
   };
 
