@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { ColorSwatch } from '@/components/ColorSwatch';
 import { ThemedText } from '@/components/ThemedText';
@@ -28,15 +28,33 @@ export function ColorimetryColorRow({
         {title}
       </ThemedText>
 
-      <View style={styles.row}>
-        {colors.map((color, index) => (
-          <ColorSwatch
-            key={`${color}-${index}`}
-            color={color ?? emptyColor}
-            selected={!!onSlotPress && color !== null}
-            onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
-          />
-        ))}
+      <View style={[styles.row, onSlotPress && styles.editableRow]}>
+        {colors.map((color, index) => {
+          if (color === null && onSlotPress) {
+            return (
+              <Pressable
+                key={`empty-${index}`}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar cor favorita"
+                accessibilityState={{ disabled }}
+                disabled={disabled}
+                onPress={() => onSlotPress(index)}
+                style={styles.addButton}
+              >
+                <Text style={styles.addLabel}>+</Text>
+              </Pressable>
+            );
+          }
+
+          return (
+            <ColorSwatch
+              key={`${color}-${index}`}
+              color={color ?? emptyColor}
+              selected={!!onSlotPress && color !== null}
+              onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
+            />
+          );
+        })}
       </View>
 
       {caption && (
