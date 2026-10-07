@@ -77,7 +77,7 @@ export default function StorefrontScreen() {
               title="Vitrine"
               actions={[
                 {
-                  icon: 'clipboard-text-outline',
+                  icon: 'heart',
                   iconSet: 'material-community',
                   onPress: () => router.push('/Wishlist'),
                   accessibilityLabel: 'Wishlist',

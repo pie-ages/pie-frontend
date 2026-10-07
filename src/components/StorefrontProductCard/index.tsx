@@ -46,7 +46,7 @@ export function StorefrontProductCard({ product, onPress }: StorefrontProductCar
           hitSlop={4}
         >
           <MaterialCommunityIcons
-            name="clipboard-text-outline"
+            name="heart"
             size={18}
             color={wishlisted ? Colors.white : Colors.icon}
           />

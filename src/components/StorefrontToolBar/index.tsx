@@ -24,11 +24,7 @@ export function StorefrontToolBar() {
           onPress={() => router.push('/Wishlist')}
           style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}
         >
-          <MaterialCommunityIcons
-            name="clipboard-text-outline"
-            size={18}
-            color={Colors.light.text}
-          />
+          <MaterialCommunityIcons name="heart" size={18} color={Colors.light.text} />
         </Pressable>
 
         <Pressable
