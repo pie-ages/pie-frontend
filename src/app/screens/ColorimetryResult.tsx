@@ -39,32 +39,65 @@ export default function ColorimetryResultScreen() {
   const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
     useColorimetryPreferences(photoUri !== null, 4000);
 
-  const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
+  const [colorOverrides, setColorOverrides] = useState<Record<number, string | null>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const hasChanges = Object.keys(colorOverrides).length > 0;
 
-  const favoriteColors = preferences
+  const favoriteColors: (string | null)[] = preferences
     ? Array.from(
-        { length: Math.max(FAVORITE_SLOTS, preferences.favoriteColors.length) },
-        (_, i) => colorOverrides[i] ?? preferences.favoriteColors[i] ?? null,
+        {
+          length: Math.max(
+            FAVORITE_SLOTS,
+            preferences.favoriteColors.length,
+            ...Object.keys(colorOverrides).map((index) => Number(index) + 1),
+          ),
+        },
+        (_, index) =>
+          Object.prototype.hasOwnProperty.call(colorOverrides, index)
+            ? colorOverrides[index]
+            : (preferences.favoriteColors[index] ?? null),
       )
     : [];
 
-  const pickerColors = preferences
-    ? Array.from(
-        new Set([
-          ...preferences.highlightColors,
-          ...preferences.avoidColors,
-          ...preferences.favoriteColors,
-        ]),
-      )
-    : [];
+  if (favoriteColors.length > 0 && !favoriteColors.includes(null)) {
+    favoriteColors.push(null);
+  }
 
   function handleSelectFavorite(color: string) {
     if (activeSlot === null || isSaving) return;
+
+    const normalizedColor = color.toUpperCase();
+
+    const isDuplicate = favoriteColors.some(
+      (favorite, index) => index !== activeSlot && favorite?.toUpperCase() === normalizedColor,
+    );
+
+    if (isDuplicate) {
+      setFavoriteError('Essa cor já está nas suas favoritas.');
+      setActiveSlot(null);
+      return;
+    }
+
     setSaved(false);
-    setColorOverrides((prev) => ({ ...prev, [activeSlot]: color }));
+    setFavoriteError(null);
+    setColorOverrides((previous) => ({
+      ...previous,
+      [activeSlot]: normalizedColor,
+    }));
+    setActiveSlot(null);
+  }
+
+  function handleRemoveFavorite() {
+    if (activeSlot === null || isSaving) return;
+
+    setSaved(false);
+    setFavoriteError(null);
+    setColorOverrides((previous) => ({
+      ...previous,
+      [activeSlot]: null,
+    }));
     setActiveSlot(null);
   }
 
@@ -79,6 +112,7 @@ export default function ColorimetryResultScreen() {
     );
     if (success) {
       setColorOverrides({});
+      setFavoriteError(null);
       setSaved(true);
     }
   }
@@ -120,6 +154,7 @@ export default function ColorimetryResultScreen() {
     setColorOverrides({});
     setActiveSlot(null);
     setSaved(false);
+    setFavoriteError(null);
     setCameraError(null);
   }
 
@@ -209,9 +244,18 @@ export default function ColorimetryResultScreen() {
             title="Escolha suas Cores Favoritas"
             colors={favoriteColors}
             disabled={isSaving}
-            onSlotPress={setActiveSlot}
+            onSlotPress={(index) => {
+              setFavoriteError(null);
+              setActiveSlot(index);
+            }}
           />
         </View>
+
+        {favoriteError && (
+          <ThemedText accessibilityRole="alert" style={styles.saveError} themeColor="textSecondary">
+            {favoriteError}
+          </ThemedText>
+        )}
 
         {saveError && (
           <ThemedText style={styles.saveError} themeColor="textSecondary">
@@ -244,9 +288,13 @@ export default function ColorimetryResultScreen() {
 
       <ColorPickerModal
         visible={activeSlot !== null && !isSaving}
-        colors={pickerColors}
         selectedColor={activeSlot !== null ? (favoriteColors[activeSlot] ?? undefined) : undefined}
         onSelect={handleSelectFavorite}
+        onRemove={
+          activeSlot !== null && favoriteColors[activeSlot] != null
+            ? handleRemoveFavorite
+            : undefined
+        }
         onClose={() => setActiveSlot(null)}
       />
     </SafeAreaView>

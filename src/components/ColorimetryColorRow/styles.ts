@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-import { Spacing } from '@/constants/Theme';
+import { Colors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   card: {
@@ -27,6 +27,24 @@ export const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 14,
     lineHeight: 20,
-    paddingHorizontal: Spacing.four,
+  },
+  editableRow: {
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    gap: Spacing.three,
+  },
+  addButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: Colors.brand.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addLabel: {
+    color: Colors.brand.primary,
+    fontSize: 28,
   },
 });
