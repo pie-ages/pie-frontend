@@ -21,6 +21,13 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  inputError: {
+    borderColor: Colors.error,
+  },
+  errorText: {
+    fontSize: 13,
+    color: Colors.error,
+  },
   input: {
     flex: 1,
     height: '100%',

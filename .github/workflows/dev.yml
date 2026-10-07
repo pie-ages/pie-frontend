@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint, typecheck e testes
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
@@ -26,10 +26,19 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Lint
         run: npm run lint
+
+      - name: Typecheck
+        # expo-env.d.ts é gerado pelo expo start e fica fora do git
+        run: |
+          echo '/// <reference types="expo/types" />' > expo-env.d.ts
+          npm run typecheck
+
+      - name: Test
+        run: npm test
 
   mirror:
     name: Mirror to GitLab

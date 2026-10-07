@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AuthButton } from '@/components/AuthButton';
 import { LookPieceCard } from '@/components/LookPieceCard';
 import { Colors } from '@/constants/Theme';
-import type { WardrobePiece } from '@/types/look';
+import type { WardrobePiece } from '@/types/Look';
 
 import { styles } from './styles';
 

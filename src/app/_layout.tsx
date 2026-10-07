@@ -11,8 +11,8 @@ import { useEffect } from 'react';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { UserStyleProvider } from '@/hooks/UseUserStyle';
-import { WishlistProvider } from '@/hooks/UseWishlist';
+import { UserStyleProvider } from '@/contexts/UserStyleContext';
+import { WishlistProvider } from '@/contexts/WishlistContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,7 +43,7 @@ function RootNavigator() {
 
   useEffect(() => {
     if (isAuthenticated && pendingStyleQuiz) {
-      router.replace('/screens/StyleQuiz');
+      router.replace('/StyleQuiz');
     }
   }, [isAuthenticated, pendingStyleQuiz]);
 
@@ -56,25 +56,21 @@ function RootNavigator() {
       }}
     >
       <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen name="screens/Login" />
-        <Stack.Screen name="screens/Register" />
+        <Stack.Screen name="(screens)/Login/index" />
+        <Stack.Screen name="(screens)/Register/index" />
       </Stack.Protected>
 
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="screens/Storefront" />
-        <Stack.Screen name="screens/Closet" />
-        <Stack.Screen name="screens/Looks" />
-        <Stack.Screen name="screens/MyStyle" />
-        <Stack.Screen name="screens/StyleQuiz" />
-        <Stack.Screen name="screens/StyleSelection" />
-        <Stack.Screen name="screens/CreateLook" />
-        <Stack.Screen name="screens/AddPieceScreen" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="screens/ColorimetryResult" />
+        <Stack.Screen name="(screens)/MyStyle/index" />
+        <Stack.Screen name="(screens)/StyleQuiz/index" />
+        <Stack.Screen name="(screens)/StyleSelection/index" />
+        <Stack.Screen name="(screens)/ColorimetryResult/index" />
+        <Stack.Screen name="(screens)/CreateLook/index" />
+        <Stack.Screen name="(screens)/AddPiece/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(screens)/ProductDetails/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(screens)/Wishlist/index" options={{ presentation: 'modal' }} />
       </Stack.Protected>
-
-      <Stack.Screen name="screens/ProductDetails" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="screens/Wishlist" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }

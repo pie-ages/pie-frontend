@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/Theme';
-import type { WardrobePiece } from '@/types/look';
+import type { WardrobePiece } from '@/types/Look';
 
 import { styles } from './styles';
 

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { StorefrontProductCard } from '@/components/StorefrontProductCard';
-import type { CatalogItem } from '@/types/Product';
+import type { CatalogItem } from '@/schemas/productSchema';
 
 import { styles } from './styles';
 

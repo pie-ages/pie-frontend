@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-import type { Look } from '@/types/look';
+import type { Look } from '@/types/Look';
 
 import { styles } from './styles';
 
