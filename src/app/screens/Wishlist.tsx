@@ -57,11 +57,7 @@ function EmptyState({ onExplore }: { onExplore: () => void }) {
   return (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconCircle}>
-        <MaterialCommunityIcons
-          name="clipboard-text-outline"
-          size={40}
-          color={BrandColors.primary}
-        />
+        <MaterialCommunityIcons name="heart" size={40} color={BrandColors.primary} />
       </View>
       <Text style={styles.emptyTitle}>Sua lista de desejos está vazia</Text>
       <Text style={styles.emptySubtitle}>
