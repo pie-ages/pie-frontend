@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { fetchProductDetail } from '@/api/products';
+import { MOCK_PRODUCTS } from '@/mocks/products';
 import type { ProductPublicDetail } from '@/types/Product';
 
 export function useProductDetails(id: string | undefined) {
@@ -9,39 +9,37 @@ export function useProductDetails(id: string | undefined) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isActive = true;
-
-    async function loadProduct() {
-      if (!id) {
-        setIsLoading(false);
-        setError('Não foi possível carregar este produto.');
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-      setProduct(null);
-
-      try {
-        const detail = await fetchProductDetail(id);
-        if (!isActive) return;
-        setProduct(detail);
-      } catch {
-        if (isActive) {
-          setError('Não foi possível carregar este produto.');
-        }
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadProduct();
-
-    return () => {
-      isActive = false;
-    };
+    // TEMPORARY MOCK FOR UI TESTING
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      const baseProduct = MOCK_PRODUCTS[0]; // Camisa listrada
+      
+      const mockDetail: ProductPublicDetail = {
+        id: id || '1',
+        name: baseProduct.name,
+        description: 'Descrição de teste para validar a UI do aplicativo. Esta é uma camisa muito bonita e confortável.',
+        category: baseProduct.category,
+        color: baseProduct.color,
+        price: baseProduct.price,
+        imageUrl: baseProduct.imageUrl,
+        purchaseUrl: baseProduct.purchaseUrl,
+        companyName: baseProduct.companyName,
+        styles: baseProduct.styles,
+        sizes: baseProduct.sizes, // ['P', 'M', 'G', 'GG']
+        materials: baseProduct.materials,
+        available: true,
+        inWishlist: false,
+        images: [
+          { id: 'img1', url: baseProduct.imageUrl || '', isPrimary: true, displayOrder: 1 },
+          { id: 'img2', url: 'https://images.unsplash.com/photo-1574180566232-aaad1b5b8450?w=400&q=80&auto=format', isPrimary: false, displayOrder: 2 },
+          { id: 'img3', url: 'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400&q=80&auto=format', isPrimary: false, displayOrder: 3 }
+        ]
+      };
+      
+      setProduct(mockDetail);
+      setIsLoading(false);
+    }, 500);
   }, [id]);
 
   return { product, isLoading, error };
