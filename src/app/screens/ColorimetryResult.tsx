@@ -61,12 +61,16 @@ export default function ColorimetryResultScreen() {
       )
     : [];
 
-  if (favoriteColors.length > 0 && !favoriteColors.includes(null)) {
-    favoriteColors.push(null);
-  }
+  const selectedFavoriteColors = favoriteColors.filter((color): color is string => color !== null);
 
   function handleSelectFavorite(color: string) {
     if (activeSlot === null || isSaving) return;
+
+    if (favoriteColors[activeSlot] == null && selectedFavoriteColors.length >= FAVORITE_SLOTS) {
+      setFavoriteError('Você pode escolher no máximo 4 cores favoritas.');
+      setActiveSlot(null);
+      return;
+    }
 
     const normalizedColor = color.toUpperCase();
 
@@ -89,27 +93,31 @@ export default function ColorimetryResultScreen() {
     setActiveSlot(null);
   }
 
-  function handleRemoveFavorite() {
-    if (activeSlot === null || isSaving) return;
+  function handleRemoveFavorite(index: number) {
+    if (favoriteColors[index] == null || isSaving) return;
 
     setSaved(false);
     setFavoriteError(null);
     setColorOverrides((previous) => ({
       ...previous,
-      [activeSlot]: null,
+      [index]: null,
     }));
     setActiveSlot(null);
   }
 
   async function handleEnter() {
     if (isSaving) return;
+    if (selectedFavoriteColors.length > FAVORITE_SLOTS) {
+      setFavoriteError(
+        'Você possui mais de 4 cores favoritas. Remova as cores excedentes para continuar.',
+      );
+      return;
+    }
     if (!hasChanges) {
       router.replace('/(tabs)/Storefront');
       return;
     }
-    const success = await saveFavoriteColors(
-      favoriteColors.filter((color): color is string => color !== null),
-    );
+    const success = await saveFavoriteColors(selectedFavoriteColors);
     if (success) {
       setColorOverrides({});
       setFavoriteError(null);
@@ -244,7 +252,16 @@ export default function ColorimetryResultScreen() {
             title="Escolha suas Cores Favoritas"
             colors={favoriteColors}
             disabled={isSaving}
+            onSlotRemove={handleRemoveFavorite}
             onSlotPress={(index) => {
+              if (
+                favoriteColors[index] == null &&
+                selectedFavoriteColors.length >= FAVORITE_SLOTS
+              ) {
+                setFavoriteError('Você pode escolher no máximo 4 cores favoritas.');
+                return;
+              }
+
               setFavoriteError(null);
               setActiveSlot(index);
             }}
@@ -270,7 +287,7 @@ export default function ColorimetryResultScreen() {
 
         <View style={styles.footer}>
           <AuthButton
-            title={hasChanges ? 'Salvar favoritas' : 'Entrar'}
+            title={hasChanges ? 'Salvar favoritas' : 'Continuar'}
             onPress={handleEnter}
             isLoading={isSaving}
           />
@@ -290,11 +307,6 @@ export default function ColorimetryResultScreen() {
         visible={activeSlot !== null && !isSaving}
         selectedColor={activeSlot !== null ? (favoriteColors[activeSlot] ?? undefined) : undefined}
         onSelect={handleSelectFavorite}
-        onRemove={
-          activeSlot !== null && favoriteColors[activeSlot] != null
-            ? handleRemoveFavorite
-            : undefined
-        }
         onClose={() => setActiveSlot(null)}
       />
     </SafeAreaView>

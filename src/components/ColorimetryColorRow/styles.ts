@@ -30,8 +30,8 @@ export const styles = StyleSheet.create({
   },
   editableRow: {
     flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    gap: Spacing.three,
+    justifyContent: 'space-between',
+    rowGap: Spacing.three,
   },
   addButton: {
     width: 48,
@@ -43,8 +43,21 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addLabel: {
-    color: Colors.brand.primary,
-    fontSize: 28,
+  colorSlot: {
+    width: 48,
+    height: 48,
+  },
+  removeButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#661414',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

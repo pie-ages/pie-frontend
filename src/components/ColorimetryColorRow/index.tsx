@@ -1,7 +1,9 @@
-import { Pressable, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { Pressable, View } from 'react-native';
 
 import { ColorSwatch } from '@/components/ColorSwatch';
 import { ThemedText } from '@/components/ThemedText';
+import { Colors } from '@/constants/Theme';
 
 import { styles } from './styles';
 
@@ -12,6 +14,7 @@ type ColorimetryColorRowProps = {
   emptyColor?: string;
   disabled?: boolean;
   onSlotPress?: (index: number) => void;
+  onSlotRemove?: (index: number) => void;
 };
 
 export function ColorimetryColorRow({
@@ -21,6 +24,7 @@ export function ColorimetryColorRow({
   emptyColor = '#999999',
   disabled = false,
   onSlotPress,
+  onSlotRemove,
 }: ColorimetryColorRowProps) {
   return (
     <View style={styles.card}>
@@ -41,18 +45,32 @@ export function ColorimetryColorRow({
                 onPress={() => onSlotPress(index)}
                 style={styles.addButton}
               >
-                <Text style={styles.addLabel}>+</Text>
+                <Feather name="plus" size={24} color={Colors.brand.primary} />
               </Pressable>
             );
           }
 
           return (
-            <ColorSwatch
-              key={`${color}-${index}`}
-              color={color ?? emptyColor}
-              selected={!!onSlotPress && color !== null}
-              onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
-            />
+            <View key={`${color}-${index}`} style={styles.colorSlot}>
+              <ColorSwatch
+                color={color ?? emptyColor}
+                selected={!!onSlotPress && color !== null}
+                onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
+              />
+              {color !== null && onSlotRemove && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remover cor favorita ${index + 1}`}
+                  accessibilityState={{ disabled }}
+                  disabled={disabled}
+                  onPress={() => onSlotRemove(index)}
+                  hitSlop={4}
+                  style={styles.removeButton}
+                >
+                  <Feather name="x" size={14} color="#661414" />
+                </Pressable>
+              )}
+            </View>
           );
         })}
       </View>

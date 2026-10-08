@@ -1,13 +1,8 @@
 import { useRef, useState } from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ColorPicker, {
-  HueSlider,
-  Panel1,
-  Preview,
-  type ColorFormatsObject,
-} from 'reanimated-color-picker';
+import ColorPicker, { HueSlider, Panel1, type ColorFormatsObject } from 'reanimated-color-picker';
 
 import { AuthButton } from '@/components/AuthButton';
 import { ThemedText } from '@/components/ThemedText';
@@ -19,7 +14,6 @@ type ColorPickerModalProps = {
   visible: boolean;
   selectedColor?: string;
   onSelect: (color: string) => void;
-  onRemove?: () => void;
   onClose: () => void;
 };
 
@@ -27,7 +21,6 @@ export function ColorPickerModal({
   visible,
   selectedColor,
   onSelect,
-  onRemove,
   onClose,
 }: ColorPickerModalProps) {
   return (
@@ -42,12 +35,7 @@ export function ColorPickerModal({
 
         <View style={styles.sheet}>
           {visible && (
-            <VisualColorForm
-              selectedColor={selectedColor}
-              onSelect={onSelect}
-              onRemove={onRemove}
-              onClose={onClose}
-            />
+            <VisualColorForm selectedColor={selectedColor} onSelect={onSelect} onClose={onClose} />
           )}
         </View>
       </GestureHandlerRootView>
@@ -57,7 +45,7 @@ export function ColorPickerModal({
 
 type VisualColorFormProps = Omit<ColorPickerModalProps, 'visible'>;
 
-function VisualColorForm({ selectedColor, onSelect, onRemove, onClose }: VisualColorFormProps) {
+function VisualColorForm({ selectedColor, onSelect, onClose }: VisualColorFormProps) {
   const initialRgb = selectedColor ? hexToRgb(selectedColor) : null;
   const initialColor = initialRgb ? rgbToHex(initialRgb) : '#FF0000';
 
@@ -100,8 +88,6 @@ function VisualColorForm({ selectedColor, onSelect, onRemove, onClose }: VisualC
           <Panel1 style={styles.panel} />
 
           <HueSlider style={styles.hueSlider} />
-
-          <Preview style={styles.preview} />
         </ColorPicker>
 
         {error && (
@@ -115,9 +101,19 @@ function VisualColorForm({ selectedColor, onSelect, onRemove, onClose }: VisualC
           onPress={handleConfirm}
         />
 
-        {onRemove && <AuthButton title="Remover cor" variant="secondary" onPress={onRemove} />}
-
-        <AuthButton title="Cancelar" variant="secondary" onPress={onClose} />
+        <View style={styles.actions}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onClose}
+            style={({ pressed }) => [
+              styles.actionButton,
+              styles.cancelButton,
+              pressed && styles.actionPressed,
+            ]}
+          >
+            <Text style={[styles.actionText, styles.cancelText]}>Cancelar</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
