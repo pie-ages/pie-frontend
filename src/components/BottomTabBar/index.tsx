@@ -71,3 +71,30 @@ export function BottomTabBar(props: ViewProps) {
     </View>
   );
 }
+
+type TabBarSpotlightProps = Pick<TabBarButtonProps, 'label' | 'icon' | 'iconSet'> & {
+  index: number;
+  tabCount: number;
+};
+
+export function TabBarSpotlight({ index, tabCount, ...button }: TabBarSpotlightProps) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View pointerEvents="none" style={[styles.wrapper, { bottom: insets.bottom + Spacing.one }]}>
+      <View style={[styles.container, styles.spotlightContainer]}>
+        {Array.from({ length: tabCount }, (_, slot) => (
+          <View
+            key={slot}
+            style={[
+              styles.spotlightSlot,
+              slot === index ? styles.spotlightSlotActive : styles.spotlightSlotHidden,
+            ]}
+          >
+            <TabBarButton {...button} isFocused />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}

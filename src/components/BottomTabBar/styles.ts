@@ -44,4 +44,19 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 12,
   },
+  spotlightContainer: {
+    borderColor: 'transparent',
+    boxShadow: 'none',
+  },
+  spotlightSlot: {
+    flex: 1,
+    flexDirection: 'row',
+    borderRadius: 999,
+  },
+  spotlightSlotActive: {
+    backgroundColor: '#FFFFFF',
+  },
+  spotlightSlotHidden: {
+    opacity: 0,
+  },
 });
