@@ -23,7 +23,7 @@ import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 const FAVORITE_SLOTS = 4;
 
 export default function ColorimetryResultScreen() {
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const capturingRef = useRef(false);
@@ -37,7 +37,7 @@ export default function ColorimetryResultScreen() {
   }, []);
 
   const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
-    useColorimetryPreferences(photoUri !== null, 4000);
+    useColorimetryPreferences(photo, 4000);
 
   const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
@@ -103,7 +103,7 @@ export default function ColorimetryResultScreen() {
       });
       if (!mountedRef.current || result.canceled) return;
       retry();
-      setPhotoUri(result.assets[0].uri);
+      setPhoto(result.assets[0]);
     } catch {
       if (mountedRef.current) {
         setCameraError('Não foi possível abrir a câmera. Tente novamente.');
@@ -116,14 +116,14 @@ export default function ColorimetryResultScreen() {
 
   function handleRedoColorimetry() {
     if (isSaving) return;
-    setPhotoUri(null);
+    setPhoto(null);
     setColorOverrides({});
     setActiveSlot(null);
     setSaved(false);
     setCameraError(null);
   }
 
-  if (photoUri === null) {
+  if (photo === null) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.captureContent}>
@@ -159,7 +159,7 @@ export default function ColorimetryResultScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
         <Image
-          source={{ uri: photoUri }}
+          source={{ uri: photo.uri }}
           style={styles.photo}
           accessibilityLabel="Foto capturada"
         />
