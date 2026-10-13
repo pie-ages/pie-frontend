@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
 import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
+import { ColorimetryConsentModal } from '@/components/ColorimetryConsentModal';
 import { ColorPickerModal } from '@/components/ColorPickerModal';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
@@ -26,7 +28,10 @@ export default function ColorimetryResultScreen() {
   const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [hasConsented, setHasConsented] = useState(false);
+  const [isConsentVisible, setIsConsentVisible] = useState(false);
   const capturingRef = useRef(false);
+  const openCameraOnDismissRef = useRef(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -83,7 +88,32 @@ export default function ColorimetryResultScreen() {
     }
   }
 
-  async function handleTakePhoto() {
+  function handleTakePhoto() {
+    if (!hasConsented) {
+      setIsConsentVisible(true);
+      return;
+    }
+    void openCamera();
+  }
+
+  function handleAcceptConsent() {
+    setHasConsented(true);
+    setIsConsentVisible(false);
+    // iOS cannot present the camera while the modal is still animating out; wait for onDismiss there.
+    if (Platform.OS === 'ios') {
+      openCameraOnDismissRef.current = true;
+    } else {
+      void openCamera();
+    }
+  }
+
+  function handleConsentDismiss() {
+    if (!openCameraOnDismissRef.current) return;
+    openCameraOnDismissRef.current = false;
+    void openCamera();
+  }
+
+  async function openCamera() {
     if (capturingRef.current) return;
     capturingRef.current = true;
     setIsCapturing(true);
@@ -151,6 +181,12 @@ export default function ColorimetryResultScreen() {
             />
           </View>
         </ScrollView>
+        <ColorimetryConsentModal
+          visible={isConsentVisible}
+          onAccept={handleAcceptConsent}
+          onClose={() => setIsConsentVisible(false)}
+          onDismiss={handleConsentDismiss}
+        />
       </SafeAreaView>
     );
   }
