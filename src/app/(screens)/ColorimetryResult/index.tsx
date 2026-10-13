@@ -36,7 +36,7 @@ export default function ColorimetryResultScreen() {
     };
   }, []);
 
-  const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
+  const { preferences, status, errorMessage, retry, isSaving, saveError, saveFavoriteColors } =
     useColorimetryPreferences(photo, 4000);
 
   const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
@@ -172,8 +172,8 @@ export default function ColorimetryResultScreen() {
   if (status === 'error') {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
-        <ThemedText themeColor="textSecondary">
-          Não foi possível carregar sua colorimetria.
+        <ThemedText themeColor="textSecondary" style={styles.instructions}>
+          {errorMessage ?? 'Não foi possível carregar sua colorimetria.'}
         </ThemedText>
         <Pressable onPress={retry} hitSlop={8} style={styles.retryButton}>
           <Text style={styles.redoLink}>Tentar novamente</Text>
@@ -192,17 +192,23 @@ export default function ColorimetryResultScreen() {
           {'Resultado\nda colorimetria\nfeito utilizando IA'}
         </ThemedText>
 
+        {preferences!.season && (
+          <ThemedText type="smallBold" style={styles.seasonLabel}>
+            Sua estação: {preferences!.season.label}
+          </ThemedText>
+        )}
+
         <View style={styles.rows}>
           <ColorimetryColorRow
             title="Suas cores de destaque"
             colors={preferences!.highlightColors}
-            caption="Tons terrosos e quentes valorizam sua pele."
+            caption={preferences!.season?.highlightCaption}
           />
 
           <ColorimetryColorRow
             title="Cores a evitar perto do rosto"
             colors={preferences!.avoidColors}
-            caption="Tons de baixo contraste com o seu tom de pele"
+            caption={preferences!.season?.avoidCaption}
           />
 
           <ColorimetryColorRow
@@ -297,6 +303,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: -0.43,
     lineHeight: 40,
+  },
+  seasonLabel: {
+    paddingBottom: Spacing.three,
+    color: Colors.brand.primary,
   },
   rows: {
     gap: Spacing.three,
