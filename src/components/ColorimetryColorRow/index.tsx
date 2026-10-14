@@ -11,8 +11,11 @@ type ColorimetryColorRowProps = {
   colors: (string | null)[];
   emptyColor?: string;
   disabled?: boolean;
+  compact?: boolean;
   onSlotPress?: (index: number) => void;
 };
+
+const COMPACT_SWATCH_SIZE = 40;
 
 export function ColorimetryColorRow({
   title,
@@ -20,6 +23,7 @@ export function ColorimetryColorRow({
   colors,
   emptyColor = '#999999',
   disabled = false,
+  compact = false,
   onSlotPress,
 }: ColorimetryColorRowProps) {
   return (
@@ -28,11 +32,13 @@ export function ColorimetryColorRow({
         {title}
       </ThemedText>
 
-      <View style={styles.row}>
+      <View style={[styles.row, compact && styles.rowCompact]}>
         {colors.map((color, index) => (
           <ColorSwatch
             key={`${color}-${index}`}
             color={color ?? emptyColor}
+            size={compact ? COMPACT_SWATCH_SIZE : undefined}
+            outlined={compact}
             selected={!!onSlotPress && color !== null}
             onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
           />
@@ -40,7 +46,11 @@ export function ColorimetryColorRow({
       </View>
 
       {caption && (
-        <ThemedText type="small" themeColor="textSecondary" style={styles.caption}>
+        <ThemedText
+          type="small"
+          themeColor="textSecondary"
+          style={[styles.caption, compact && styles.captionCompact]}
+        >
           {caption}
         </ThemedText>
       )}
