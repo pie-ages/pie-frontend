@@ -1,11 +1,9 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useState } from 'react';
+import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
-import { ProfileSheet } from '@/components/ProfileSheet';
 import { Colors } from '@/constants/Theme';
-import { useAuth } from '@/contexts/AuthContext';
 
 import { styles } from './styles';
 
@@ -38,9 +36,6 @@ function ActionIcon({ set, name }: { set: IconSet; name: string }) {
 }
 
 export function ScreenToolBar({ title, actions = [], showProfile = true }: ScreenToolBarProps) {
-  const { signOut } = useAuth();
-  const [isProfileSheetVisible, setProfileSheetVisible] = useState(false);
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -60,7 +55,7 @@ export function ScreenToolBar({ title, actions = [], showProfile = true }: Scree
 
         {showProfile ? (
           <Pressable
-            onPress={() => setProfileSheetVisible(true)}
+            onPress={() => router.push('/Profile')}
             accessibilityRole="button"
             accessibilityLabel="Perfil"
             style={({ pressed }) => [
@@ -73,17 +68,6 @@ export function ScreenToolBar({ title, actions = [], showProfile = true }: Scree
           </Pressable>
         ) : null}
       </View>
-
-      {showProfile ? (
-        <ProfileSheet
-          visible={isProfileSheetVisible}
-          onClose={() => setProfileSheetVisible(false)}
-          onSignOut={() => {
-            setProfileSheetVisible(false);
-            signOut();
-          }}
-        />
-      ) : null}
     </View>
   );
 }

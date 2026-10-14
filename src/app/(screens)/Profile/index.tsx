@@ -6,16 +6,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
+import { ProductActionButton } from '@/components/ProductActionButton';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
+import { useAuth } from '@/contexts/AuthContext';
+import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
+import { useUserProductStyles } from '@/hooks/UseUserProductStyles';
 import { useUserProfile } from '@/hooks/UseUserProfile';
-import { MOCK_FAVORITE_STYLE_LABELS, MOCK_PROFILE_PREFERENCES } from '@/mocks/userProfile';
+import { STYLE_LABELS } from '@/types/Style';
 
 export default function ProfileScreen() {
   const { profile, status: profileStatus, retry: retryProfile } = useUserProfile();
+  const {
+    preferences,
+    status: preferencesStatus,
+    retry: retryPreferences,
+  } = useColorimetryPreferences();
+  const {
+    styles: selectedStyles,
+    status: stylesStatus,
+    retry: retryStyles,
+  } = useUserProductStyles();
+  const { signOut } = useAuth();
 
-  const isLoading = profileStatus === 'loading';
-  const hasError = profileStatus === 'error';
+  const isLoading =
+    profileStatus === 'loading' || preferencesStatus === 'loading' || stylesStatus === 'loading';
+  const hasError =
+    profileStatus === 'error' || preferencesStatus === 'error' || stylesStatus === 'error';
 
   function handleClose() {
     if (router.canGoBack()) router.back();
@@ -23,18 +40,13 @@ export default function ProfileScreen() {
 
   function handleRetry() {
     if (profileStatus === 'error') retryProfile();
+    if (preferencesStatus === 'error') retryPreferences();
+    if (stylesStatus === 'error') retryStyles();
   }
 
-  function handleRedoColorimetry() {
-    // Refazer a colorimetria é um fluxo próprio, fora do escopo de visualização do perfil.
-  }
-
-  function handleEditFavoriteColors() {
-    // A edição das cores favoritas está fora do escopo de visualização do perfil.
-  }
-
-  function handleEditStyle() {
-    // A edição de estilo está fora do escopo de visualização do perfil.
+  async function handleSignOut() {
+    await signOut();
+    router.replace('/Login');
   }
 
   return (
@@ -61,8 +73,8 @@ export default function ProfileScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.profileCard}>
             <View style={styles.avatar}>
-              {profile?.avatarUrl ? (
-                <Image source={{ uri: profile.avatarUrl }} style={styles.avatarImage} />
+              {profile?.photoUrl ? (
+                <Image source={{ uri: profile.photoUrl }} style={styles.avatarImage} />
               ) : (
                 <Feather name="user" size={28} color={Colors.icon} />
               )}
@@ -77,16 +89,11 @@ export default function ProfileScreen() {
 
           <ColorimetryColorRow
             title="Colorimetria"
-            colors={MOCK_PROFILE_PREFERENCES.highlightColors}
+            colors={preferences?.highlightColors ?? []}
             caption="Tons terrosos e quentes valorizam sua pele."
-            action={{ label: 'Refazer', icon: 'refresh-cw', onPress: handleRedoColorimetry }}
           />
 
-          <ColorimetryColorRow
-            title="Cores Favoritas"
-            colors={MOCK_PROFILE_PREFERENCES.favoriteColors}
-            action={{ label: 'Editar', icon: 'edit-2', onPress: handleEditFavoriteColors }}
-          />
+          <ColorimetryColorRow title="Cores Favoritas" colors={preferences?.favoriteColors ?? []} />
 
           <View style={styles.styleCard}>
             <View style={styles.styleHeader}>
@@ -94,7 +101,7 @@ export default function ProfileScreen() {
                 Estilo
               </ThemedText>
               <Pressable
-                onPress={handleEditStyle}
+                onPress={() => router.push('/StyleSelection')}
                 style={styles.action}
                 accessibilityRole="button"
                 accessibilityLabel="Editar estilo"
@@ -104,19 +111,28 @@ export default function ProfileScreen() {
             </View>
 
             <View style={styles.styleItems}>
-              {MOCK_FAVORITE_STYLE_LABELS.map((style) => (
-                <ThemedText key={style} style={styles.styleItem}>
-                  {style}
-                </ThemedText>
+              {selectedStyles.map((style) => (
+                <View key={style} style={styles.stylePill}>
+                  <ThemedText style={styles.styleItem}>{STYLE_LABELS[style]}</ThemedText>
+                </View>
               ))}
+              {selectedStyles.length === 0 && (
+                <ThemedText type="small" themeColor="textSecondary">
+                  Nenhum estilo selecionado.
+                </ThemedText>
+              )}
             </View>
 
             <ThemedText type="small" themeColor="textSecondary" style={styles.styleCaption}>
-              Baseado nas respostas do seu quiz
+              Baseado nas escolhas do seu quiz
             </ThemedText>
           </View>
         </ScrollView>
       )}
+
+      <View style={styles.footer}>
+        <ProductActionButton title="Sair" onPress={handleSignOut} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -207,11 +223,26 @@ const styles = StyleSheet.create({
   },
   styleItem: {
     fontSize: 15,
+    color: Colors.white,
   },
   styleItems: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.two,
+  },
+  stylePill: {
+    backgroundColor: Colors.brand.primary,
+    borderRadius: 999,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
   },
   styleCaption: {
     marginTop: Spacing.one,
+  },
+  footer: {
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.two,
+    backgroundColor: Colors.white,
   },
 });

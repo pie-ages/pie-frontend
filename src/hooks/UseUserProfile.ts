@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { fetchUserProfile } from '@/mocks/userProfile';
-import type { UserProfile } from '@/types/UserProfile';
+import { fetchProfile } from '@/services/profile';
+import type { Profile } from '@/types/Profile';
 
-export type UserProfileStatus = 'loading' | 'success' | 'error';
+export type ProfileStatus = 'loading' | 'success' | 'error';
 
 export function useUserProfile() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [status, setStatus] = useState<UserProfileStatus>('loading');
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [status, setStatus] = useState<ProfileStatus>('loading');
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let isActive = true;
 
-    fetchUserProfile()
+    fetchProfile()
       .then((data) => {
         if (!isActive) return;
         setProfile(data);

@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { StyleOptionGrid } from '@/components/StyleOptionGrid';
+import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useStyleSelection } from '@/hooks/UseStyleSelection';
 
 export default function StyleSelectionScreen() {
-  const { styleOptions, selectedIds, toggle, confirm } = useStyleSelection();
+  const { styleOptions, selectedIds, toggle, confirm, isLoading, isSaving, error } =
+    useStyleSelection();
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -21,10 +23,20 @@ export default function StyleSelectionScreen() {
         <View style={styles.grid}>
           <StyleOptionGrid options={styleOptions} selectedIds={selectedIds} onToggle={toggle} />
         </View>
+        {error && (
+          <ThemedText accessibilityRole="alert" themeColor="textSecondary">
+            {error}
+          </ThemedText>
+        )}
       </View>
 
       <View style={styles.footer}>
-        <ProductActionButton title="Continuar" onPress={confirm} />
+        <ProductActionButton
+          title="Continuar"
+          onPress={confirm}
+          isLoading={isLoading || isSaving}
+          disabled={isLoading}
+        />
       </View>
     </SafeAreaView>
   );
