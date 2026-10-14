@@ -58,6 +58,7 @@ function RootNavigator() {
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="(screens)/Login/index" />
         <Stack.Screen name="(screens)/Register/index" />
+        <Stack.Screen name="(screens)/ForgotPassword/index" />
       </Stack.Protected>
 
       <Stack.Protected guard={isAuthenticated}>
@@ -71,6 +72,8 @@ function RootNavigator() {
         <Stack.Screen name="(screens)/ProductDetails/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(screens)/Wishlist/index" options={{ presentation: 'modal' }} />
       </Stack.Protected>
+
+      <Stack.Screen name="(screens)/ResetPassword/index" />
     </Stack>
   );
 }

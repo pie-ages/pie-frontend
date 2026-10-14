@@ -1,7 +1,15 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Controller } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -25,6 +33,10 @@ export default function LoginScreen() {
 
   function handleCreateAccount() {
     router.push('/Register');
+  }
+
+  function handleRecoverAccess() {
+    router.push('/ForgotPassword');
   }
 
   return (
@@ -100,6 +112,17 @@ export default function LoginScreen() {
                   onPress={handleCreateAccount}
                   disabled={isLoading}
                 />
+
+                <Pressable
+                  onPress={handleRecoverAccess}
+                  disabled={isLoading}
+                  accessibilityRole="link"
+                  style={styles.recovery}
+                >
+                  <Text style={styles.recoveryText}>
+                    Esqueceu a senha? <Text style={styles.recoveryLink}>Recuperar acesso</Text>
+                  </Text>
+                </Pressable>
               </View>
             </View>
           </View>
@@ -166,5 +189,22 @@ const styles = StyleSheet.create({
   actions: {
     marginTop: 32,
     gap: 12,
+  },
+
+  recovery: {
+    alignSelf: 'center',
+    marginTop: 4,
+    paddingVertical: 8,
+  },
+
+  recoveryText: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+
+  recoveryLink: {
+    fontWeight: '600',
+    color: Colors.brand.primary,
+    textDecorationLine: 'underline',
   },
 });
