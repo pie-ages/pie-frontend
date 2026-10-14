@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useLayoutScale } from '@/hooks/UseLayoutScale';
-import type { StyleQuizAnswer, StyleQuizOption } from '@/types/StyleQuiz';
+import type { StyleQuizOption } from '@/schemas/styleSchema';
+import type { StyleQuizAnswer } from '@/types/StyleQuiz';
 
 import { createStyles } from './styles';
 
@@ -78,11 +79,6 @@ export function StyleQuizChoicePreview({
                 <Text style={styles.label} allowFontScaling={false}>
                   {selectedOption.label}
                 </Text>
-                {selectedOption.description ? (
-                  <Text style={styles.description} allowFontScaling={false}>
-                    {selectedOption.description}
-                  </Text>
-                ) : null}
               </View>
             </View>
           ) : null}

@@ -4,9 +4,7 @@ import { Colors } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   card: {
-    flexGrow: 0,
-    flexBasis: '31%',
-    height: 64,
+    flex: 1,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -22,7 +20,7 @@ export const styles = StyleSheet.create({
     opacity: 0.85,
   },
   label: {
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: '700',
     textAlign: 'center',
   },

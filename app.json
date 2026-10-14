@@ -45,6 +45,8 @@
       [
         "expo-image-picker",
         {
+          "cameraPermission": "O app acessa sua câmera para fotografar peças e iniciar a colorimetria.",
+          "microphonePermission": false,
           "photosPermission": "O app acessa suas fotos para adicionar uma imagem ao look."
         }
       ]

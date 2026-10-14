@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import type { Look } from '@/types/look';
+import type { Look } from '@/types/Look';
 
 export function useLookFocusNavigation(looks: Look[], initialLookId?: string) {
   const [activeLookId, setActiveLookId] = useState(initialLookId);

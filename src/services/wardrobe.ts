@@ -1,0 +1,105 @@
+import { Platform } from 'react-native';
+import { z } from 'zod';
+
+import {
+  wardrobeImageAnalysisSchema,
+  wardrobeItemSchema,
+  type WardrobeImageAnalysis,
+  type WardrobeItemDTO,
+} from '@/schemas/wardrobeSchema';
+import { apiGetAuth, apiUploadAuth, parseResponse } from '@/services/client';
+import type { WardrobePiece } from '@/types/Look';
+import { groupWardrobePieces, type WardrobeFetch } from '@/utils/wardrobe-rows';
+
+export type { WardrobeImageAnalysis, WardrobeItemDTO };
+
+export type CreateWardrobeItemPayload = {
+  productId?: string | null;
+  name: string;
+  category: string;
+  style?: string | null;
+  color?: string | null;
+};
+
+export type WardrobeImageAsset = {
+  uri: string;
+  fileName?: string | null;
+  mimeType?: string | null;
+  fileSize?: number | null;
+};
+
+function toPiece(item: WardrobeItemDTO): WardrobePiece {
+  const category = item.category?.trim() || 'Outros';
+  const name =
+    item.name?.trim() || [item.category, item.color].filter(Boolean).join(' · ') || 'Peça';
+  return {
+    id: item.id,
+    name,
+    imageUrl: item.photoUrl,
+    category,
+    wardrobeItemId: item.id,
+    productId: null,
+  };
+}
+
+export async function fetchWardrobeItems(signal?: AbortSignal): Promise<WardrobePiece[]> {
+  const items = parseResponse(
+    z.array(wardrobeItemSchema),
+    await apiGetAuth('/api/users/me/wardrobe/items', signal),
+    'Resposta inválida ao carregar o guarda-roupa.',
+  );
+  return items.map(toPiece);
+}
+
+export async function createWardrobeItem(
+  payload: CreateWardrobeItemPayload,
+  image: WardrobeImageAsset,
+): Promise<WardrobeItemDTO> {
+  const formData = await imageFormData(image);
+  formData.append('item', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+  return parseResponse(
+    wardrobeItemSchema,
+    await apiUploadAuth('/api/users/me/wardrobe/items', formData),
+  );
+}
+
+export async function analyzeWardrobeImage(
+  image: WardrobeImageAsset,
+  signal?: AbortSignal,
+): Promise<WardrobeImageAnalysis> {
+  const formData = await imageFormData(image, signal);
+  return parseResponse(
+    wardrobeImageAnalysisSchema,
+    await apiUploadAuth('/api/users/me/wardrobe/items/analyze', formData, signal),
+    'Não foi possível identificar a peça. Preencha os campos manualmente.',
+  );
+}
+
+export async function imageFormData(
+  image: WardrobeImageAsset,
+  signal?: AbortSignal,
+  fallbackName = `wardrobe-${Date.now()}.jpg`,
+): Promise<FormData> {
+  const formData = new FormData();
+  const fileName = image.fileName ?? fallbackName;
+  if (Platform.OS !== 'web') {
+    formData.append('file', {
+      uri: image.uri,
+      name: fileName,
+      type: image.mimeType ?? 'image/jpeg',
+    } as unknown as Blob);
+    return formData;
+  }
+  const imageResponse = await fetch(image.uri, { signal });
+  if (!imageResponse.ok) throw new Error('Não foi possível ler a foto selecionada.');
+  const imageBlob = await imageResponse.blob();
+  formData.append(
+    'file',
+    imageBlob.slice(0, imageBlob.size, image.mimeType ?? (imageBlob.type || 'image/jpeg')),
+    fileName,
+  );
+  return formData;
+}
+
+export const fetchWardrobe: WardrobeFetch = async ({ signal }) =>
+  groupWardrobePieces(await fetchWardrobeItems(signal));

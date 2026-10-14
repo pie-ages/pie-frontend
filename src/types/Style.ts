@@ -21,45 +21,22 @@ export const STYLE_LABELS: Record<Style, string> = {
   sensual: 'Sensual',
 };
 
-const DEFAULT_STYLE: Style = 'classico';
-
-export function resolveStyle(styles: string[]): Style {
-  const [primary] = styles;
-  return STYLES.includes(primary as Style) ? (primary as Style) : DEFAULT_STYLE;
-}
-
-export function resolveStyles(styles: string[]): Style[] {
-  const valid = STYLES.filter((style) => styles.includes(style));
-  return valid.length > 0 ? valid : [DEFAULT_STYLE];
-}
-
-export const QUIZ_STYLE_CODE_MAP: Record<string, Style> = {
-  CLASSIC: 'classico',
-  CASUAL: 'casual',
-  ROMANTIC: 'romantico',
-  REFINED: 'refinado',
-  DRAMATIC: 'dramatico',
-  CREATIVE: 'criativo',
-  SENSUAL: 'sensual',
+export const STYLE_DESCRIPTIONS: Record<Style, string> = {
+  romantico: 'Peças delicadas, cores suaves e detalhes leves.',
+  criativo: 'Combinações originais, cores marcantes e muita personalidade.',
+  casual: 'Conforto, praticidade e peças fáceis de combinar.',
+  classico: 'Peças atemporais, cortes alinhados e combinações elegantes.',
+  refinado: 'Acabamentos sofisticados, tecidos nobres e visual impecável.',
+  dramatico: 'Contrastes fortes, formas marcantes e presença.',
+  sensual: 'Silhuetas valorizadas, confiança e detalhes envolventes.',
 };
 
-export function resolveStyleFromQuizCodes(codes: string[]): Style {
-  const tally = new Map<Style, number>();
-
-  for (const code of codes) {
-    const style = QUIZ_STYLE_CODE_MAP[code];
-    if (!style) continue;
-    tally.set(style, (tally.get(style) ?? 0) + 1);
-  }
-
-  let winner: Style | null = null;
-  let winnerCount = 0;
-  for (const [style, count] of tally) {
-    if (count > winnerCount) {
-      winner = style;
-      winnerCount = count;
-    }
-  }
-
-  return winner ?? DEFAULT_STYLE;
-}
+export const STYLE_BACKGROUNDS: Record<Style, string> = {
+  romantico: '#F4D7DE',
+  criativo: '#FFD98E',
+  casual: '#CFE8E0',
+  classico: '#E4DED3',
+  refinado: '#D9C9A8',
+  dramatico: '#3A2E39',
+  sensual: '#6E263D',
+};

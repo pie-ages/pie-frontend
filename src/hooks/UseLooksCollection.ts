@@ -1,8 +1,7 @@
-import { isCancel } from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { fetchLooks } from '@/api/looks';
-import { appendLookPage, type Look } from '@/types/look';
+import { fetchLooks } from '@/services/looks';
+import { appendLookPage, type Look } from '@/types/Look';
 
 export type LooksStatus = 'loading' | 'success' | 'error' | 'empty';
 
@@ -31,8 +30,8 @@ export function useLooksCollection() {
         setPageError(false);
         setStatus(result.items.length === 0 ? 'empty' : 'success');
       })
-      .catch((error) => {
-        if (!controller.signal.aborted && !isCancel(error)) {
+      .catch(() => {
+        if (!controller.signal.aborted) {
           inFlight.current = false;
           setStatus('error');
         }
@@ -63,8 +62,8 @@ export function useLooksCollection() {
         setLooks((previous) => appendLookPage(previous, result.items));
         setPage(result.page);
         setHasNext(result.hasNext);
-      } catch (error) {
-        if (!controller.signal.aborted && !isCancel(error)) setPageError(true);
+      } catch {
+        if (!controller.signal.aborted) setPageError(true);
       } finally {
         if (controllerRef.current === controller) {
           inFlight.current = false;
@@ -80,5 +79,25 @@ export function useLooksCollection() {
     setAttempt((value) => value + 1);
   }, []);
 
-  return { status, looks, retry, hasNext, loadingMore, pageError, loadMore };
+  const refresh = useCallback(() => {
+    setAttempt((value) => value + 1);
+  }, []);
+
+  const updateLookPhoto = useCallback((lookId: string, photoUrl: string | null) => {
+    setLooks((previous) =>
+      previous.map((look) => (look.id === lookId ? { ...look, imageUrl: photoUrl } : look)),
+    );
+  }, []);
+
+  return {
+    status,
+    looks,
+    retry,
+    refresh,
+    hasNext,
+    loadingMore,
+    pageError,
+    loadMore,
+    updateLookPhoto,
+  };
 }

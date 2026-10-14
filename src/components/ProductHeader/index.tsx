@@ -47,7 +47,7 @@ export function ProductHeader({
         hitSlop={8}
       >
         <MaterialCommunityIcons
-          name="clipboard-text-outline"
+          name="heart"
           size={22}
           color={isWishlisted ? '#FFFFFF' : theme.text}
         />

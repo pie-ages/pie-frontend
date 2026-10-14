@@ -48,13 +48,6 @@ export function createStyles(s: ScaleFn) {
       color: Colors.light.text,
       textAlign: 'center',
     },
-    description: {
-      fontFamily: FontFamilies.jakartaRegular,
-      fontSize: s(12),
-      lineHeight: s(16),
-      color: Colors.light.textSecondary,
-      textAlign: 'center',
-    },
     title: {
       ...SystemFonts.bold,
       fontSize: s(22),

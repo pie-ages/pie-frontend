@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { MOCK_STYLE_QUIZ } from '@/mocks/styleQuiz';
-import type { StyleQuizQuestion } from '@/types/StyleQuiz';
+import type { StyleQuizQuestion } from '@/schemas/styleSchema';
+import { fetchStyleQuestions } from '@/services/style';
 
 const ERROR_MESSAGE = 'Não foi possível carregar o questionário.';
 
@@ -18,11 +18,9 @@ export function useStyleQuiz() {
       setError(null);
 
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        const sorted = await fetchStyleQuestions();
 
         if (!isActive) return;
-
-        const sorted = [...MOCK_STYLE_QUIZ.questions].sort((a, b) => a.order - b.order);
 
         if (sorted.length === 0) {
           setError(ERROR_MESSAGE);

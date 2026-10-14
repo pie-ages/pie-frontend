@@ -4,7 +4,7 @@
 2. Se o MCP estiver indisponível ou a issue não existir, informe a limitação e não infira requisitos pelo ID.
 3. Inspecione código, testes, configurações e documentação relevantes antes de recomendar mudanças. Linear define **o que**; o repositório define **como**; ADRs e documentação definem **por quê**.
 4. No planejamento, explique problema, contexto, conceitos, alternativas, trade-offs, recomendação e plano. Não produza código de implementação nessa fase.
-5. Só implemente mediante solicitação explícita. O app Expo está em `pie/`; preserve os padrões encontrados nele.
+5. Só implemente mediante solicitação explícita. O app Expo está na raiz do repositório (código em `src/`); preserve os padrões encontrados nele.
 6. Siga também [`docs/padroes-de-branch-e-commit.md`](docs/padroes-de-branch-e-commit.md): não faça commits diretos em `main` ou `dev`.
 7. Nunca versione segredos, tokens ou configuração pessoal de MCP.
 
