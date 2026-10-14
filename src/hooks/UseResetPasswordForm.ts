@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -9,12 +9,12 @@ import { resetPassword } from '@/services/auth';
 import { ApiError } from '@/services/client';
 
 export function useResetPasswordForm() {
+  const router = useRouter();
   const { isAuthenticated, signOut } = useAuth();
   const { token_hash: tokenHash } = useLocalSearchParams<{ token_hash?: string }>();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isDone, setIsDone] = useState(false);
 
   const {
     control,
@@ -53,7 +53,7 @@ export function useResetPasswordForm() {
       await signOut();
     }
 
-    setIsDone(true);
+    router.replace('/Login');
   });
 
   return {
@@ -64,7 +64,6 @@ export function useResetPasswordForm() {
     isConfirmPasswordVisible,
     isLoading: isSubmitting,
     error,
-    isDone,
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
     handleReset,

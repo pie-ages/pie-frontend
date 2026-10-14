@@ -19,25 +19,18 @@ export default function ResetPasswordScreen() {
     isConfirmPasswordVisible,
     isLoading,
     error,
-    isDone,
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
     handleReset,
   } = useResetPasswordForm();
 
-  function handleGoToLogin() {
-    router.replace('/Login');
-  }
-
   function handleRequestNewLink() {
     router.replace('/ForgotPassword');
   }
 
-  const description = !hasToken
-    ? 'Este link é inválido ou já expirou. Solicite a recuperação novamente.'
-    : isDone
-      ? 'Senha redefinida. Use a nova senha para entrar na sua conta.'
-      : 'Escolha uma nova senha para voltar a acessar sua conta.';
+  const description = hasToken
+    ? 'Escolha uma nova senha para voltar a acessar sua conta.'
+    : 'Este link é inválido ou já expirou. Solicite a recuperação novamente.';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -61,7 +54,7 @@ export default function ResetPasswordScreen() {
 
               <Text style={styles.description}>{description}</Text>
 
-              {hasToken && !isDone && (
+              {hasToken && (
                 <View style={styles.form}>
                   <Controller
                     name="password"
@@ -105,17 +98,8 @@ export default function ResetPasswordScreen() {
             </View>
 
             <View style={styles.actions}>
-              {hasToken && !isDone && (
-                <AuthButton title="Salvar senha" onPress={handleReset} isLoading={isLoading} />
-              )}
-
               {hasToken ? (
-                <AuthButton
-                  title="Voltar para o login"
-                  variant="secondary"
-                  onPress={handleGoToLogin}
-                  disabled={isLoading}
-                />
+                <AuthButton title="Salvar senha" onPress={handleReset} isLoading={isLoading} />
               ) : (
                 <AuthButton title="Solicitar novo link" onPress={handleRequestNewLink} />
               )}
