@@ -17,6 +17,7 @@ import { AuthButton } from '@/components/AuthButton';
 import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
 import { ColorPickerModal } from '@/components/ColorPickerModal';
 import { ThemedText } from '@/components/ThemedText';
+import { HIGHLIGHT_COLORS_CAPTION } from '@/constants/Colorimetry';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 
@@ -196,7 +197,7 @@ export default function ColorimetryResultScreen() {
           <ColorimetryColorRow
             title="Suas cores de destaque"
             colors={preferences!.highlightColors}
-            caption="Tons terrosos e quentes valorizam sua pele."
+            caption={HIGHLIGHT_COLORS_CAPTION}
           />
 
           <ColorimetryColorRow

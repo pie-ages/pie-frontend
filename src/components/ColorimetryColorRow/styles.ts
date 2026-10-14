@@ -23,10 +23,17 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     marginBottom: Spacing.two,
   },
+  rowCompact: {
+    justifyContent: 'space-evenly',
+    marginBottom: 0,
+  },
   caption: {
     color: '#000000',
     fontSize: 14,
     lineHeight: 20,
     paddingHorizontal: Spacing.four,
+  },
+  captionCompact: {
+    textAlign: 'center',
   },
 });

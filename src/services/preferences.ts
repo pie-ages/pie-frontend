@@ -4,8 +4,11 @@ import {
 } from '@/schemas/colorimetrySchema';
 import { apiGetAuth, apiPutAuth, parseResponse } from '@/services/client';
 
-export async function fetchPreferences(): Promise<ColorimetryPreferences> {
-  return parseResponse(colorimetryPreferencesSchema, await apiGetAuth('/api/users/me/preferences'));
+export async function fetchPreferences(signal?: AbortSignal): Promise<ColorimetryPreferences> {
+  return parseResponse(
+    colorimetryPreferencesSchema,
+    await apiGetAuth('/api/users/me/preferences', signal),
+  );
 }
 
 export async function updateFavoriteColors(
