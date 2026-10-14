@@ -11,7 +11,6 @@ type ColorimetryColorRowProps = {
   colors: (string | null)[];
   emptyColor?: string;
   disabled?: boolean;
-  /** Versão de leitura usada no perfil: círculos menores, contornados e caption centralizada. */
   compact?: boolean;
   onSlotPress?: (index: number) => void;
 };

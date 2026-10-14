@@ -31,7 +31,6 @@ function isIdentifiedStyle(style: string): style is IdentifiedStyle {
   return (IDENTIFIED_STYLES as readonly string[]).includes(style);
 }
 
-// Estilos que o app ainda não conhece são ignorados para não derrubar a seção inteira.
 export const favoriteStylesSchema = z.object({
   styles: z.array(z.string()).transform((styles) => styles.filter(isIdentifiedStyle)),
 });
