@@ -70,6 +70,7 @@ function RootNavigator() {
         <Stack.Screen name="(screens)/AddPiece/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(screens)/ProductDetails/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(screens)/Wishlist/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(screens)/Profile/index" options={{ presentation: 'modal' }} />
       </Stack.Protected>
     </Stack>
   );
