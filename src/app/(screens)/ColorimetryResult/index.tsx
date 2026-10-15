@@ -41,7 +41,6 @@ export default function ColorimetryResultScreen() {
 
   const [colorOverrides, setColorOverrides] = useState<Record<number, string | null>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
-  const [saved, setSaved] = useState(false);
   const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const hasChanges = Object.keys(colorOverrides).length > 0;
 
@@ -78,7 +77,6 @@ export default function ColorimetryResultScreen() {
       return;
     }
 
-    setSaved(false);
     setFavoriteError(null);
     setColorOverrides((previous) => ({
       ...previous,
@@ -90,7 +88,6 @@ export default function ColorimetryResultScreen() {
   function handleRemoveFavorite(index: number) {
     if (favoriteColors[index] == null || isSaving) return;
 
-    setSaved(false);
     setFavoriteError(null);
     setColorOverrides((previous) => ({
       ...previous,
@@ -107,16 +104,11 @@ export default function ColorimetryResultScreen() {
       );
       return;
     }
-    if (!hasChanges) {
-      router.replace('/Storefront');
-      return;
+    if (hasChanges) {
+      const success = await saveFavoriteColors(selectedFavoriteColors);
+      if (!success) return;
     }
-    const success = await saveFavoriteColors(selectedFavoriteColors);
-    if (success) {
-      setColorOverrides({});
-      setFavoriteError(null);
-      setSaved(true);
-    }
+    router.replace('/Storefront');
   }
 
   async function handleTakePhoto() {
@@ -155,7 +147,6 @@ export default function ColorimetryResultScreen() {
     setPhotoUri(null);
     setColorOverrides({});
     setActiveSlot(null);
-    setSaved(false);
     setFavoriteError(null);
     setCameraError(null);
   }
@@ -265,18 +256,9 @@ export default function ColorimetryResultScreen() {
             {saveError}
           </ThemedText>
         )}
-        {saved && (
-          <ThemedText style={styles.saveError} themeColor="textSecondary">
-            Cores favoritas salvas com sucesso.
-          </ThemedText>
-        )}
 
         <View style={styles.footer}>
-          <AuthButton
-            title={hasChanges ? 'Salvar favoritas' : 'Continuar'}
-            onPress={handleEnter}
-            isLoading={isSaving}
-          />
+          <AuthButton title="Continuar" onPress={handleEnter} isLoading={isSaving} />
 
           <Pressable
             onPress={handleRedoColorimetry}
