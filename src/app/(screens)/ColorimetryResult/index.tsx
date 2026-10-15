@@ -20,7 +20,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 
-const FAVORITE_SLOTS = 4;
+const MAX_COLORS = 4;
 
 export default function ColorimetryResultScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -39,48 +39,76 @@ export default function ColorimetryResultScreen() {
   const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
     useColorimetryPreferences(photoUri !== null, 4000);
 
-  const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
+  const [colorOverrides, setColorOverrides] = useState<Record<number, string | null>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [favoriteError, setFavoriteError] = useState<string | null>(null);
   const hasChanges = Object.keys(colorOverrides).length > 0;
 
-  const favoriteColors = preferences
+  const favoriteColors: (string | null)[] = preferences
     ? Array.from(
-        { length: Math.max(FAVORITE_SLOTS, preferences.favoriteColors.length) },
-        (_, i) => colorOverrides[i] ?? preferences.favoriteColors[i] ?? null,
+        {
+          length: Math.max(
+            MAX_COLORS,
+            preferences.favoriteColors.length,
+            ...Object.keys(colorOverrides).map((index) => Number(index) + 1),
+          ),
+        },
+        (_, index) =>
+          Object.prototype.hasOwnProperty.call(colorOverrides, index)
+            ? colorOverrides[index]
+            : (preferences.favoriteColors[index] ?? null),
       )
     : [];
 
-  const pickerColors = preferences
-    ? Array.from(
-        new Set([
-          ...preferences.highlightColors,
-          ...preferences.avoidColors,
-          ...preferences.favoriteColors,
-        ]),
-      )
-    : [];
+  const selectedFavoriteColors = favoriteColors.filter((color): color is string => color !== null);
 
   function handleSelectFavorite(color: string) {
     if (activeSlot === null || isSaving) return;
-    setSaved(false);
-    setColorOverrides((prev) => ({ ...prev, [activeSlot]: color }));
+
+    const normalizedColor = color.toUpperCase();
+
+    const isDuplicate = favoriteColors.some(
+      (favorite, index) => index !== activeSlot && favorite?.toUpperCase() === normalizedColor,
+    );
+
+    if (isDuplicate) {
+      setFavoriteError('Essa cor já está nas suas favoritas.');
+      setActiveSlot(null);
+      return;
+    }
+
+    setFavoriteError(null);
+    setColorOverrides((previous) => ({
+      ...previous,
+      [activeSlot]: normalizedColor,
+    }));
+    setActiveSlot(null);
+  }
+
+  function handleRemoveFavorite(index: number) {
+    if (favoriteColors[index] == null || isSaving) return;
+
+    setFavoriteError(null);
+    setColorOverrides((previous) => ({
+      ...previous,
+      [index]: null,
+    }));
     setActiveSlot(null);
   }
 
   async function handleEnter() {
     if (isSaving) return;
-    if (!hasChanges) {
-      router.replace('/Storefront');
+    if (selectedFavoriteColors.length > MAX_COLORS) {
+      setFavoriteError(
+        `Você pode escolher no máximo ${MAX_COLORS} cores favoritas. Remova as cores excedentes para continuar.`,
+      );
       return;
     }
-    const success = await saveFavoriteColors(
-      favoriteColors.filter((color): color is string => color !== null),
-    );
-    if (success) {
-      setColorOverrides({});
-      setSaved(true);
+    if (hasChanges) {
+      const success = await saveFavoriteColors(selectedFavoriteColors);
+      if (!success) return;
     }
+    router.replace('/Storefront');
   }
 
   async function handleTakePhoto() {
@@ -119,7 +147,7 @@ export default function ColorimetryResultScreen() {
     setPhotoUri(null);
     setColorOverrides({});
     setActiveSlot(null);
-    setSaved(false);
+    setFavoriteError(null);
     setCameraError(null);
   }
 
@@ -209,27 +237,28 @@ export default function ColorimetryResultScreen() {
             title="Escolha suas Cores Favoritas"
             colors={favoriteColors}
             disabled={isSaving}
-            onSlotPress={setActiveSlot}
+            onSlotRemove={handleRemoveFavorite}
+            onSlotPress={(index) => {
+              setFavoriteError(null);
+              setActiveSlot(index);
+            }}
           />
         </View>
+
+        {favoriteError && (
+          <ThemedText accessibilityRole="alert" style={styles.saveError} themeColor="textSecondary">
+            {favoriteError}
+          </ThemedText>
+        )}
 
         {saveError && (
           <ThemedText style={styles.saveError} themeColor="textSecondary">
             {saveError}
           </ThemedText>
         )}
-        {saved && (
-          <ThemedText style={styles.saveError} themeColor="textSecondary">
-            Cores favoritas salvas com sucesso.
-          </ThemedText>
-        )}
 
         <View style={styles.footer}>
-          <AuthButton
-            title={hasChanges ? 'Salvar favoritas' : 'Entrar'}
-            onPress={handleEnter}
-            isLoading={isSaving}
-          />
+          <AuthButton title="Continuar" onPress={handleEnter} isLoading={isSaving} />
 
           <Pressable
             onPress={handleRedoColorimetry}
@@ -244,7 +273,6 @@ export default function ColorimetryResultScreen() {
 
       <ColorPickerModal
         visible={activeSlot !== null && !isSaving}
-        colors={pickerColors}
         selectedColor={activeSlot !== null ? (favoriteColors[activeSlot] ?? undefined) : undefined}
         onSelect={handleSelectFavorite}
         onClose={() => setActiveSlot(null)}
