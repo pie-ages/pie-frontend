@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { fetchCompanies } from '@/api/companies';
-import { fetchTaxonomy } from '@/api/taxonomy';
+import { fetchCompanies } from '@/services/companies';
+import { fetchTaxonomy } from '@/services/taxonomy';
 import type { FilterGroup } from '@/types/Filter';
 
 type TaxonomyState = {

@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 
-import type { LooksViewMode } from '@/types/look';
+import type { LooksViewMode } from '@/types/Look';
 
 import { styles } from './styles';
 

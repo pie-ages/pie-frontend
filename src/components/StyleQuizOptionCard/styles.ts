@@ -69,12 +69,5 @@ export function createStyles(s: ScaleFn) {
       color: Colors.light.text,
       textAlign: 'center',
     },
-    description: {
-      fontFamily: FontFamilies.jakartaRegular,
-      fontSize: s(9),
-      lineHeight: s(11.25),
-      color: Colors.light.textSecondary,
-      textAlign: 'center',
-    },
   });
 }

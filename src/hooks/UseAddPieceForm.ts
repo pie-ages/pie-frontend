@@ -1,23 +1,24 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useRef, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 
+import {
+  ALLOWED_IMAGE_TYPES,
+  addPieceSchema,
+  type AddPieceFormData,
+  type AddPieceFormInput,
+} from '@/schemas/wardrobeSchema';
 import {
   analyzeWardrobeImage,
   createWardrobeItem,
-  type CreateWardrobeItemPayload,
   type WardrobeImageAsset,
-} from '@/api/wardrobe';
-
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
-const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+} from '@/services/wardrobe';
 
 type AddPieceOperation = 'analyze' | 'submit' | null;
 
+const ANALYZED_FIELDS = ['category', 'style', 'color'] as const;
+
 export function useAddPieceForm() {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [style, setStyle] = useState('');
-  const [color, setColor] = useState('');
-  const [image, setImage] = useState<WardrobeImageAsset | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isAnalyzed, setIsAnalyzed] = useState(false);
@@ -25,6 +26,18 @@ export function useAddPieceForm() {
   const [operation, setOperation] = useState<AddPieceOperation>(null);
   const busyRef = useRef(false);
   const analysisRef = useRef<AbortController | null>(null);
+
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    clearErrors,
+    formState: { errors },
+  } = useForm<AddPieceFormInput, unknown, AddPieceFormData>({
+    resolver: zodResolver(addPieceSchema),
+    defaultValues: { name: '', category: '', style: '', color: '', image: null },
+  });
+  const image = useWatch({ control, name: 'image' });
 
   useEffect(() => () => analysisRef.current?.abort(), []);
 
@@ -34,10 +47,9 @@ export function useAddPieceForm() {
     const controller = new AbortController();
     analysisRef.current = controller;
     busyRef.current = true;
-    setImage(value);
-    setCategory('');
-    setStyle('');
-    setColor('');
+    setValue('image', value);
+    clearErrors('image');
+    ANALYZED_FIELDS.forEach((field) => setValue(field, ''));
     setError(null);
     setAnalysisError(null);
     setIsAnalyzed(false);
@@ -52,9 +64,8 @@ export function useAddPieceForm() {
       }
       const result = await analyzeWardrobeImage(value, controller.signal);
       if (controller.signal.aborted) return;
-      setCategory(result.category);
-      setStyle(result.style);
-      setColor(result.color);
+      ANALYZED_FIELDS.forEach((field) => setValue(field, result[field]));
+      clearErrors([...ANALYZED_FIELDS]);
       setIsAnalyzed(true);
     } catch (requestError) {
       if (controller.signal.aborted) return;
@@ -70,61 +81,40 @@ export function useAddPieceForm() {
     }
   }
 
-  function validate(): string | null {
-    if (!name.trim()) return 'Informe o nome da peça.';
-    if (!category) return 'Selecione a categoria da peça.';
-    if (!image) return 'Adicione uma imagem da peça.';
-    if (image.mimeType && !ALLOWED_IMAGE_TYPES.has(image.mimeType)) {
-      return 'Formato não suportado. Use JPEG, PNG ou WebP.';
-    }
-    if (image.fileSize && image.fileSize > MAX_IMAGE_SIZE_BYTES) {
-      return 'A imagem deve ter no máximo 5 MB.';
-    }
-    return null;
-  }
-
-  async function submit() {
+  async function submit(): Promise<boolean> {
     if (busyRef.current) return false;
+    let saved = false;
 
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      return false;
-    }
+    await handleSubmit(async ({ name, category, style, color, image: pieceImage }) => {
+      busyRef.current = true;
+      setError(null);
+      setOperation('submit');
 
-    busyRef.current = true;
-    setError(null);
-    setOperation('submit');
+      try {
+        await createWardrobeItem(
+          { name, category, style: style || null, color: color || null },
+          pieceImage,
+        );
+        setSuccess(true);
+        saved = true;
+      } catch (requestError) {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : 'Não foi possível cadastrar a peça. Tente novamente.',
+        );
+      } finally {
+        setOperation(null);
+        busyRef.current = false;
+      }
+    })();
 
-    const payload: CreateWardrobeItemPayload = {
-      name: name.trim(),
-      category,
-      style: style || null,
-      color: color || null,
-    };
-
-    try {
-      await createWardrobeItem(payload, image as WardrobeImageAsset);
-      setSuccess(true);
-      return true;
-    } catch (requestError) {
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : 'Não foi possível cadastrar a peça. Tente novamente.',
-      );
-      return false;
-    } finally {
-      setOperation(null);
-      busyRef.current = false;
-    }
+    return saved;
   }
 
   return {
-    name,
-    category,
-    style,
-    color,
+    control,
+    errors,
     image,
     error,
     success,
@@ -132,26 +122,6 @@ export function useAddPieceForm() {
     isAnalyzed,
     operation,
     selectImage,
-    setName: (value: string) => {
-      setName(value);
-      setError(null);
-    },
-    setCategory: (value: string) => {
-      setCategory(value);
-      setError(null);
-    },
-    setStyle: (value: string) => {
-      setStyle(value);
-      setError(null);
-    },
-    setColor: (value: string) => {
-      setColor(value);
-      setError(null);
-    },
-    setImage: (value: WardrobeImageAsset | null) => {
-      setImage(value);
-      setError(null);
-    },
     submit,
   };
 }

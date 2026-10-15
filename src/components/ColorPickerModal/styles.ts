@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   dismissArea: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   sheet: {
     width: '100%',

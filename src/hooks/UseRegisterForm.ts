@@ -1,22 +1,29 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
-import type { RegisterPayload } from '@/shared/Register';
+import { useAuth } from '@/contexts/AuthContext';
+import { registerSchema, type RegisterFormData } from '@/schemas/authSchema';
+import { ApiError } from '@/services/client';
 
-async function simulateRegisterRequest(_payload: RegisterPayload) {
+async function simulateRegisterRequest(_payload: Omit<RegisterFormData, 'confirmPassword'>) {
   await new Promise((resolve) => setTimeout(resolve, 1500));
 }
 
 export function useRegisterForm() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
+  const { completeMockSignUp } = useAuth();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
-
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
+  });
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible((previousValue) => !previousValue);
@@ -26,76 +33,36 @@ export function useRegisterForm() {
     setIsConfirmPasswordVisible((previousValue) => !previousValue);
   };
 
-  const setSubmissionError = (message: string) => setError(message);
-
-  const validateForm = () => {
-    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
-      setError('Preencha todos os campos obrigatórios.');
-      return false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email.trim())) {
-      setError('Por favor, insira um e-mail válido.');
-      return false;
-    }
-
-    if (password.length < 6) {
-      setError('A senha deve ter pelo menos 6 caracteres.');
-      return false;
-    }
-
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem.');
-      return false;
-    }
-
+  const handleRegister = handleSubmit(async ({ name, email, password }) => {
     setError(null);
-    return true;
-  };
-
-  const handleRegister = async (): Promise<boolean> => {
-    if (!validateForm()) {
-      return false;
-    }
-
-    setIsLoading(true);
 
     try {
-      const payload: RegisterPayload = {
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      };
-
-      await simulateRegisterRequest(payload);
-
-      return true;
+      await simulateRegisterRequest({ name, email, password });
     } catch {
       setError('Ocorreu um erro ao criar a conta. Tente novamente.');
-      return false;
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
+
+    try {
+      await completeMockSignUp({ email, password });
+    } catch (registerError) {
+      setError(
+        registerError instanceof ApiError
+          ? registerError.message
+          : 'Não foi possível iniciar sua sessão. Tente novamente.',
+      );
+    }
+  });
 
   return {
-    name,
-    email,
-    password,
-    confirmPassword,
+    control,
+    errors,
     isPasswordVisible,
     isConfirmPasswordVisible,
-    isLoading,
+    isLoading: isSubmitting,
     error,
-    setName,
-    setEmail,
-    setPassword,
-    setConfirmPassword,
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
-    setSubmissionError,
     handleRegister,
   };
 }

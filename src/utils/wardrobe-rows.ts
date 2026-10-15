@@ -1,4 +1,4 @@
-import type { WardrobePiece } from '../types/look';
+import type { WardrobePiece } from '../types/Look';
 
 export type WardrobeRowPage = {
   id: string;

@@ -11,6 +11,7 @@ type AuthPasswordInputProps = Omit<TextInputProps, 'secureTextEntry'> & {
   label: string;
   isVisible: boolean;
   onToggleVisibility: () => void;
+  error?: string;
 };
 
 export function AuthPasswordInput({

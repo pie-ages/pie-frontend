@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useEffect, useRef, useState } from 'react';
+import { Controller, type Control } from 'react-hook-form';
 import {
   Keyboard,
   Modal,
@@ -14,18 +15,16 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors } from '@/constants/Theme';
+import type { LookFormData } from '@/schemas/lookSchema';
 
 import { styles } from './styles';
 
 type SaveLookSheetProps = {
   visible: boolean;
-  name: string;
-  occasion: string;
+  control: Control<LookFormData>;
   imageUri: string | null;
   error: string | null;
   saving: boolean;
-  onChangeName: (value: string) => void;
-  onChangeOccasion: (value: string) => void;
   onPickImage: () => void;
   onCancel: () => void;
   onConfirm: () => void;
@@ -33,13 +32,10 @@ type SaveLookSheetProps = {
 
 export function SaveLookSheet({
   visible,
-  name,
-  occasion,
+  control,
   imageUri,
   error,
   saving,
-  onChangeName,
-  onChangeOccasion,
   onPickImage,
   onCancel,
   onConfirm,
@@ -154,26 +150,47 @@ export function SaveLookSheet({
               onLayout={(event) => setPageHeight(0, event.nativeEvent.layout.height)}
             >
               <Text style={styles.label}>Nome do Look</Text>
-              <TextInput
-                value={name}
-                onChangeText={onChangeName}
-                editable={!saving}
-                maxLength={60}
-                placeholder="Ex.: Ir para faculdade"
-                placeholderTextColor={Colors.placeholder}
-                style={styles.input}
-                accessibilityLabel="Nome do look"
+              <Controller
+                name="title"
+                control={control}
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <>
+                    <TextInput
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      editable={!saving}
+                      maxLength={60}
+                      placeholder="Ex.: Ir para faculdade"
+                      placeholderTextColor={Colors.placeholder}
+                      style={styles.input}
+                      accessibilityLabel="Nome do look"
+                    />
+                    {fieldState.error ? (
+                      <Text accessibilityRole="alert" style={styles.error}>
+                        {fieldState.error.message}
+                      </Text>
+                    ) : null}
+                  </>
+                )}
               />
               <Text style={styles.label}>Ocasião</Text>
-              <TextInput
-                value={occasion}
-                onChangeText={onChangeOccasion}
-                editable={!saving}
-                maxLength={120}
-                placeholder="Ex.: Trabalho, Casual, Festa"
-                placeholderTextColor={Colors.placeholder}
-                style={styles.input}
-                accessibilityLabel="Ocasião do look"
+              <Controller
+                name="occasion"
+                control={control}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    editable={!saving}
+                    maxLength={120}
+                    placeholder="Ex.: Trabalho, Casual, Festa"
+                    placeholderTextColor={Colors.placeholder}
+                    style={styles.input}
+                    accessibilityLabel="Ocasião do look"
+                  />
+                )}
               />
             </View>
 
