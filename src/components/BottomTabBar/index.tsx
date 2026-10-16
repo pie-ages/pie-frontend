@@ -1,8 +1,16 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { TabTriggerSlotProps } from 'expo-router/ui';
-import { forwardRef } from 'react';
-import { Platform, Pressable, View, type ViewProps } from 'react-native';
+import { forwardRef, useEffect, useRef, useState } from 'react';
+import { Platform, Pressable, View, type LayoutRectangle, type ViewProps } from 'react-native';
+import Animated, {
+  Easing,
+  FadeIn,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/ThemedText';
@@ -77,21 +85,70 @@ type TabBarSpotlightProps = Pick<TabBarButtonProps, 'label' | 'icon' | 'iconSet'
   tabCount: number;
 };
 
+const SPOTLIGHT_BORDER_WIDTH = 1;
+const SPOTLIGHT_SLIDE = {
+  duration: 300,
+  easing: Easing.out(Easing.cubic),
+  reduceMotion: ReduceMotion.System,
+};
+
 export function TabBarSpotlight({ index, tabCount, ...button }: TabBarSpotlightProps) {
   const insets = useSafeAreaInsets();
+  const [slots, setSlots] = useState<(LayoutRectangle | undefined)[]>([]);
+  const hasPlaced = useRef(false);
+  const translateX = useSharedValue(0);
+
+  const slot = slots[index];
+
+  useEffect(() => {
+    if (!slot) return;
+
+    const target = slot.x - SPOTLIGHT_BORDER_WIDTH;
+
+    if (hasPlaced.current) {
+      translateX.value = withTiming(target, SPOTLIGHT_SLIDE);
+    } else {
+      translateX.value = target;
+      hasPlaced.current = true;
+    }
+  }, [slot, translateX]);
+
+  const pillStyle = useAnimatedStyle(() => ({ transform: [{ translateX: translateX.value }] }));
 
   return (
     <View pointerEvents="none" style={[styles.wrapper, { bottom: insets.bottom + Spacing.one }]}>
       <View style={[styles.container, styles.spotlightContainer]}>
-        {Array.from({ length: tabCount }, (_, slot) => (
-          <View
-            key={slot}
+        {slot && (
+          <Animated.View
             style={[
-              styles.spotlightSlot,
-              slot === index ? styles.spotlightSlotActive : styles.spotlightSlotHidden,
+              styles.spotlightPill,
+              { top: slot.y - SPOTLIGHT_BORDER_WIDTH, width: slot.width, height: slot.height },
+              pillStyle,
             ]}
+          />
+        )}
+
+        {Array.from({ length: tabCount }, (_, i) => (
+          <View
+            key={i}
+            style={styles.spotlightSlot}
+            onLayout={({ nativeEvent }) =>
+              setSlots((current) => {
+                const next = [...current];
+                next[i] = nativeEvent.layout;
+                return next;
+              })
+            }
           >
-            <TabBarButton {...button} isFocused />
+            {i === index && (
+              <Animated.View
+                key={`${button.label}`}
+                entering={FadeIn.duration(250).reduceMotion(ReduceMotion.System)}
+                style={styles.spotlightContent}
+              >
+                <TabBarButton {...button} isFocused />
+              </Animated.View>
+            )}
           </View>
         ))}
       </View>

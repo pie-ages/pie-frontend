@@ -1,4 +1,5 @@
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import Animated, { Keyframe, ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomTabInset, Spacing } from '@/constants/Theme';
@@ -16,6 +17,13 @@ type OnboardingTooltipProps = {
   style?: StyleProp<ViewStyle>;
 };
 
+const STEP_ENTERING = new Keyframe({
+  0: { opacity: 0, transform: [{ translateY: 8 }] },
+  100: { opacity: 1, transform: [{ translateY: 0 }] },
+})
+  .duration(600)
+  .reduceMotion(ReduceMotion.System);
+
 export function OnboardingTooltip({
   stepLabel,
   title,
@@ -29,7 +37,10 @@ export function OnboardingTooltip({
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.card, { bottom: insets.bottom + BottomTabInset + Spacing.three }, style]}>
+    <Animated.View
+      entering={STEP_ENTERING}
+      style={[styles.card, { bottom: insets.bottom + BottomTabInset + Spacing.three }, style]}
+    >
       <View style={styles.header}>
         <View style={styles.badge}>
           {stepLabel ? <Text style={styles.badgeLabel}>{stepLabel}</Text> : null}
@@ -64,6 +75,6 @@ export function OnboardingTooltip({
           {nextLabel ? <Text style={styles.nextLabel}>{nextLabel}</Text> : null}
         </Pressable>
       </View>
-    </View>
+    </Animated.View>
   );
 }

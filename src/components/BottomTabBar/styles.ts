@@ -53,10 +53,14 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 999,
   },
-  spotlightSlotActive: {
-    backgroundColor: '#FFFFFF',
+  spotlightContent: {
+    flex: 1,
+    flexDirection: 'row',
   },
-  spotlightSlotHidden: {
-    opacity: 0,
+  spotlightPill: {
+    position: 'absolute',
+    left: 0,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
   },
 });

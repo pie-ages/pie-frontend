@@ -1,4 +1,5 @@
 import { BlurTargetView } from 'expo-blur';
+import { useRouter } from 'expo-router';
 import { Tabs, TabList, TabSlot, TabTrigger } from 'expo-router/ui';
 import { useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -12,6 +13,7 @@ export const unstable_settings = {
 
 export default function TabsLayout() {
   const blurTargetRef = useRef<View | null>(null);
+  const router = useRouter();
   const [isOnboardingVisible, setIsOnboardingVisible] = useState(true);
 
   return (
@@ -39,7 +41,10 @@ export default function TabsLayout() {
       {isOnboardingVisible && (
         <OnboardingOverlay
           blurTarget={blurTargetRef}
-          onSkip={() => setIsOnboardingVisible(false)}
+          onSkip={() => {
+            setIsOnboardingVisible(false);
+            router.replace('/Storefront');
+          }}
         />
       )}
     </Tabs>

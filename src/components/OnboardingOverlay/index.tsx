@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import type { RefObject } from 'react';
+import { useState, type RefObject } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabBarSpotlight } from '@/components/BottomTabBar';
 import { OnboardingTooltip } from '@/components/OnboardingTooltip';
+import { ONBOARDING_STEPS } from '@/constants/OnboardingSteps';
 import { Colors, Spacing } from '@/constants/Theme';
 
 import { styles } from './styles';
@@ -16,9 +17,21 @@ type OnboardingOverlayProps = {
 };
 
 const BLUR_INTENSITY = 20;
+const IMPLEMENTED_STEPS = ONBOARDING_STEPS.slice(0, 2);
+
+const TAB_SPOTLIGHTS = [
+  { label: 'Vitrine', icon: 'hanger', iconSet: 'material-community' },
+  { label: 'Closet', icon: 'wardrobe-outline', iconSet: 'material-community' },
+] as const;
 
 export function OnboardingOverlay({ onSkip, blurTarget }: OnboardingOverlayProps) {
   const insets = useSafeAreaInsets();
+  const [stepIndex, setStepIndex] = useState(0);
+
+  const step = IMPLEMENTED_STEPS[stepIndex];
+  const isFirstStep = stepIndex === 0;
+  const isLastImplementedStep = stepIndex === IMPLEMENTED_STEPS.length - 1;
+  const tabSpotlight = step.highlight.type === 'tab' ? TAB_SPOTLIGHTS[step.highlight.index] : null;
 
   const webStyle =
     Platform.OS === 'web'
@@ -44,13 +57,9 @@ export function OnboardingOverlay({ onSkip, blurTarget }: OnboardingOverlayProps
         </BlurView>
       )}
 
-      <TabBarSpotlight
-        index={0}
-        tabCount={3}
-        label="Vitrine"
-        icon="hanger"
-        iconSet="material-community"
-      />
+      {tabSpotlight && step.highlight.type === 'tab' && (
+        <TabBarSpotlight index={step.highlight.index} tabCount={3} {...tabSpotlight} />
+      )}
 
       <Pressable
         onPress={onSkip}
@@ -67,7 +76,16 @@ export function OnboardingOverlay({ onSkip, blurTarget }: OnboardingOverlayProps
         <Ionicons name="chevron-forward" size={18} color={Colors.white} />
       </Pressable>
 
-      <OnboardingTooltip />
+      <OnboardingTooltip
+        key={step.id}
+        stepLabel={`Passo ${stepIndex + 1} de ${ONBOARDING_STEPS.length}`}
+        title={step.title}
+        description={step.description}
+        backLabel={isFirstStep ? undefined : '← Voltar'}
+        nextLabel={step.nextLabel}
+        onBack={isFirstStep ? undefined : () => setStepIndex((current) => current - 1)}
+        onNext={isLastImplementedStep ? undefined : () => setStepIndex((current) => current + 1)}
+      />
     </View>
   );
 }
