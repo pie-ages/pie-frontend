@@ -43,6 +43,7 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     nextLabel: 'Próximo →',
     highlight: { type: 'profile' },
     placement: 'top',
+    align: 'end',
   },
   {
     id: 'wishlist',
@@ -52,5 +53,6 @@ export const ONBOARDING_STEPS: readonly OnboardingStep[] = [
     nextLabel: 'Começar →',
     highlight: { type: 'wishlist' },
     placement: 'top',
+    align: 'end',
   },
 ];

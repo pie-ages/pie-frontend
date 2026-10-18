@@ -16,11 +16,19 @@ export const styles = StyleSheet.create({
   },
   skipButton: {
     position: 'absolute',
-    right: Spacing.five,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.one,
     borderRadius: Spacing.two,
+  },
+  skipButtonRight: {
+    right: Spacing.five,
+  },
+  skipButtonLeft: {
+    left: Spacing.five,
+  },
+  targetSpotlight: {
+    position: 'absolute',
   },
   skipLabel: {
     fontSize: 16,

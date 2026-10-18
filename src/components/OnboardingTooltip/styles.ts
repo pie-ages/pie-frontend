@@ -25,6 +25,10 @@ export const styles = StyleSheet.create({
     borderColor: TooltipColors.border,
     backgroundColor: Colors.white,
   },
+  cardEnd: {
+    alignSelf: 'auto',
+    right: Spacing.three,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -3,6 +3,7 @@ import Animated, { Keyframe, ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomTabInset, Spacing } from '@/constants/Theme';
+import type { OnboardingTooltipAlign } from '@/types/Onboarding';
 
 import { styles } from './styles';
 
@@ -14,6 +15,7 @@ type OnboardingTooltipProps = {
   nextLabel?: string;
   onBack?: () => void;
   onNext?: () => void;
+  anchor?: { top: number; align: OnboardingTooltipAlign };
   style?: StyleProp<ViewStyle>;
 };
 
@@ -32,15 +34,17 @@ export function OnboardingTooltip({
   nextLabel,
   onBack,
   onNext,
+  anchor,
   style,
 }: OnboardingTooltipProps) {
   const insets = useSafeAreaInsets();
 
+  const positionStyle: StyleProp<ViewStyle> = anchor
+    ? [{ top: anchor.top }, anchor.align === 'end' && styles.cardEnd]
+    : { bottom: insets.bottom + BottomTabInset + Spacing.three };
+
   return (
-    <Animated.View
-      entering={STEP_ENTERING}
-      style={[styles.card, { bottom: insets.bottom + BottomTabInset + Spacing.three }, style]}
-    >
+    <Animated.View entering={STEP_ENTERING} style={[styles.card, positionStyle, style]}>
       <View style={styles.header}>
         <View style={styles.badge}>
           {stepLabel ? <Text style={styles.badgeLabel}>{stepLabel}</Text> : null}
