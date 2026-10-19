@@ -44,13 +44,18 @@ export const resetPasswordSchema = z
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export const loginResponseSchema = z.object({
-  token: z.string().min(1),
-  user: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string(),
-    photoUrl: z.string().nullable(),
-  }),
+  accessToken: z.string().min(1),
+  refreshToken: z.string().min(1),
+  expiresIn: z.number(),
+  tokenType: z.string(),
+  user: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      email: z.string(),
+      photoUrl: z.string().nullable(),
+    })
+    .nullable(),
 });
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;

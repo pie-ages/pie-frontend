@@ -57,8 +57,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
     }
     const data = result.data;
 
-    await storeToken(data.token);
-    setToken(data.token);
+    await storeToken(data.accessToken);
+    setToken(data.accessToken);
   }
 
   async function completeMockSignUp(payload: LoginFormData) {
