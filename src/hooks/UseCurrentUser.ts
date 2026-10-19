@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from 'react';
 import type { CurrentUser } from '@/schemas/userSchema';
 import { isSessionExpiredError } from '@/services/client';
 import { fetchCurrentUser } from '@/services/user';
-import type { ProfileStatus } from '@/types/Profile';
+import { ProfileStatus } from '@/types/Profile';
 
 export function useCurrentUser(enabled: boolean) {
   const [user, setUser] = useState<CurrentUser | null>(null);
-  const [status, setStatus] = useState<ProfileStatus>('loading');
+  const [status, setStatus] = useState<ProfileStatus>(ProfileStatus.Loading);
   const [sessionExpired, setSessionExpired] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
@@ -19,23 +19,23 @@ export function useCurrentUser(enabled: boolean) {
       .then((data) => {
         if (controller.signal.aborted) return;
         setUser(data);
-        setStatus('success');
+        setStatus(ProfileStatus.Success);
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
         if (isSessionExpiredError(error)) setSessionExpired(true);
-        else setStatus('error');
+        else setStatus(ProfileStatus.Error);
       });
 
     return () => {
       controller.abort();
-      setStatus('loading');
+      setStatus(ProfileStatus.Loading);
       setSessionExpired(false);
     };
   }, [attempt, enabled]);
 
   const retry = useCallback(() => {
-    setStatus('loading');
+    setStatus(ProfileStatus.Loading);
     setAttempt((value) => value + 1);
   }, []);
 

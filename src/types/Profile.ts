@@ -1,1 +1,6 @@
-export type ProfileStatus = 'loading' | 'success' | 'error' | 'empty';
+export enum ProfileStatus {
+  Loading = 'loading',
+  Success = 'success',
+  Error = 'error',
+  Empty = 'empty',
+}

@@ -1,7 +1,7 @@
 import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
 import { ProfileSectionCard } from '@/components/ProfileSectionCard';
 import { ProfileSectionStatus } from '@/components/ProfileSectionStatus';
-import type { ProfileStatus } from '@/types/Profile';
+import { ProfileStatus } from '@/types/Profile';
 
 type ProfileColorSectionProps = {
   title: string;
@@ -22,11 +22,11 @@ export function ProfileColorSection({
   emptyTitle,
   onRetry,
 }: ProfileColorSectionProps) {
-  if (status === 'success' && colors.length > 0) {
+  if (status === ProfileStatus.Success && colors.length > 0) {
     return <ColorimetryColorRow compact title={title} colors={colors} caption={caption} />;
   }
 
-  const sectionStatus = status === 'success' ? 'empty' : status;
+  const sectionStatus = status === ProfileStatus.Success ? ProfileStatus.Empty : status;
 
   return (
     <ProfileSectionCard title={title}>

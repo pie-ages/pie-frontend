@@ -5,7 +5,7 @@ import { ProfileAvatar } from '@/components/ProfileAvatar';
 import { ProfileSectionCard } from '@/components/ProfileSectionCard';
 import { Colors } from '@/constants/Theme';
 import type { CurrentUser } from '@/schemas/userSchema';
-import type { ProfileStatus } from '@/types/Profile';
+import { ProfileStatus } from '@/types/Profile';
 
 import { styles } from './styles';
 
@@ -16,7 +16,7 @@ type ProfileUserSectionProps = {
 };
 
 export function ProfileUserSection({ status, user, onRetry }: ProfileUserSectionProps) {
-  if (status === 'success' && user) {
+  if (status === ProfileStatus.Success && user) {
     return (
       <ProfileSectionCard style={styles.card}>
         <View style={styles.row}>
@@ -38,7 +38,7 @@ export function ProfileUserSection({ status, user, onRetry }: ProfileUserSection
 
   return (
     <ProfileSectionCard style={styles.card}>
-      {status === 'error' ? (
+      {status === ProfileStatus.Error ? (
         <ErrorState
           title="Não foi possível carregar seus dados"
           subtitle="Verifique sua conexão e tente novamente."

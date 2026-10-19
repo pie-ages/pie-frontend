@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { ProfileEmptyState } from '@/components/ProfileEmptyState';
-import type { ProfileStatus } from '@/types/Profile';
+import { ProfileStatus } from '@/types/Profile';
 
 import { styles } from './styles';
 
@@ -20,14 +20,14 @@ export function ProfileSectionStatus({
   emptyTitle,
   onRetry,
 }: ProfileSectionStatusProps) {
-  if (status === 'empty') {
+  if (status === ProfileStatus.Empty) {
     return <ProfileEmptyState title={emptyTitle} />;
   }
 
   return (
     <View style={styles.container}>
-      {status === 'loading' && <LoadingState />}
-      {status === 'error' && (
+      {status === ProfileStatus.Loading && <LoadingState />}
+      {status === ProfileStatus.Error && (
         <ErrorState
           title={errorTitle}
           subtitle="Verifique sua conexão e tente novamente."

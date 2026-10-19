@@ -4,7 +4,7 @@ import { ProfileSectionCard } from '@/components/ProfileSectionCard';
 import { ProfileSectionStatus } from '@/components/ProfileSectionStatus';
 import { ThemedText } from '@/components/ThemedText';
 import { IDENTIFIED_STYLE_INFO, type IdentifiedStyle } from '@/types/IdentifiedStyle';
-import type { ProfileStatus } from '@/types/Profile';
+import { ProfileStatus } from '@/types/Profile';
 
 import { styles } from './styles';
 
@@ -15,7 +15,7 @@ type ProfileStyleSectionProps = {
 };
 
 export function ProfileStyleSection({ status, favoriteStyles, onRetry }: ProfileStyleSectionProps) {
-  if (status !== 'success') {
+  if (status !== ProfileStatus.Success) {
     return (
       <ProfileSectionCard title="Estilo">
         <ProfileSectionStatus
