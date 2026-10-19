@@ -99,7 +99,6 @@ export default function ColorimetryResultScreen() {
   function handleAcceptConsent() {
     setHasConsented(true);
     setIsConsentVisible(false);
-    // iOS cannot present the camera while the modal is still animating out; wait for onDismiss there.
     if (Platform.OS === 'ios') {
       openCameraOnDismissRef.current = true;
     } else {
