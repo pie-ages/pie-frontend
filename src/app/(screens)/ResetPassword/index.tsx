@@ -25,7 +25,7 @@ export default function ResetPasswordScreen() {
   } = useResetPasswordForm();
 
   function handleRequestNewLink() {
-    router.replace('/ForgotPassword');
+    router.dismissTo('/ForgotPassword');
   }
 
   const description = hasToken

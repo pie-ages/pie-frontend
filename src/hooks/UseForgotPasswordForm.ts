@@ -29,7 +29,8 @@ export function useForgotPasswordForm() {
     } catch (recoveryError) {
       setError(
         recoveryError instanceof ApiError
-          ? recoveryError.message
+          ? (recoveryError.serverMessage ??
+              'Não foi possível enviar as instruções. Tente novamente.')
           : 'Não foi possível conectar. Verifique sua conexão e tente novamente.',
       );
     }

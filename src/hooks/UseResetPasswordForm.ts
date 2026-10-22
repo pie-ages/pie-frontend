@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Alert } from 'react-native';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/schemas/authSchema';
@@ -43,7 +44,7 @@ export function useResetPasswordForm() {
     } catch (resetError) {
       setError(
         resetError instanceof ApiError
-          ? resetError.message
+          ? (resetError.serverMessage ?? 'Não foi possível redefinir a senha. Tente novamente.')
           : 'Não foi possível conectar. Verifique sua conexão e tente novamente.',
       );
       return;
@@ -53,7 +54,8 @@ export function useResetPasswordForm() {
       await signOut();
     }
 
-    router.replace('/Login');
+    router.dismissTo('/Login');
+    Alert.alert('Senha redefinida!', 'Entre com a sua nova senha para acessar sua conta.');
   });
 
   return {

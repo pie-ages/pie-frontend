@@ -14,7 +14,7 @@ export default function ForgotPasswordScreen() {
   const { control, emailError, isLoading, error, sentTo, handleRecovery } = useForgotPasswordForm();
 
   function handleBackToLogin() {
-    router.replace('/Login');
+    router.dismissTo('/Login');
   }
 
   return (
@@ -64,7 +64,10 @@ export default function ForgotPasswordScreen() {
                 {error && <Text style={styles.errorText}>{error}</Text>}
 
                 {sentTo && (
-                  <Text style={styles.successText}>Enviamos as instruções para {sentTo}.</Text>
+                  <Text style={styles.successText}>
+                    Se houver uma conta com {sentTo}, você receberá um e-mail com as instruções.
+                    Confira também a caixa de spam.
+                  </Text>
                 )}
               </View>
             </View>
