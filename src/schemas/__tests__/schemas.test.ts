@@ -1,9 +1,18 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { registerSchema } from '@/schemas/authSchema';
-import { lookFormSchema } from '@/schemas/lookSchema';
+import { loginResponseSchema, registerSchema } from '@/schemas/authSchema';
 import { styleIdentificationSchema } from '@/schemas/styleSchema';
 import { addPieceSchema, wardrobeImageAnalysisSchema } from '@/schemas/wardrobeSchema';
+
+import { lookFormSchema } from '../lookSchema';
+
+const validLoginResponse = {
+  accessToken: 'eyJhbGciOiJIUzI1NiJ9.payload.sig',
+  refreshToken: 'refresh-token-string',
+  expiresIn: 3600,
+  tokenType: 'bearer',
+  user: { id: 'uuid-1', name: 'Anna', email: 'anna@pie.com.br', photoUrl: null },
+};
 
 const validRegister = {
   name: ' Anna ',
@@ -11,6 +20,29 @@ const validRegister = {
   password: '123456',
   confirmPassword: '123456',
 };
+
+describe('loginResponseSchema', () => {
+  it('parses a valid response from the backend', () => {
+    const result = loginResponseSchema.safeParse(validLoginResponse);
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts null user', () => {
+    const result = loginResponseSchema.safeParse({ ...validLoginResponse, user: null });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects legacy shape with token instead of accessToken', () => {
+    const legacy = { token: 'abc', user: validLoginResponse.user };
+    const result = loginResponseSchema.safeParse(legacy);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects response missing refreshToken', () => {
+    const { refreshToken: _r, ...noRefresh } = validLoginResponse;
+    expect(loginResponseSchema.safeParse(noRefresh).success).toBe(false);
+  });
+});
 
 describe('registerSchema', () => {
   it('trims fields and accepts matching passwords', () => {
