@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -21,6 +22,7 @@ import { mockUserProfile } from '@/mocks/profileMocks';
 export default function EditProfileScreen() {
   const [name, setName] = useState(mockUserProfile.name);
   const [email, setEmail] = useState(mockUserProfile.email);
+  const [photoUri, setPhotoUri] = useState(mockUserProfile.avatarUrl);
 
   function handleClose() {
     if (router.canGoBack()) {
@@ -30,9 +32,29 @@ export default function EditProfileScreen() {
     }
   }
 
+  async function handleUpdatePhoto() {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert('Você precisa permitir o acesso à galeria para mudar a foto.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setPhotoUri(result.assets[0].uri);
+    }
+  }
+
   function handleSave() {
     // Aqui vai a interação com a API para salvar as alterações do perfil
-    console.log('Salvar:', { name, email });
+    console.log('Salvar:', { name, email, photoUri });
     handleClose();
   }
 
@@ -53,8 +75,12 @@ export default function EditProfileScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.photoContainer}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: mockUserProfile.avatarUrl }} style={styles.avatarImage} />
-              <TouchableOpacity style={styles.editPhotoButton} activeOpacity={0.8}>
+              <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+              <TouchableOpacity
+                style={styles.editPhotoButton}
+                activeOpacity={0.8}
+                onPress={handleUpdatePhoto}
+              >
                 <Feather name="camera" size={16} color={Colors.white} />
               </TouchableOpacity>
             </View>
