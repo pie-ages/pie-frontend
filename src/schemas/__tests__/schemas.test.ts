@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { registerSchema } from '@/schemas/authSchema';
+import { colorimetryPreferencesSchema } from '@/schemas/colorimetrySchema';
 import { favoriteStylesSchema, styleIdentificationSchema } from '@/schemas/styleSchema';
 import { currentUserSchema } from '@/schemas/userSchema';
 import { addPieceSchema, wardrobeImageAnalysisSchema } from '@/schemas/wardrobeSchema';
@@ -107,5 +108,25 @@ describe('favoriteStylesSchema', () => {
       'CASUAL',
       'BOHO',
     ]);
+  });
+});
+
+describe('colorimetryPreferencesSchema', () => {
+  const colors = { highlightColors: ['#FFB58C'], avoidColors: ['#00C48C'], favoriteColors: [] };
+
+  it('accepts preferences before any analysis, without a season', () => {
+    expect(colorimetryPreferencesSchema.safeParse(colors).success).toBe(true);
+    expect(colorimetryPreferencesSchema.safeParse({ ...colors, season: null }).success).toBe(true);
+  });
+
+  it('keeps the analyzed season label and captions', () => {
+    const season = {
+      id: 'soft_autumn',
+      label: 'Outono Suave',
+      highlightCaption: 'Tons quentes e suaves valorizam sua pele.',
+      avoidCaption: 'Tons frios e vivos competem com a sua coloração natural.',
+    };
+    const result = colorimetryPreferencesSchema.safeParse({ ...colors, season });
+    expect(result.success && result.data.season?.label).toBe('Outono Suave');
   });
 });

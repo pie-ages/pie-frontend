@@ -41,6 +41,7 @@ export function useProfilePreferences(enabled: boolean) {
 
   return {
     highlightColors: preferences?.highlightColors ?? [],
+    highlightCaption: preferences?.season?.highlightCaption,
     favoriteColors: preferences?.favoriteColors ?? [],
     status,
     sessionExpired,

@@ -5,7 +5,6 @@ import { ProductActionButton } from '@/components/ProductActionButton';
 import { ProfileColorSection } from '@/components/ProfileColorSection';
 import { ProfileStyleSection } from '@/components/ProfileStyleSection';
 import { ProfileUserSection } from '@/components/ProfileUserSection';
-import { HIGHLIGHT_COLORS_CAPTION } from '@/constants/Colorimetry';
 import { BrandColors } from '@/constants/Theme';
 import { useCurrentUser } from '@/hooks/UseCurrentUser';
 import { useFavoriteStyles } from '@/hooks/UseFavoriteStyles';
@@ -62,7 +61,7 @@ export function ProfileSheet({ visible, onClose, onSignOut }: ProfileSheetProps)
 
             <ProfileColorSection
               title="Colorimetria"
-              caption={HIGHLIGHT_COLORS_CAPTION}
+              caption={preferences.highlightCaption}
               status={preferences.status}
               colors={preferences.highlightColors}
               errorTitle="Não foi possível carregar sua colorimetria"
