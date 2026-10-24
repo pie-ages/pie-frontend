@@ -128,9 +128,7 @@ export default function StyleSelectionScreen() {
           <TouchableOpacity
             style={styles.continueButton}
             activeOpacity={0.8}
-            onPress={() => {
-              router.push('/(screens)/ColorimetryResult');
-            }}
+            onPress={() => router.replace('/(screens)/ColorimetryResult')}
           >
             <Text style={styles.continueButtonText}>Continuar</Text>
           </TouchableOpacity>
