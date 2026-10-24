@@ -10,7 +10,10 @@ let cached: CompanySummary[] | null = null;
 
 export async function fetchCompanies(): Promise<CompanySummary[]> {
   if (cached) return cached;
-  const data = parseResponse(z.array(companySummarySchema), await apiFetch('/api/companies'));
+  const data = parseResponse(
+    z.array(companySummarySchema),
+    await apiFetch('/api/companies/active'),
+  );
   cached = data;
   return data;
 }
