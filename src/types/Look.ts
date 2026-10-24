@@ -63,4 +63,4 @@ export type LookDraft = {
   items: WardrobePiece[];
 };
 
-export const MAX_LOOK_PIECES = 3;
+export const MAX_LOOK_PIECES = 4;
