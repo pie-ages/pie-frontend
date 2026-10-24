@@ -1,5 +1,5 @@
 import { Pressable, Text, View, type StyleProp, type ViewStyle } from 'react-native';
-import Animated, { Keyframe, ReduceMotion } from 'react-native-reanimated';
+import Animated, { Easing, Keyframe, ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomTabInset, Spacing } from '@/constants/Theme';
@@ -19,11 +19,23 @@ type OnboardingTooltipProps = {
   style?: StyleProp<ViewStyle>;
 };
 
-const STEP_ENTERING = new Keyframe({
-  0: { opacity: 0, transform: [{ translateY: 8 }] },
-  100: { opacity: 1, transform: [{ translateY: 0 }] },
+const STEP_EXIT_DURATION = 160;
+
+const STEP_EXITING = new Keyframe({
+  0: { opacity: 1, transform: [{ scale: 1 }] },
+  100: { opacity: 0, transform: [{ scale: 0.85 }], easing: Easing.in(Easing.quad) },
 })
-  .duration(600)
+  .duration(STEP_EXIT_DURATION)
+  .reduceMotion(ReduceMotion.System);
+
+const STEP_ENTERING = new Keyframe({
+  0: { opacity: 0, transform: [{ scale: 0.85 }] },
+  60: { opacity: 1, transform: [{ scale: 1.06 }], easing: Easing.out(Easing.quad) },
+  80: { opacity: 1, transform: [{ scale: 0.98 }] },
+  100: { opacity: 1, transform: [{ scale: 1 }] },
+})
+  .duration(480)
+  .delay(STEP_EXIT_DURATION)
   .reduceMotion(ReduceMotion.System);
 
 export function OnboardingTooltip({
@@ -44,7 +56,11 @@ export function OnboardingTooltip({
     : { bottom: insets.bottom + BottomTabInset + Spacing.three };
 
   return (
-    <Animated.View entering={STEP_ENTERING} style={[styles.card, positionStyle, style]}>
+    <Animated.View
+      entering={STEP_ENTERING}
+      exiting={STEP_EXITING}
+      style={[styles.card, positionStyle, style]}
+    >
       <View style={styles.header}>
         <View style={styles.badge}>
           {stepLabel ? <Text style={styles.badgeLabel}>{stepLabel}</Text> : null}
