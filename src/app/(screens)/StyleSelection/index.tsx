@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -124,7 +125,13 @@ export default function StyleSelectionScreen() {
         </View>
 
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.continueButton} activeOpacity={0.8} onPress={() => {}}>
+          <TouchableOpacity
+            style={styles.continueButton}
+            activeOpacity={0.8}
+            onPress={() => {
+              router.push('/(screens)/ColorimetryResult');
+            }}
+          >
             <Text style={styles.continueButtonText}>Continuar</Text>
           </TouchableOpacity>
         </View>

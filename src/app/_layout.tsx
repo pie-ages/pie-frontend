@@ -4,12 +4,13 @@ import {
   PlusJakartaSans_700Bold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { UserStyleProvider } from '@/contexts/UserStyleContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 
@@ -32,10 +33,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  // const { isAuthenticated, isInitializing, pendingStyleQuiz } = useAuth();
-  const isAuthenticated = true;
-  const isInitializing = false;
-  const pendingStyleQuiz = false;
+  const { isAuthenticated, isInitializing, pendingStyleQuiz } = useAuth();
 
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
@@ -44,19 +42,16 @@ function RootNavigator() {
     Inter_700Bold,
   });
 
-  /*
   useEffect(() => {
     if (isAuthenticated && pendingStyleQuiz) {
       router.replace('/StyleQuiz');
     }
   }, [isAuthenticated, pendingStyleQuiz]);
-  */
 
   if (isInitializing || !fontsLoaded) return null;
 
   return (
     <Stack
-      initialRouteName="(screens)/MyStyle/index"
       screenOptions={{
         headerShown: false,
       }}

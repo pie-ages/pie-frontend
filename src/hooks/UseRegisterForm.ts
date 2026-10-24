@@ -5,15 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerSchema, type RegisterFormData } from '@/schemas/authSchema';
 import { ApiError } from '@/services/client';
-import { registerUser } from '@/services/user';
-
-const REGISTER_ERROR_MESSAGE = 'Ocorreu um erro ao criar a conta. Tente novamente.';
-
-function getRegisterErrorMessage(error: unknown): string {
-  if (!(error instanceof ApiError)) return REGISTER_ERROR_MESSAGE;
-  if (error.status === 409) return 'Este e-mail já está cadastrado.';
-  return error.serverMessage ?? REGISTER_ERROR_MESSAGE;
-}
+import { createUser } from '@/services/users';
 
 export function useRegisterForm() {
   const { completeSignUp } = useAuth();
@@ -42,18 +34,22 @@ export function useRegisterForm() {
     setError(null);
 
     try {
-      await registerUser({ name, email, password });
-    } catch (registerError) {
-      setError(getRegisterErrorMessage(registerError));
+      await createUser({ name, email, password });
+    } catch (createError) {
+      setError(
+        createError instanceof ApiError && createError.serverMessage
+          ? createError.serverMessage
+          : 'Ocorreu um erro ao criar a conta. Tente novamente.',
+      );
       return;
     }
 
     try {
       await completeSignUp({ email, password });
-    } catch (signInError) {
+    } catch (registerError) {
       setError(
-        signInError instanceof ApiError
-          ? signInError.message
+        registerError instanceof ApiError
+          ? registerError.message
           : 'Conta criada, mas não foi possível iniciar sua sessão. Faça login para continuar.',
       );
     }

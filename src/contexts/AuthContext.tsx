@@ -1,10 +1,19 @@
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
-import { loginResponseSchema, type LoginFormData } from '@/schemas/authSchema';
-import { ApiError, apiPost } from '@/services/client';
-import { getStoredToken, removeStoredToken, storeToken } from '@/utils/auth-storage';
+import { loginResponseSchema, type LoginFormData, type LoginResponse } from '@/schemas/authSchema';
+import { ApiError, apiPost, apiPostAuth } from '@/services/client';
+import {
+  clearSession,
+  getStoredExpiresAt,
+  getStoredRefreshToken,
+  getStoredToken,
+  storeSession,
+} from '@/utils/auth-storage';
+
+type SessionUser = NonNullable<LoginResponse['user']>;
 
 type AuthContextValue = {
+  user: SessionUser | null;
   isAuthenticated: boolean;
   isInitializing: boolean;
   pendingStyleQuiz: boolean;
@@ -18,25 +27,57 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [pendingStyleQuiz, setPendingStyleQuiz] = useState(false);
+
+  async function tryRefresh(): Promise<{ token: string; user: SessionUser | null } | null> {
+    const refreshToken = await getStoredRefreshToken();
+    if (!refreshToken) return null;
+
+    try {
+      const response = await apiPost('/api/auth/refresh', { refreshToken });
+      const result = loginResponseSchema.safeParse(response);
+      if (!result.success) return null;
+
+      const data = result.data;
+      await storeSession(data.accessToken, data.refreshToken, data.expiresIn);
+      return { token: data.accessToken, user: data.user ?? null };
+    } catch {
+      await clearSession();
+      return null;
+    }
+  }
 
   useEffect(() => {
     let isActive = true;
 
-    getStoredToken()
-      .then(async (storedToken) => {
-        if (storedToken?.startsWith('mock-signup-')) {
-          await removeStoredToken();
+    async function init() {
+      try {
+        const storedToken = await getStoredToken();
+        if (!storedToken) return;
+
+        const expiresAt = await getStoredExpiresAt();
+        const isExpired = expiresAt !== null && Date.now() >= expiresAt - 30_000;
+
+        if (isExpired) {
+          const refreshed = await tryRefresh();
+          if (isActive) {
+            setToken(refreshed?.token ?? null);
+            setUser(refreshed?.user ?? null);
+          }
+          return;
         }
-        if (isActive) setToken(storedToken?.startsWith('mock-signup-') ? null : storedToken);
-      })
-      .catch(() => {
+
+        if (isActive) setToken(storedToken);
+      } catch {
         if (isActive) setToken(null);
-      })
-      .finally(() => {
+      } finally {
         if (isActive) setIsInitializing(false);
-      });
+      }
+    }
+
+    init();
 
     return () => {
       isActive = false;
@@ -55,10 +96,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!result.success) {
       throw new ApiError('A API retornou uma resposta de autenticação inválida.', 200);
     }
-    const data = result.data;
 
-    await storeToken(data.token);
-    setToken(data.token);
+    const data = result.data;
+    await storeSession(data.accessToken, data.refreshToken, data.expiresIn);
+    setToken(data.accessToken);
+    setUser(data.user ?? null);
   }
 
   async function completeSignUp(payload: LoginFormData) {
@@ -67,9 +109,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function signOut() {
-    await removeStoredToken();
-    setPendingStyleQuiz(false);
+    const currentToken = token;
     setToken(null);
+    setUser(null);
+    setPendingStyleQuiz(false);
+
+    if (currentToken) {
+      apiPostAuth('/api/auth/logout').catch(() => {});
+    }
+
+    await clearSession();
   }
 
   function completeStyleQuiz() {
@@ -77,6 +126,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   const value: AuthContextValue = {
+    user,
     isAuthenticated: token !== null,
     isInitializing,
     pendingStyleQuiz,

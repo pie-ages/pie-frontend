@@ -25,14 +25,30 @@ export const registerSchema = z
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
+export type CreateUserPayload = Omit<RegisterFormData, 'confirmPassword'>;
+
+export const userResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  photoUrl: z.string().nullable(),
+});
+
+export type UserResponse = z.infer<typeof userResponseSchema>;
+
 export const loginResponseSchema = z.object({
-  token: z.string().min(1),
-  user: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.string(),
-    photoUrl: z.string().nullable(),
-  }),
+  accessToken: z.string().min(1),
+  refreshToken: z.string().min(1),
+  expiresIn: z.number(),
+  tokenType: z.string(),
+  user: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      email: z.string(),
+      photoUrl: z.string().nullable(),
+    })
+    .nullable(),
 });
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
