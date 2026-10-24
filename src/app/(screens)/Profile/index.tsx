@@ -3,50 +3,45 @@ import { router } from 'expo-router';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
-import { ProductActionButton } from '@/components/ProductActionButton';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
-import { useAuth } from '@/contexts/AuthContext';
-import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
-import { useUserProductStyles } from '@/hooks/UseUserProductStyles';
-import { useUserProfile } from '@/hooks/UseUserProfile';
+import { mockUserProfile } from '@/mocks/profileMocks';
 import { STYLE_LABELS } from '@/types/Style';
 
 export default function ProfileScreen() {
+  /* Hooks comentados para teste com dados mockados
   const { profile, status: profileStatus, retry: retryProfile } = useUserProfile();
-  const {
-    preferences,
-    status: preferencesStatus,
-    retry: retryPreferences,
-  } = useColorimetryPreferences();
-  const {
-    styles: selectedStyles,
-    status: stylesStatus,
-    retry: retryStyles,
-  } = useUserProductStyles();
-  const { signOut } = useAuth();
+  const { preferences, status: preferencesStatus, retry: retryPreferences } = useColorimetryPreferences();
+  const { styles: selectedStyles, status: stylesStatus, retry: retryStyles } = useUserProductStyles();
+  */
 
-  const isLoading =
-    profileStatus === 'loading' || preferencesStatus === 'loading' || stylesStatus === 'loading';
-  const hasError =
-    profileStatus === 'error' || preferencesStatus === 'error' || stylesStatus === 'error';
+  // Dados mockados
+  const profile = {
+    name: mockUserProfile.name,
+    email: mockUserProfile.email,
+    photoUrl: mockUserProfile.avatarUrl,
+  };
+
+  const preferences = {
+    highlightColors: mockUserProfile.colorimetry.colors,
+    favoriteColors: mockUserProfile.favoriteColors,
+  };
+
+  const selectedStyles = ['dramatico', 'casual', 'romantico'] as any[];
+
+  const isLoading = false;
+  const hasError = false;
 
   function handleClose() {
     if (router.canGoBack()) router.back();
   }
 
   function handleRetry() {
-    if (profileStatus === 'error') retryProfile();
-    if (preferencesStatus === 'error') retryPreferences();
-    if (stylesStatus === 'error') retryStyles();
-  }
-
-  async function handleSignOut() {
-    await signOut();
-    router.replace('/Login');
+    // if (profileStatus === 'error') retryProfile();
+    // if (preferencesStatus === 'error') retryPreferences();
+    // if (stylesStatus === 'error') retryStyles();
   }
 
   return (
@@ -59,7 +54,7 @@ export default function ProfileScreen() {
           accessibilityRole="button"
           accessibilityLabel="Fechar perfil"
         >
-          <Feather name="x" size={22} color={Colors.brand.primary} />
+          <Feather name="x" size={24} color={Colors.brand.primary} />
         </Pressable>
         <Text style={styles.headerTitle}>Perfil</Text>
         <View style={styles.headerSpacer} />
@@ -76,44 +71,82 @@ export default function ProfileScreen() {
               {profile?.photoUrl ? (
                 <Image source={{ uri: profile.photoUrl }} style={styles.avatarImage} />
               ) : (
-                <Feather name="user" size={28} color={Colors.icon} />
+                <Feather name="user" size={36} color={Colors.icon} />
               )}
             </View>
             <View style={styles.profileInfo}>
-              <ThemedText type="smallBold">Nome: {profile?.name}</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Email: {profile?.email}
-              </ThemedText>
+              <Text style={styles.profileName}>{profile?.name}</Text>
+              <Text style={styles.profileEmail}>{profile?.email}</Text>
             </View>
           </View>
 
-          <ColorimetryColorRow
-            title="Colorimetria"
-            colors={preferences?.highlightColors ?? []}
-            caption="Tons terrosos e quentes valorizam sua pele."
-          />
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <ThemedText type="smallBold" style={styles.cardTitle}>
+                Colorimetria
+              </ThemedText>
+              <Pressable
+                onPress={() => router.push('/')}
+                style={styles.actionButton}
+                accessibilityRole="button"
+                accessibilityLabel="Refazer colorimetria"
+              >
+                <Feather name="refresh-cw" size={12} color={Colors.white} />
+                <Text style={styles.actionButtonText}>Refazer</Text>
+              </Pressable>
+            </View>
+            <View style={styles.colorsRow}>
+              {preferences?.highlightColors?.map((color, index) => (
+                <View key={index} style={[styles.colorCircle, { backgroundColor: color }]} />
+              ))}
+            </View>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.cardCaption}>
+              Tons terrosos e quentes valorizam sua pele.
+            </ThemedText>
+          </View>
 
-          <ColorimetryColorRow title="Cores Favoritas" colors={preferences?.favoriteColors ?? []} />
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <ThemedText type="smallBold" style={styles.cardTitle}>
+                Cores Favoritas
+              </ThemedText>
+              <Pressable
+                onPress={() => router.push('/')}
+                style={styles.actionButton}
+                accessibilityRole="button"
+                accessibilityLabel="Editar cores favoritas"
+              >
+                <Feather name="edit-2" size={12} color={Colors.white} />
+                <Text style={styles.actionButtonText}>Editar</Text>
+              </Pressable>
+            </View>
+            <View style={styles.colorsRow}>
+              {preferences?.favoriteColors?.map((color, index) => (
+                <View key={index} style={[styles.colorCircle, { backgroundColor: color }]} />
+              ))}
+            </View>
+          </View>
 
-          <View style={styles.styleCard}>
-            <View style={styles.styleHeader}>
-              <ThemedText type="smallBold" style={styles.styleTitle}>
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <ThemedText type="smallBold" style={styles.cardTitle}>
                 Estilo
               </ThemedText>
               <Pressable
-                onPress={() => router.push('/StyleSelection')}
-                style={styles.action}
+                onPress={() => router.push('/')}
+                style={styles.actionButton}
                 accessibilityRole="button"
                 accessibilityLabel="Editar estilo"
               >
-                <Feather name="edit-2" size={18} color={Colors.brand.primary} />
+                <Feather name="edit-2" size={12} color={Colors.white} />
+                <Text style={styles.actionButtonText}>Editar</Text>
               </Pressable>
             </View>
 
             <View style={styles.styleItems}>
               {selectedStyles.map((style) => (
                 <View key={style} style={styles.stylePill}>
-                  <ThemedText style={styles.styleItem}>{STYLE_LABELS[style]}</ThemedText>
+                  <Text style={styles.styleItem}>{STYLE_LABELS[style]}</Text>
                 </View>
               ))}
               {selectedStyles.length === 0 && (
@@ -123,16 +156,12 @@ export default function ProfileScreen() {
               )}
             </View>
 
-            <ThemedText type="small" themeColor="textSecondary" style={styles.styleCaption}>
-              Baseado nas escolhas do seu quiz
+            <ThemedText type="small" themeColor="textSecondary" style={styles.cardCaption}>
+              Baseado nas escolhas do seu quiz.
             </ThemedText>
           </View>
         </ScrollView>
       )}
-
-      <View style={styles.footer}>
-        <ProductActionButton title="Sair" onPress={handleSignOut} />
-      </View>
     </SafeAreaView>
   );
 }
@@ -145,13 +174,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.brand.tertiary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -159,33 +188,66 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '700',
     color: Colors.light.text,
   },
   headerSpacer: {
-    width: 32,
+    width: 40,
   },
   content: {
     paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.six,
-    paddingBottom: Spacing.five,
+    paddingTop: Spacing.four,
+    paddingBottom: Spacing.six,
     gap: Spacing.five,
   },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.three,
+    gap: Spacing.four,
+    backgroundColor: '#F8F8F8',
+    borderColor: '#E8E8E8',
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: Spacing.four,
+  },
+  card: {
     backgroundColor: '#F8F8F8',
     borderColor: '#E8E8E8',
     borderWidth: 1,
     borderRadius: 8,
     padding: Spacing.three,
   },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.three,
+  },
+  cardTitle: {
+    fontSize: 16,
+  },
+  cardCaption: {
+    marginTop: Spacing.two + 1,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.brand.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 6,
+  },
+  actionButtonText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: '600',
+  },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: Colors.brand.tertiary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -196,34 +258,29 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   profileInfo: {
-    gap: 2,
-  },
-  styleCard: {
-    backgroundColor: '#F8F8F8',
-    borderColor: '#E8E8E8',
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: Spacing.three,
-    gap: Spacing.three,
-  },
-  styleHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  styleTitle: {
-    fontSize: 16,
-  },
-  action: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
-    transform: [{ translateX: 8 }, { translateY: -4 }],
+    gap: 4,
   },
-  styleItem: {
-    fontSize: 15,
-    color: Colors.white,
+  profileName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.light.text,
+  },
+  profileEmail: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+  colorsRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+  },
+  colorCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
   styleItems: {
     flexDirection: 'row',
@@ -231,18 +288,14 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   stylePill: {
-    backgroundColor: Colors.brand.primary,
+    backgroundColor: Colors.brand.tertiary,
     borderRadius: 999,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-  },
-  styleCaption: {
-    marginTop: Spacing.one,
-  },
-  footer: {
     paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.two,
-    backgroundColor: Colors.white,
+    paddingVertical: Spacing.one + 2,
+  },
+  styleItem: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.brand.primary,
   },
 });

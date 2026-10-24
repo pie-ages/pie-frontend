@@ -4,13 +4,12 @@ import {
   PlusJakartaSans_700Bold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { useFonts } from 'expo-font';
-import { router, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { UserStyleProvider } from '@/contexts/UserStyleContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 
@@ -33,7 +32,11 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
-  const { isAuthenticated, isInitializing, pendingStyleQuiz } = useAuth();
+  // const { isAuthenticated, isInitializing, pendingStyleQuiz } = useAuth();
+  const isAuthenticated = true;
+  const isInitializing = false;
+  const pendingStyleQuiz = false;
+
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_700Bold,
@@ -41,11 +44,13 @@ function RootNavigator() {
     Inter_700Bold,
   });
 
+  /*
   useEffect(() => {
     if (isAuthenticated && pendingStyleQuiz) {
       router.replace('/StyleQuiz');
     }
   }, [isAuthenticated, pendingStyleQuiz]);
+  */
 
   if (isInitializing || !fontsLoaded) return null;
 
@@ -62,6 +67,7 @@ function RootNavigator() {
 
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(screens)/Profile/index" />
         <Stack.Screen name="(screens)/MyStyle/index" />
         <Stack.Screen name="(screens)/StyleQuiz/index" />
         <Stack.Screen name="(screens)/StyleSelection/index" />
@@ -70,7 +76,6 @@ function RootNavigator() {
         <Stack.Screen name="(screens)/AddPiece/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(screens)/ProductDetails/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(screens)/Wishlist/index" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="(screens)/Profile/index" options={{ presentation: 'modal' }} />
       </Stack.Protected>
     </Stack>
   );
