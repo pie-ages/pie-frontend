@@ -46,7 +46,7 @@ type WardrobePickerModalProps = {
   pieces: WardrobePiece[];
   status: WardrobeStatus;
   selectedIds: string[];
-  onToggle: (piece: WardrobePiece) => void;
+  onSelect: (piece: WardrobePiece) => void;
   onRetry: () => void;
   onClose: () => void;
 };
@@ -56,7 +56,7 @@ export function WardrobePickerModal({
   pieces,
   status,
   selectedIds,
-  onToggle,
+  onSelect,
   onRetry,
   onClose,
 }: WardrobePickerModalProps) {
@@ -117,7 +117,9 @@ export function WardrobePickerModal({
                         <View key={piece.id} style={styles.cell}>
                           <LookPieceCard
                             piece={piece}
-                            onPress={() => onToggle(piece)}
+                            onPress={
+                              selectedIds.includes(piece.id) ? undefined : () => onSelect(piece)
+                            }
                             selected={selectedIds.includes(piece.id)}
                           />
                         </View>
