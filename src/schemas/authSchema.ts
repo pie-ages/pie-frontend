@@ -26,7 +26,7 @@ export const registerSchema = z
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const loginResponseSchema = z.object({
-  token: z.string().min(1),
+  accessToken: z.string().min(1),
   user: z.object({
     id: z.string(),
     name: z.string(),
