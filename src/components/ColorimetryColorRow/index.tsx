@@ -5,7 +5,7 @@ import { ColorSwatch } from '@/components/ColorSwatch';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Theme';
 
-import { styles } from './styles';
+import { COMPACT_SWATCH_SIZE, styles } from './styles';
 
 type ColorimetryColorRowProps = {
   title: string;
@@ -13,6 +13,7 @@ type ColorimetryColorRowProps = {
   colors: (string | null)[];
   emptyColor?: string;
   disabled?: boolean;
+  compact?: boolean;
   onSlotPress?: (index: number) => void;
   onSlotRemove?: (index: number) => void;
 };
@@ -23,6 +24,7 @@ export function ColorimetryColorRow({
   colors,
   emptyColor = '#999999',
   disabled = false,
+  compact = false,
   onSlotPress,
   onSlotRemove,
 }: ColorimetryColorRowProps) {
@@ -32,7 +34,7 @@ export function ColorimetryColorRow({
         {title}
       </ThemedText>
 
-      <View style={[styles.row, onSlotPress && styles.editableRow]}>
+      <View style={[styles.row, onSlotPress && styles.editableRow, compact && styles.rowCompact]}>
         {colors.map((color, index) => {
           if (color === null && onSlotPress) {
             return (
@@ -51,9 +53,14 @@ export function ColorimetryColorRow({
           }
 
           return (
-            <View key={`${color}-${index}`} style={styles.colorSlot}>
+            <View
+              key={`${color}-${index}`}
+              style={[styles.colorSlot, compact && styles.colorSlotCompact]}
+            >
               <ColorSwatch
                 color={color ?? emptyColor}
+                size={compact ? COMPACT_SWATCH_SIZE : undefined}
+                outlined={compact}
                 selected={!!onSlotPress && color !== null}
                 onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
               />
@@ -76,7 +83,11 @@ export function ColorimetryColorRow({
       </View>
 
       {caption && (
-        <ThemedText type="small" themeColor="textSecondary" style={styles.caption}>
+        <ThemedText
+          type="small"
+          themeColor="textSecondary"
+          style={[styles.caption, compact && styles.captionCompact]}
+        >
           {caption}
         </ThemedText>
       )}
