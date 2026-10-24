@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
   Modal,
   Platform,
   Pressable,
@@ -31,21 +32,30 @@ export default function CreateLookScreen() {
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const form = useLookForm();
   const wardrobe = useWardrobe();
-  const [isPicking, setIsPicking] = useState(false);
+  const [pickingSlot, setPickingSlot] = useState<number | null>(null);
+  const [isChoosingQuantity, setIsChoosingQuantity] = useState(false);
+  const [pendingSuggestion, setPendingSuggestion] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [image, setImage] = useState<LookImageAsset | null>(null);
 
   const busy = form.operation !== null;
   const selectedIds = form.items.map((item) => item.id);
-  const canAddMore = form.items.length < MAX_LOOK_PIECES;
+  const canSuggest = form.pieceCount === null || !form.isComplete;
+  const [areaWidth, setAreaWidth] = useState(0);
   const [areaHeight, setAreaHeight] = useState(0);
   const gap = Spacing.two;
   const padding = Spacing.three;
-  const widthCap = Math.min(windowWidth * 0.67, 300);
-  const heightByWidth = widthCap / LOOK_PIECE_ASPECT_RATIO;
-  const heightToFitThree = areaHeight ? (areaHeight - padding * 2 - gap * 2) / 3 : heightByWidth;
-  const slotHeight = Math.max(Math.min(heightByWidth, heightToFitThree), 0);
+  const rowCount = form.pieceCount === 4 ? 2 : (form.pieceCount ?? 3);
+  const contentWidth = areaWidth ? areaWidth - padding * 2 : windowWidth - padding * 2;
+  const widthCap =
+    form.pieceCount === 4
+      ? (Math.min(contentWidth, 380) - gap) / 2
+      : Math.min(windowWidth * 0.6, 240);
+  const maxSlotHeight = areaHeight
+    ? (areaHeight - padding * 2 - gap * (rowCount - 1)) / rowCount
+    : widthCap / LOOK_PIECE_ASPECT_RATIO;
+  const slotHeight = Math.max(Math.min(widthCap / LOOK_PIECE_ASPECT_RATIO, maxSlotHeight), 0);
   const slotWidth = slotHeight * LOOK_PIECE_ASPECT_RATIO;
   const emptyAddHeight = slotHeight * 3 + gap * 2;
 
@@ -77,6 +87,39 @@ export default function CreateLookScreen() {
     });
   };
 
+  const chooseQuantity = (count: number) => {
+    const applyQuantity = () => {
+      form.choosePieceCount(count);
+      setIsChoosingQuantity(false);
+      if (pendingSuggestion) {
+        setPendingSuggestion(false);
+        form.requestSuggestion(count);
+      }
+    };
+
+    if (form.slots.slice(count).some(Boolean)) {
+      Alert.alert(
+        'Alterar quantidade de peças?',
+        'As peças que não couberem na nova quantidade serão removidas do look.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Alterar', style: 'destructive', onPress: applyQuantity },
+        ],
+      );
+      return;
+    }
+    applyQuantity();
+  };
+
+  const suggestPieces = () => {
+    if (form.pieceCount === null) {
+      setPendingSuggestion(true);
+      setIsChoosingQuantity(true);
+      return;
+    }
+    form.requestSuggestion();
+  };
+
   return (
     <View
       style={[
@@ -88,55 +131,73 @@ export default function CreateLookScreen() {
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={styles.title}>Criar Look</Text>
-          <Text style={styles.subtitle}>Selecione peças do seu closet para montar seu look.</Text>
+          <Text style={styles.subtitle}>
+            {form.pieceCount === null
+              ? 'Selecione peças do seu closet para montar seu look.'
+              : `Escolha ${form.pieceCount} ${form.pieceCount === 1 ? 'peça' : 'peças'} para o look.`}
+          </Text>
+          {form.pieceCount !== null ? (
+            <Pressable
+              onPress={() => setIsChoosingQuantity(true)}
+              disabled={busy}
+              accessibilityRole="button"
+              accessibilityLabel={`Alterar quantidade de peças, atualmente ${form.pieceCount}`}
+              style={({ pressed }) => [styles.quantityButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.quantityText}>
+                {form.pieceCount} {form.pieceCount === 1 ? 'peça' : 'peças'} · Alterar
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
-        <Pressable
-          onPress={goBack}
-          accessibilityRole="button"
-          accessibilityLabel="Fechar"
-          hitSlop={8}
-          style={({ pressed }) => [styles.close, pressed && styles.closePressed]}
-        >
-          <Feather name="x" size={20} color={Colors.light.text} />
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={goBack}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar"
+            hitSlop={8}
+            style={({ pressed }) => [styles.close, pressed && styles.closePressed]}
+          >
+            <Feather name="x" size={20} color={Colors.light.text} />
+          </Pressable>
+          <Pressable
+            onPress={() => setIsSaving(true)}
+            disabled={!form.isComplete || busy}
+            accessibilityRole="button"
+            accessibilityLabel="Salvar look"
+            accessibilityState={{ disabled: !form.isComplete || busy }}
+            hitSlop={6}
+            style={({ pressed }) => [
+              styles.saveIcon,
+              (!form.isComplete || busy) && styles.saveIconDisabled,
+              pressed && form.isComplete && !busy && styles.pressed,
+            ]}
+          >
+            <Feather
+              name="check"
+              size={22}
+              color={form.isComplete && !busy ? Colors.white : Colors.iconMuted}
+            />
+          </Pressable>
+        </View>
       </View>
 
       <View
-        style={styles.composition}
-        onLayout={(event) => setAreaHeight(event.nativeEvent.layout.height)}
+        style={[styles.composition, form.pieceCount === 4 && styles.compositionGrid]}
+        onLayout={(event) => {
+          setAreaWidth(event.nativeEvent.layout.width);
+          setAreaHeight(event.nativeEvent.layout.height);
+        }}
       >
-        {form.items.map((piece) => (
-          <View key={piece.id} style={[styles.slot, { width: slotWidth, height: slotHeight }]}>
-            {piece.imageUrl ? (
-              <Image source={{ uri: piece.imageUrl }} style={styles.slotImage} contentFit="cover" />
-            ) : (
-              <View style={styles.slotFallback}>
-                <Feather name="image" size={28} color={Colors.iconMuted} />
-              </View>
-            )}
-            <Pressable
-              onPress={() => form.togglePiece(piece)}
-              accessibilityRole="button"
-              accessibilityLabel={`Remover ${piece.name}`}
-              hitSlop={6}
-              style={({ pressed }) => [styles.remove, pressed && styles.pressed]}
-            >
-              <Feather name="x" size={14} color={Colors.white} />
-            </Pressable>
-          </View>
-        ))}
-
-        {canAddMore ? (
+        {form.pieceCount === null ? (
           <Pressable
-            onPress={() => setIsPicking(true)}
+            onPress={() => setIsChoosingQuantity(true)}
             disabled={busy}
             accessibilityRole="button"
-            accessibilityLabel="Adicionar peça ao look"
+            accessibilityLabel="Escolher quantidade de peças"
             style={({ pressed }) => [
               styles.addSlot,
-              form.items.length === 0
-                ? { width: slotWidth, height: emptyAddHeight }
-                : { width: slotWidth, height: slotHeight },
+              { width: slotWidth, height: emptyAddHeight },
               pressed && styles.pressed,
             ]}
           >
@@ -144,28 +205,74 @@ export default function CreateLookScreen() {
               <Feather name="plus" size={24} color={Colors.icon} />
             </View>
           </Pressable>
-        ) : null}
+        ) : (
+          form.slots.map((piece, index) => (
+            <View
+              key={piece?.id ?? `empty-${index}`}
+              style={[styles.slot, { width: slotWidth, height: slotHeight }]}
+            >
+              {piece ? (
+                <>
+                  {piece.imageUrl ? (
+                    <Image
+                      source={{ uri: piece.imageUrl }}
+                      style={styles.slotImage}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <View style={styles.slotFallback}>
+                      <Feather name="image" size={28} color={Colors.iconMuted} />
+                    </View>
+                  )}
+                  <Pressable
+                    onPress={() => form.removePieceAt(index)}
+                    disabled={busy}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remover ${piece.name}`}
+                    hitSlop={6}
+                    style={({ pressed }) => [styles.remove, pressed && styles.pressed]}
+                  >
+                    <Feather name="trash-2" size={14} color={Colors.white} />
+                  </Pressable>
+                </>
+              ) : (
+                <Pressable
+                  onPress={() => setPickingSlot(index)}
+                  disabled={busy}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Adicionar peça ${index + 1}`}
+                  style={({ pressed }) => [
+                    styles.addSlot,
+                    StyleSheet.absoluteFill,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <View style={styles.addCircle}>
+                    <Feather name="plus" size={24} color={Colors.icon} />
+                  </View>
+                </Pressable>
+              )}
+            </View>
+          ))
+        )}
       </View>
 
-      <View style={styles.footer}>
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: Math.max(insets.bottom + Spacing.two, Spacing.four) },
+        ]}
+      >
         {form.error && !isSaving ? (
           <Text accessibilityRole="alert" style={styles.error}>
             {form.error}
           </Text>
         ) : null}
-        {form.items.length > 0 ? (
+        {canSuggest ? (
           <AuthButton
-            title="Salvar Look"
-            onPress={() => setIsSaving(true)}
-            isLoading={form.operation === 'save'}
-            disabled={busy}
-          />
-        ) : null}
-        {canAddMore ? (
-          <AuthButton
-            title={form.items.length ? 'Sugerir peças com IA' : 'Sugerir look com IA'}
+            title={form.pieceCount ? 'Sugerir peças com IA' : 'Sugerir look com IA'}
             variant="secondary"
-            onPress={form.requestSuggestion}
+            onPress={suggestPieces}
             isLoading={form.operation === 'suggest'}
             disabled={busy}
           />
@@ -173,14 +280,68 @@ export default function CreateLookScreen() {
       </View>
 
       <WardrobePickerModal
-        visible={isPicking}
+        visible={pickingSlot !== null}
         pieces={wardrobe.pieces}
         status={wardrobe.status}
         onRetry={wardrobe.retry}
         selectedIds={selectedIds}
-        onToggle={form.togglePiece}
-        onClose={() => setIsPicking(false)}
+        onSelect={(piece) => {
+          if (pickingSlot === null) return;
+          form.assignPiece(pickingSlot, piece);
+          setPickingSlot(null);
+        }}
+        onClose={() => setPickingSlot(null)}
       />
+
+      <Modal
+        visible={isChoosingQuantity}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setIsChoosingQuantity(false);
+          setPendingSuggestion(false);
+        }}
+      >
+        <View style={styles.quantityBackdrop}>
+          <View style={styles.quantityCard}>
+            <Text style={styles.quantityTitle}>Quantas peças terá o look?</Text>
+            <View style={styles.quantityOptions}>
+              {Array.from({ length: MAX_LOOK_PIECES }, (_, index) => index + 1).map((count) => (
+                <Pressable
+                  key={count}
+                  onPress={() => chooseQuantity(count)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: form.pieceCount === count }}
+                  style={({ pressed }) => [
+                    styles.quantityOption,
+                    form.pieceCount === count && styles.quantityOptionSelected,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.quantityOptionText,
+                      form.pieceCount === count && styles.quantityOptionTextSelected,
+                    ]}
+                  >
+                    {count} {count === 1 ? 'peça' : 'peças'}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <Pressable
+              onPress={() => {
+                setIsChoosingQuantity(false);
+                setPendingSuggestion(false);
+              }}
+              accessibilityRole="button"
+              style={styles.quantityCancel}
+            >
+              <Text style={styles.quantityCancelText}>Cancelar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       <SaveLookSheet
         visible={isSaving}
@@ -203,7 +364,7 @@ export default function CreateLookScreen() {
             <View style={styles.headerText}>
               <Text style={styles.title}>Sugestão de look</Text>
               <Text style={styles.subtitle}>
-                Ao aceitar, estas peças substituem a composição atual.
+                Ao aceitar, estas peças preencherão os espaços vazios do look.
               </Text>
             </View>
             <Pressable
@@ -270,6 +431,11 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: Spacing.one,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+  },
   title: {
     fontSize: 28,
     fontWeight: '700',
@@ -277,6 +443,18 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+  quantityButton: {
+    alignSelf: 'flex-start',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    backgroundColor: Colors.light.backgroundElement,
+  },
+  quantityText: {
+    fontSize: 12,
+    fontWeight: '600',
     color: Colors.light.textSecondary,
   },
   close: {
@@ -290,6 +468,17 @@ const styles = StyleSheet.create({
   closePressed: {
     opacity: 0.7,
   },
+  saveIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.brand.primary,
+  },
+  saveIconDisabled: {
+    backgroundColor: Colors.light.backgroundElement,
+  },
   composition: {
     flex: 1,
     minHeight: 0,
@@ -297,6 +486,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.two,
     padding: Spacing.three,
+  },
+  compositionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignContent: 'center',
   },
   slot: {
     borderRadius: 16,
@@ -324,7 +518,7 @@ const styles = StyleSheet.create({
   remove: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    left: 8,
     width: 26,
     height: 26,
     borderRadius: 13,
@@ -339,9 +533,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.placeholder,
   },
   addCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.white,
@@ -354,6 +548,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.two,
     paddingBottom: Spacing.four,
+  },
+  quantityBackdrop: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.four,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+  },
+  quantityCard: {
+    width: '100%',
+    maxWidth: 360,
+    gap: Spacing.three,
+    padding: Spacing.four,
+    borderRadius: 24,
+    backgroundColor: Colors.white,
+  },
+  quantityTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.light.text,
+    textAlign: 'center',
+  },
+  quantityOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: Spacing.two,
+  },
+  quantityOption: {
+    minWidth: '44%',
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    alignItems: 'center',
+    borderRadius: 16,
+    backgroundColor: Colors.light.backgroundElement,
+  },
+  quantityOptionSelected: {
+    backgroundColor: Colors.brand.primary,
+  },
+  quantityOptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.light.text,
+  },
+  quantityOptionTextSelected: {
+    color: Colors.white,
+  },
+  quantityCancel: {
+    alignItems: 'center',
+    paddingVertical: Spacing.one,
+  },
+  quantityCancelText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.light.textSecondary,
   },
   suggestionContent: {
     padding: Spacing.three,

@@ -13,6 +13,8 @@ import { MAX_LOOK_PIECES, type WardrobePiece } from '@/types/Look';
 
 export function useLookForm() {
   const [suggestion, setSuggestion] = useState<WardrobePiece[] | null>(null);
+  const [pieceCount, setPieceCount] = useState<number | null>(null);
+  const [slots, setSlots] = useState<(WardrobePiece | null)[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [operation, setOperation] = useState<'save' | 'suggest' | null>(null);
   const busyRef = useRef(false);
@@ -22,7 +24,6 @@ export function useLookForm() {
     control,
     handleSubmit,
     setValue,
-    getValues,
     clearErrors,
     formState: { errors },
   } = useForm<LookFormData>({
@@ -31,30 +32,59 @@ export function useLookForm() {
   });
   const items = useWatch({ control, name: 'items' });
 
-  function setItems(next: WardrobePiece[]) {
-    setValue('items', next);
+  function updateSlots(next: (WardrobePiece | null)[]) {
+    setSlots(next);
+    setValue(
+      'items',
+      next.filter((item): item is WardrobePiece => item !== null),
+    );
     clearErrors('items');
   }
 
-  function togglePiece(piece: WardrobePiece) {
-    if (busyRef.current) return;
+  function choosePieceCount(count: number) {
+    if (busyRef.current || count < 1 || count > MAX_LOOK_PIECES) return;
+    setPieceCount(count);
+    updateSlots(Array.from({ length: count }, (_, index) => slots[index] ?? null));
     setError(null);
-    const current = getValues('items');
-    if (current.some((item) => item.id === piece.id)) {
-      setItems(current.filter((item) => item.id !== piece.id));
-    } else if (current.length < MAX_LOOK_PIECES) {
-      setItems([...current, piece]);
-    }
   }
 
-  async function requestSuggestion() {
+  function assignPiece(index: number, piece: WardrobePiece) {
+    if (
+      busyRef.current ||
+      index < 0 ||
+      index >= slots.length ||
+      slots.some((item, slotIndex) => slotIndex !== index && item?.id === piece.id)
+    ) {
+      return;
+    }
+    const next = [...slots];
+    next[index] = piece;
+    updateSlots(next);
+    setError(null);
+  }
+
+  function removePieceAt(index: number) {
     if (busyRef.current) return;
+    const next = [...slots];
+    next[index] = null;
+    updateSlots(next);
+    setError(null);
+  }
+
+  async function requestSuggestion(size = slots.filter((slot) => slot === null).length) {
+    if (size === null || size === undefined) return;
+    if (busyRef.current || size < 1) return;
     busyRef.current = true;
     setError(null);
     setOperation('suggest');
     try {
-      const result = await fetchLookSuggestion();
-      setSuggestion(result.slice(0, MAX_LOOK_PIECES));
+      const result = await fetchLookSuggestion(size);
+      const suggestions = result.slice(0, size);
+      if (suggestions.length === 0) {
+        setError('Não há peças disponíveis para sugerir. Adicione peças ao seu closet.');
+        return;
+      }
+      setSuggestion(suggestions);
     } catch {
       setError('Não foi possível gerar uma sugestão. Tente novamente.');
     } finally {
@@ -65,13 +95,23 @@ export function useLookForm() {
 
   function acceptSuggestion() {
     if (!suggestion) return;
-    setItems(suggestion.slice(0, MAX_LOOK_PIECES));
+    const next = [...slots];
+    const selectedIds = new Set(next.flatMap((item) => (item ? [item.id] : [])));
+    const suggestions = suggestion.filter((item) => !selectedIds.has(item.id));
+    let suggestionIndex = 0;
+    for (let index = 0; index < next.length && suggestionIndex < suggestions.length; index += 1) {
+      if (next[index] === null) {
+        next[index] = suggestions[suggestionIndex];
+        suggestionIndex += 1;
+      }
+    }
+    updateSlots(next);
     setSuggestion(null);
     setError(null);
   }
 
   async function saveLook(image: LookImageAsset | null, onSuccess: () => void) {
-    if (busyRef.current) return;
+    if (busyRef.current || pieceCount === null || items.length !== pieceCount) return;
 
     await handleSubmit(async ({ title, occasion, items: pieces }) => {
       busyRef.current = true;
@@ -82,6 +122,7 @@ export function useLookForm() {
         if (!lookId) {
           const look = await createLook({
             title,
+            pieceCount: pieces.length,
             occasion: occasion || undefined,
             wardrobeItemIds: pieces
               .map((item) => item.wardrobeItemId)
@@ -113,10 +154,15 @@ export function useLookForm() {
   return {
     control,
     items,
+    slots,
+    pieceCount,
+    isComplete: pieceCount !== null && items.length === pieceCount,
     suggestion,
     error: error ?? errors.items?.message ?? null,
     operation,
-    togglePiece,
+    choosePieceCount,
+    assignPiece,
+    removePieceAt,
     requestSuggestion,
     acceptSuggestion,
     dismissSuggestion: () => setSuggestion(null),

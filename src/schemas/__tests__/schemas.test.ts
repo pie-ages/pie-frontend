@@ -1,6 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { registerSchema } from '@/schemas/authSchema';
+import { lookFormSchema } from '@/schemas/lookSchema';
 import { styleIdentificationSchema } from '@/schemas/styleSchema';
 import { addPieceSchema, wardrobeImageAnalysisSchema } from '@/schemas/wardrobeSchema';
 
@@ -34,6 +35,19 @@ describe('addPieceSchema', () => {
   it('rejects unsupported image types', () => {
     const image = { uri: 'file:///a.gif', mimeType: 'image/gif' };
     expect(addPieceSchema.safeParse({ ...piece, image }).success).toBe(false);
+  });
+});
+
+describe('lookFormSchema', () => {
+  it('rejects looks with more than four pieces', () => {
+    const item = { id: 'piece', name: 'Peça', imageUrl: null, category: 'Outros' };
+    const result = lookFormSchema.safeParse({
+      title: 'Look',
+      occasion: '',
+      items: [item, item, item, item, item],
+    });
+
+    expect(result.success).toBe(false);
   });
 });
 
