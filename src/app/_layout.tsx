@@ -56,7 +56,7 @@ function RootNavigator() {
 
   return (
     <Stack
-      initialRouteName="(screens)/StyleSelection/index"
+      initialRouteName="(screens)/MyStyle/index"
       screenOptions={{
         headerShown: false,
       }}

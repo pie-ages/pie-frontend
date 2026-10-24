@@ -8,8 +8,8 @@
 //   return <Redirect href={isAuthenticated ? '/Storefront' : '/Login'} />;
 // }
 
-import StyleSelectionScreen from '@/app/(screens)/StyleSelection/index';
+import MyStyleScreen from '@/app/(screens)/MyStyle/index';
 
 export default function Index() {
-  return <StyleSelectionScreen />;
+  return <MyStyleScreen />;
 }
