@@ -57,7 +57,7 @@ function ProductDetails({ id }: { id?: string }) {
   }
 
   async function handlePurchase() {
-    if (!product) return;
+    if (!product?.purchaseUrl) return;
     await WebBrowser.openBrowserAsync(product.purchaseUrl);
   }
 

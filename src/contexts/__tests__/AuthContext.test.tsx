@@ -37,7 +37,7 @@ beforeEach(() => {
 
 describe('AuthContext — init', () => {
   it('starts unauthenticated when no token stored', async () => {
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -49,7 +49,7 @@ describe('AuthContext — init', () => {
     mockGetStoredToken.mockResolvedValue('access-token');
     mockGetStoredExpiresAt.mockResolvedValue(Date.now() + 3_600_000);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -63,7 +63,7 @@ describe('AuthContext — init', () => {
     mockApiPost.mockResolvedValue(validSession);
     mockStoreSession.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -79,7 +79,7 @@ describe('AuthContext — init', () => {
     mockGetStoredRefreshToken.mockResolvedValue('bad-refresh');
     mockApiPost.mockRejectedValue(new Error('401'));
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -93,7 +93,7 @@ describe('AuthContext — signIn', () => {
     mockApiPost.mockResolvedValue(validSession);
     mockStoreSession.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
     await act(async () => {
@@ -114,14 +114,18 @@ describe('AuthContext — signIn', () => {
       new client.ApiError('Credenciais inválidas', 401, 'Invalid credentials'),
     );
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
-    await expect(
-      act(async () => {
+    let thrownError: unknown;
+    await act(async () => {
+      try {
         await result.current.signIn({ email: 'wrong@pie.com.br', password: 'bad' });
-      }),
-    ).rejects.toThrow();
+      } catch (e) {
+        thrownError = e;
+      }
+    });
+    expect(thrownError).toBeInstanceOf(client.ApiError);
   });
 });
 
@@ -132,7 +136,7 @@ describe('AuthContext — signOut', () => {
     mockApiPostAuth.mockResolvedValue(undefined);
     mockClearSession.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
     expect(result.current.isAuthenticated).toBe(true);

@@ -75,6 +75,7 @@ function EmptyState({ onExplore }: { onExplore: () => void }) {
 
 function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: () => void }) {
   async function handleViewInStore() {
+    if (!product.purchaseUrl) return;
     await WebBrowser.openBrowserAsync(product.purchaseUrl);
   }
 
