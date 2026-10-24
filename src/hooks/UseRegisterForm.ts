@@ -5,13 +5,10 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerSchema, type RegisterFormData } from '@/schemas/authSchema';
 import { ApiError } from '@/services/client';
-
-async function simulateRegisterRequest(_payload: Omit<RegisterFormData, 'confirmPassword'>) {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-}
+import { createUser } from '@/services/users';
 
 export function useRegisterForm() {
-  const { completeMockSignUp } = useAuth();
+  const { completeSignUp } = useAuth();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,14 +34,18 @@ export function useRegisterForm() {
     setError(null);
 
     try {
-      await simulateRegisterRequest({ name, email, password });
-    } catch {
-      setError('Ocorreu um erro ao criar a conta. Tente novamente.');
+      await createUser({ name, email, password });
+    } catch (createError) {
+      setError(
+        createError instanceof ApiError && createError.serverMessage
+          ? createError.serverMessage
+          : 'Ocorreu um erro ao criar a conta. Tente novamente.',
+      );
       return;
     }
 
     try {
-      await completeMockSignUp({ email, password });
+      await completeSignUp({ email, password });
     } catch (registerError) {
       setError(
         registerError instanceof ApiError

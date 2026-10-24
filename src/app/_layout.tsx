@@ -34,6 +34,7 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { isAuthenticated, isInitializing, pendingStyleQuiz } = useAuth();
+
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_700Bold,
