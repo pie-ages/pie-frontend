@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ErrorState } from '@/components/ErrorState';
@@ -47,15 +47,9 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Pressable
-          onPress={handleClose}
-          style={styles.closeButton}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Fechar perfil"
-        >
+        <TouchableOpacity onPress={handleClose} style={styles.closeButton} activeOpacity={0.7}>
           <Feather name="x" size={24} color={Colors.brand.primary} />
-        </Pressable>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Perfil</Text>
         <View style={styles.headerSpacer} />
       </View>
@@ -67,17 +61,27 @@ export default function ProfileScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.profileCard}>
-            <View style={styles.avatar}>
-              {profile?.photoUrl ? (
-                <Image source={{ uri: profile.photoUrl }} style={styles.avatarImage} />
-              ) : (
-                <Feather name="user" size={36} color={Colors.icon} />
-              )}
+            <View style={styles.profileInfoContainer}>
+              <View style={styles.avatar}>
+                {profile?.photoUrl ? (
+                  <Image source={{ uri: profile.photoUrl }} style={styles.avatarImage} />
+                ) : (
+                  <Feather name="user" size={36} color={Colors.icon} />
+                )}
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileName}>{profile?.name}</Text>
+                <Text style={styles.profileEmail}>{profile?.email}</Text>
+              </View>
             </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{profile?.name}</Text>
-              <Text style={styles.profileEmail}>{profile?.email}</Text>
-            </View>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => router.push('/(screens)/EditProfile')}
+              style={styles.iconButton}
+            >
+              <Feather name="edit-2" size={18} color={Colors.brand.primary} />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.card}>
@@ -85,15 +89,14 @@ export default function ProfileScreen() {
               <ThemedText type="smallBold" style={styles.cardTitle}>
                 Colorimetria
               </ThemedText>
-              <Pressable
-                onPress={() => router.push('/')}
+              <TouchableOpacity
+                onPress={() => router.push('/(screens)/ColorimetryResult')}
                 style={styles.actionButton}
-                accessibilityRole="button"
-                accessibilityLabel="Refazer colorimetria"
+                activeOpacity={0.7}
               >
                 <Feather name="refresh-cw" size={12} color={Colors.white} />
                 <Text style={styles.actionButtonText}>Refazer</Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
             <View style={styles.colorsRow}>
               {preferences?.highlightColors?.map((color, index) => (
@@ -110,15 +113,14 @@ export default function ProfileScreen() {
               <ThemedText type="smallBold" style={styles.cardTitle}>
                 Cores Favoritas
               </ThemedText>
-              <Pressable
-                onPress={() => router.push('/')}
+              <TouchableOpacity
+                onPress={() => router.push('/(screens)/ColorimetryResult')}
                 style={styles.actionButton}
-                accessibilityRole="button"
-                accessibilityLabel="Editar cores favoritas"
+                activeOpacity={0.7}
               >
                 <Feather name="edit-2" size={12} color={Colors.white} />
                 <Text style={styles.actionButtonText}>Editar</Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
             <View style={styles.colorsRow}>
               {preferences?.favoriteColors?.map((color, index) => (
@@ -132,15 +134,14 @@ export default function ProfileScreen() {
               <ThemedText type="smallBold" style={styles.cardTitle}>
                 Estilo
               </ThemedText>
-              <Pressable
-                onPress={() => router.push('/')}
+              <TouchableOpacity
+                onPress={() => router.push('/(screens)/StyleSelection')}
                 style={styles.actionButton}
-                accessibilityRole="button"
-                accessibilityLabel="Editar estilo"
+                activeOpacity={0.7}
               >
                 <Feather name="edit-2" size={12} color={Colors.white} />
                 <Text style={styles.actionButtonText}>Editar</Text>
-              </Pressable>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.styleItems}>
@@ -149,13 +150,7 @@ export default function ProfileScreen() {
                   <Text style={styles.styleItem}>{STYLE_LABELS[style]}</Text>
                 </View>
               ))}
-              {selectedStyles.length === 0 && (
-                <ThemedText type="small" themeColor="textSecondary">
-                  Nenhum estilo selecionado.
-                </ThemedText>
-              )}
             </View>
-
             <ThemedText type="small" themeColor="textSecondary" style={styles.cardCaption}>
               Baseado nas escolhas do seu quiz.
             </ThemedText>
@@ -192,9 +187,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.light.text,
   },
-  headerSpacer: {
-    width: 40,
-  },
+  headerSpacer: { width: 40 },
   content: {
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
@@ -204,12 +197,26 @@ const styles = StyleSheet.create({
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.four,
+    justifyContent: 'space-between',
     backgroundColor: '#F8F8F8',
     borderColor: '#E8E8E8',
     borderWidth: 1,
     borderRadius: 12,
     padding: Spacing.four,
+  },
+  profileInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.four,
+    flex: 1,
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.brand.tertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   card: {
     backgroundColor: '#F8F8F8',

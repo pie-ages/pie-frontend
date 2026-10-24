@@ -68,6 +68,7 @@ function RootNavigator() {
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(screens)/Profile/index" />
+        <Stack.Screen name="(screens)/EditProfile/index" />
         <Stack.Screen name="(screens)/MyStyle/index" />
         <Stack.Screen name="(screens)/StyleQuiz/index" />
         <Stack.Screen name="(screens)/StyleSelection/index" />
