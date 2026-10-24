@@ -1,6 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -40,15 +39,8 @@ export default function ProductDetailsScreen() {
 function ProductDetails({ id }: { id?: string }) {
   const router = useRouter();
   const theme = useTheme();
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [loadedProductId, setLoadedProductId] = useState<string | undefined>(undefined);
   const { product, isLoading, error } = useProductDetails(id);
   const { toggle, isInWishlist } = useWishlist();
-
-  if (product && product.id !== loadedProductId) {
-    setLoadedProductId(product.id);
-    setSelectedSize(product.sizes[0] ?? null);
-  }
 
   function handleClose() {
     if (router.canGoBack()) {
@@ -122,16 +114,14 @@ function ProductDetails({ id }: { id?: string }) {
             </ThemedText>
           </View>
 
-          <View style={styles.sizeSection}>
-            <ThemedText type="smallBold" style={styles.sectionLabel} allowFontScaling={false}>
-              Tamanho
-            </ThemedText>
-            <ProductSizeSelector
-              sizes={product.sizes}
-              selectedSize={selectedSize}
-              onSelectSize={setSelectedSize}
-            />
-          </View>
+          {product.sizes.length > 0 && (
+            <View style={styles.sizeSection}>
+              <ThemedText type="smallBold" style={styles.sectionLabel} allowFontScaling={false}>
+                Tamanho
+              </ThemedText>
+              <ProductSizeSelector sizes={product.sizes} />
+            </View>
+          )}
 
           <View style={styles.row}>
             <ThemedText type="smallBold" style={styles.sectionLabel} allowFontScaling={false}>
