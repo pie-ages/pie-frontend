@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
 import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
+import { ColorimetryConsentModal } from '@/components/ColorimetryConsentModal';
 import { ColorPickerModal } from '@/components/ColorPickerModal';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors, Spacing } from '@/constants/Theme';
@@ -23,10 +25,13 @@ import { useColorimetryPreferences } from '@/hooks/UseColorimetryPreferences';
 const FAVORITE_SLOTS = 4;
 
 export default function ColorimetryResultScreen() {
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [hasConsented, setHasConsented] = useState(false);
+  const [isConsentVisible, setIsConsentVisible] = useState(false);
   const capturingRef = useRef(false);
+  const openCameraOnDismissRef = useRef(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -36,8 +41,8 @@ export default function ColorimetryResultScreen() {
     };
   }, []);
 
-  const { preferences, status, retry, isSaving, saveError, saveFavoriteColors } =
-    useColorimetryPreferences(photoUri !== null, 4000);
+  const { preferences, status, errorMessage, retry, isSaving, saveError, saveFavoriteColors } =
+    useColorimetryPreferences(photo, 4000);
 
   const [colorOverrides, setColorOverrides] = useState<Record<number, string>>({});
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
@@ -83,7 +88,31 @@ export default function ColorimetryResultScreen() {
     }
   }
 
-  async function handleTakePhoto() {
+  function handleTakePhoto() {
+    if (!hasConsented) {
+      setIsConsentVisible(true);
+      return;
+    }
+    void openCamera();
+  }
+
+  function handleAcceptConsent() {
+    setHasConsented(true);
+    setIsConsentVisible(false);
+    if (Platform.OS === 'ios') {
+      openCameraOnDismissRef.current = true;
+    } else {
+      void openCamera();
+    }
+  }
+
+  function handleConsentDismiss() {
+    if (!openCameraOnDismissRef.current) return;
+    openCameraOnDismissRef.current = false;
+    void openCamera();
+  }
+
+  async function openCamera() {
     if (capturingRef.current) return;
     capturingRef.current = true;
     setIsCapturing(true);
@@ -103,7 +132,7 @@ export default function ColorimetryResultScreen() {
       });
       if (!mountedRef.current || result.canceled) return;
       retry();
-      setPhotoUri(result.assets[0].uri);
+      setPhoto(result.assets[0]);
     } catch {
       if (mountedRef.current) {
         setCameraError('Não foi possível abrir a câmera. Tente novamente.');
@@ -116,14 +145,14 @@ export default function ColorimetryResultScreen() {
 
   function handleRedoColorimetry() {
     if (isSaving) return;
-    setPhotoUri(null);
+    setPhoto(null);
     setColorOverrides({});
     setActiveSlot(null);
     setSaved(false);
     setCameraError(null);
   }
 
-  if (photoUri === null) {
+  if (photo === null) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.captureContent}>
@@ -151,6 +180,12 @@ export default function ColorimetryResultScreen() {
             />
           </View>
         </ScrollView>
+        <ColorimetryConsentModal
+          visible={isConsentVisible}
+          onAccept={handleAcceptConsent}
+          onClose={() => setIsConsentVisible(false)}
+          onDismiss={handleConsentDismiss}
+        />
       </SafeAreaView>
     );
   }
@@ -159,7 +194,7 @@ export default function ColorimetryResultScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
         <Image
-          source={{ uri: photoUri }}
+          source={{ uri: photo.uri }}
           style={styles.photo}
           accessibilityLabel="Foto capturada"
         />
@@ -172,8 +207,8 @@ export default function ColorimetryResultScreen() {
   if (status === 'error') {
     return (
       <SafeAreaView style={[styles.safeArea, styles.centered]}>
-        <ThemedText themeColor="textSecondary">
-          Não foi possível carregar sua colorimetria.
+        <ThemedText themeColor="textSecondary" style={styles.instructions}>
+          {errorMessage ?? 'Não foi possível carregar sua colorimetria.'}
         </ThemedText>
         <Pressable onPress={retry} hitSlop={8} style={styles.retryButton}>
           <Text style={styles.redoLink}>Tentar novamente</Text>
@@ -192,17 +227,23 @@ export default function ColorimetryResultScreen() {
           {'Resultado\nda colorimetria\nfeito utilizando IA'}
         </ThemedText>
 
+        {preferences!.season && (
+          <ThemedText type="smallBold" style={styles.seasonLabel}>
+            Sua estação: {preferences!.season.label}
+          </ThemedText>
+        )}
+
         <View style={styles.rows}>
           <ColorimetryColorRow
             title="Suas cores de destaque"
             colors={preferences!.highlightColors}
-            caption="Tons terrosos e quentes valorizam sua pele."
+            caption={preferences!.season?.highlightCaption}
           />
 
           <ColorimetryColorRow
             title="Cores a evitar perto do rosto"
             colors={preferences!.avoidColors}
-            caption="Tons de baixo contraste com o seu tom de pele"
+            caption={preferences!.season?.avoidCaption}
           />
 
           <ColorimetryColorRow
@@ -297,6 +338,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: -0.43,
     lineHeight: 40,
+  },
+  seasonLabel: {
+    paddingBottom: Spacing.three,
+    color: Colors.brand.primary,
   },
   rows: {
     gap: Spacing.three,
