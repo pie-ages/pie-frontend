@@ -9,7 +9,7 @@ type AuthContextValue = {
   isInitializing: boolean;
   pendingStyleQuiz: boolean;
   signIn: (payload: LoginFormData) => Promise<void>;
-  completeMockSignUp: (payload: LoginFormData) => Promise<void>;
+  completeSignUp: (payload: LoginFormData) => Promise<void>;
   completeStyleQuiz: () => void;
   signOut: () => Promise<void>;
 };
@@ -61,7 +61,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setToken(data.token);
   }
 
-  async function completeMockSignUp(payload: LoginFormData) {
+  async function completeSignUp(payload: LoginFormData) {
     await signIn(payload);
     setPendingStyleQuiz(true);
   }
@@ -81,7 +81,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     isInitializing,
     pendingStyleQuiz,
     signIn,
-    completeMockSignUp,
+    completeSignUp,
     completeStyleQuiz,
     signOut,
   };

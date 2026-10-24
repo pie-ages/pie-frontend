@@ -5,13 +5,18 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerSchema, type RegisterFormData } from '@/schemas/authSchema';
 import { ApiError } from '@/services/client';
+import { registerUser } from '@/services/user';
 
-async function simulateRegisterRequest(_payload: Omit<RegisterFormData, 'confirmPassword'>) {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+const REGISTER_ERROR_MESSAGE = 'Ocorreu um erro ao criar a conta. Tente novamente.';
+
+function getRegisterErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiError)) return REGISTER_ERROR_MESSAGE;
+  if (error.status === 409) return 'Este e-mail já está cadastrado.';
+  return error.serverMessage ?? REGISTER_ERROR_MESSAGE;
 }
 
 export function useRegisterForm() {
-  const { completeMockSignUp } = useAuth();
+  const { completeSignUp } = useAuth();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,19 +42,19 @@ export function useRegisterForm() {
     setError(null);
 
     try {
-      await simulateRegisterRequest({ name, email, password });
-    } catch {
-      setError('Ocorreu um erro ao criar a conta. Tente novamente.');
+      await registerUser({ name, email, password });
+    } catch (registerError) {
+      setError(getRegisterErrorMessage(registerError));
       return;
     }
 
     try {
-      await completeMockSignUp({ email, password });
-    } catch (registerError) {
+      await completeSignUp({ email, password });
+    } catch (signInError) {
       setError(
-        registerError instanceof ApiError
-          ? registerError.message
-          : 'Não foi possível iniciar sua sessão. Tente novamente.',
+        signInError instanceof ApiError
+          ? signInError.message
+          : 'Conta criada, mas não foi possível iniciar sua sessão. Faça login para continuar.',
       );
     }
   });

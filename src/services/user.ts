@@ -1,6 +1,13 @@
+import type { RegisterFormData } from '@/schemas/authSchema';
 import { currentUserSchema, type CurrentUser } from '@/schemas/userSchema';
-import { apiGetAuth, parseResponse } from '@/services/client';
+import { apiGetAuth, apiPost, parseResponse } from '@/services/client';
+
+export type RegisterUserPayload = Omit<RegisterFormData, 'confirmPassword'>;
 
 export async function fetchCurrentUser(signal?: AbortSignal): Promise<CurrentUser> {
   return parseResponse(currentUserSchema, await apiGetAuth('/api/users/me', signal));
+}
+
+export async function registerUser(payload: RegisterUserPayload): Promise<CurrentUser> {
+  return parseResponse(currentUserSchema, await apiPost('/api/users', payload));
 }
