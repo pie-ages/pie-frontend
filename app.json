@@ -11,9 +11,14 @@
       "enabled": false
     },
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "br.pucrs.ages.pie",
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "br.pucrs.ages.pie",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
