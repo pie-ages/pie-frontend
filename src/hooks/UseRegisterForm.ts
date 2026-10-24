@@ -50,7 +50,7 @@ export function useRegisterForm() {
       setError(
         registerError instanceof ApiError
           ? registerError.message
-          : 'Não foi possível iniciar sua sessão. Tente novamente.',
+          : 'Conta criada, mas não foi possível iniciar sua sessão. Faça login para continuar.',
       );
     }
   });

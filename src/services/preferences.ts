@@ -5,8 +5,11 @@ import {
 import { apiGetAuth, apiPutAuth, apiUploadAuth, parseResponse } from '@/services/client';
 import { imageFormData, type WardrobeImageAsset } from '@/services/wardrobe';
 
-export async function fetchPreferences(): Promise<ColorimetryPreferences> {
-  return parseResponse(colorimetryPreferencesSchema, await apiGetAuth('/api/users/me/preferences'));
+export async function fetchPreferences(signal?: AbortSignal): Promise<ColorimetryPreferences> {
+  return parseResponse(
+    colorimetryPreferencesSchema,
+    await apiGetAuth('/api/users/me/preferences', signal),
+  );
 }
 
 export async function analyzeColorimetry(
