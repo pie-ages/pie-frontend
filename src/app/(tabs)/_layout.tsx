@@ -1,6 +1,12 @@
+import { BlurTargetView } from 'expo-blur';
+import { useRouter } from 'expo-router';
 import { Tabs, TabList, TabSlot, TabTrigger } from 'expo-router/ui';
+import { useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { BottomTabBar, TabBarButton } from '@/components/BottomTabBar';
+import { OnboardingOverlay } from '@/components/OnboardingOverlay';
+import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 
 export const unstable_settings = {
   initialRouteName: 'Storefront',
@@ -8,8 +14,22 @@ export const unstable_settings = {
 
 export default function TabsLayout() {
   return (
+    <OnboardingProvider>
+      <TabsNavigator />
+    </OnboardingProvider>
+  );
+}
+
+function TabsNavigator() {
+  const blurTargetRef = useRef<View | null>(null);
+  const router = useRouter();
+  const { isVisible: isOnboardingVisible } = useOnboarding();
+
+  return (
     <Tabs>
-      <TabSlot />
+      <BlurTargetView ref={blurTargetRef} style={styles.blurTarget}>
+        <TabSlot />
+      </BlurTargetView>
 
       <TabList asChild>
         <BottomTabBar>
@@ -26,6 +46,19 @@ export default function TabsLayout() {
           </TabTrigger>
         </BottomTabBar>
       </TabList>
+
+      {isOnboardingVisible && (
+        <OnboardingOverlay
+          blurTarget={blurTargetRef}
+          onFinish={() => router.replace('/Storefront')}
+        />
+      )}
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  blurTarget: {
+    flex: 1,
+  },
+});
