@@ -1,5 +1,9 @@
 import type { OnboardingProgress } from '@/types/Onboarding';
 
+export function getOnboardingStorageKey(userId: string): string {
+  return `pie_onboarding_progress.${userId.replace(/[^A-Za-z0-9._-]/g, '_')}`;
+}
+
 export const INITIAL_ONBOARDING_PROGRESS: OnboardingProgress = {
   status: 'in_progress',
   stepIndex: 0,

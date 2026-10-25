@@ -1,6 +1,10 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { INITIAL_ONBOARDING_PROGRESS, parseOnboardingProgress } from '@/utils/onboarding-progress';
+import {
+  getOnboardingStorageKey,
+  INITIAL_ONBOARDING_PROGRESS,
+  parseOnboardingProgress,
+} from '@/utils/onboarding-progress';
 
 describe('parseOnboardingProgress', () => {
   it('começa do primeiro passo quando não há progresso salvo', () => {
@@ -27,5 +31,19 @@ describe('parseOnboardingProgress', () => {
     expect(parseOnboardingProgress(JSON.stringify({ status: 'x' }), 6)).toEqual(
       INITIAL_ONBOARDING_PROGRESS,
     );
+  });
+});
+
+describe('getOnboardingStorageKey', () => {
+  it('gera uma chave diferente para cada usuário', () => {
+    expect(getOnboardingStorageKey('user-1')).toBe('pie_onboarding_progress.user-1');
+    expect(getOnboardingStorageKey('user-1')).not.toBe(getOnboardingStorageKey('user-2'));
+  });
+
+  it('só usa caracteres aceitos pelo SecureStore', () => {
+    const key = getOnboardingStorageKey('6f1c2b0e-1a2b-4c3d-9e8f-001122334455');
+
+    expect(key).toMatch(/^[A-Za-z0-9._-]+$/);
+    expect(getOnboardingStorageKey('a:b/c d@e')).toMatch(/^[A-Za-z0-9._-]+$/);
   });
 });

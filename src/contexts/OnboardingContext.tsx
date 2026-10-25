@@ -41,32 +41,45 @@ function isSameRect(a: OnboardingTargetRect, b: OnboardingTargetRect) {
 }
 
 export function OnboardingProvider({ children }: PropsWithChildren) {
-  const { pendingStyleQuiz } = useAuth();
-  const [progress, setProgress] = useState<OnboardingProgress | null>(null);
+  const { userId, pendingStyleQuiz } = useAuth();
+  const [loaded, setLoaded] = useState<{ userId: string; progress: OnboardingProgress } | null>(
+    null,
+  );
   const [targets, setTargets] = useState<OnboardingContextValue['targets']>({});
 
+  const progress = loaded && loaded.userId === userId ? loaded.progress : null;
+
   useEffect(() => {
+    if (!userId) return;
+
     let isActive = true;
 
-    getStoredOnboardingProgress()
+    getStoredOnboardingProgress(userId)
       .then((raw) => {
-        if (isActive) setProgress(parseOnboardingProgress(raw, ONBOARDING_STEPS.length));
+        if (isActive) {
+          setLoaded({ userId, progress: parseOnboardingProgress(raw, ONBOARDING_STEPS.length) });
+        }
       })
       .catch(() => {
-        if (isActive) setProgress(INITIAL_ONBOARDING_PROGRESS);
+        if (isActive) setLoaded({ userId, progress: INITIAL_ONBOARDING_PROGRESS });
       });
 
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [userId]);
 
-  const saveProgress = useCallback((next: OnboardingProgress) => {
-    setProgress(next);
-    storeOnboardingProgress(next).catch((error) => {
-      console.error('Erro ao salvar progresso do onboarding:', error);
-    });
-  }, []);
+  const saveProgress = useCallback(
+    (next: OnboardingProgress) => {
+      if (!userId) return;
+
+      setLoaded({ userId, progress: next });
+      storeOnboardingProgress(userId, next).catch((error) => {
+        console.error('Erro ao salvar progresso do onboarding:', error);
+      });
+    },
+    [userId],
+  );
 
   const goToStep = useCallback(
     (index: number) => {
