@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, renderHook } from '@testing-library/react-native';
+import { useController } from 'react-hook-form';
 
-import { fetchLookSuggestion } from '@/services/looks';
+import { createLook, fetchLookSuggestion } from '@/services/looks';
 import type { WardrobePiece } from '@/types/Look';
 
 import { useLookForm } from '../UseLookForm';
@@ -83,5 +84,111 @@ describe('useLookForm', () => {
 
     expect(result.current.suggestion).toBeNull();
     expect(result.current.error).toMatch(/Não há peças disponíveis/);
+  });
+
+  describe('saveLook', () => {
+    const makeProduct = (id: string): WardrobePiece => ({
+      id,
+      name: `Produto ${id}`,
+      imageUrl: null,
+      category: 'Outros',
+      wardrobeItemId: null,
+      productId: id,
+    });
+
+    // O título vem de um Controller no SaveLookSheet; aqui registramos o mesmo campo.
+    const renderForm = () =>
+      renderHook(() => {
+        const form = useLookForm();
+        const title = useController({ control: form.control, name: 'title' });
+        return { form, title };
+      });
+
+    async function save(
+      result: Awaited<ReturnType<typeof renderForm>>['result'],
+      pieces: WardrobePiece[],
+    ) {
+      jest.mocked(createLook).mockResolvedValue({ id: 'look-1' } as never);
+      const onSuccess = jest.fn();
+
+      await act(async () => result.current.form.choosePieceCount(pieces.length));
+      for (const [index, piece] of pieces.entries()) {
+        await act(async () => result.current.form.assignPiece(index, piece));
+      }
+      await act(async () => result.current.title.field.onChange('Look de teste'));
+      await act(async () => {
+        await result.current.form.saveLook(null, onSuccess);
+      });
+      return onSuccess;
+    }
+
+    it.each([1, 2, 3, 4])(
+      'sends %i pieces to the API in the order they were added',
+      async (count) => {
+        const { result } = await renderForm();
+        const pieces = Array.from({ length: count }, (_, i) => makePiece(`p${i}`));
+
+        const onSuccess = await save(result, pieces);
+
+        expect(createLook).toHaveBeenCalledTimes(1);
+        expect(createLook).toHaveBeenCalledWith({
+          title: 'Look de teste',
+          occasion: undefined,
+          items: pieces.map((piece) => ({ wardrobeItemId: piece.id })),
+        });
+        expect(onSuccess).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it('keeps wardrobe items and products interleaved as chosen', async () => {
+      const { result } = await renderForm();
+
+      await save(result, [
+        makeProduct('casaco'),
+        makePiece('camisa'),
+        makeProduct('calca'),
+        makePiece('tenis'),
+      ]);
+
+      expect(jest.mocked(createLook).mock.calls[0][0].items).toEqual([
+        { productId: 'casaco' },
+        { wardrobeItemId: 'camisa' },
+        { productId: 'calca' },
+        { wardrobeItemId: 'tenis' },
+      ]);
+    });
+
+    it('sends pieces by slot position, not by the order they were picked', async () => {
+      jest.mocked(createLook).mockResolvedValue({ id: 'look-1' } as never);
+      const { result } = await renderForm();
+
+      await act(async () => result.current.form.choosePieceCount(3));
+      await act(async () => result.current.form.assignPiece(2, makePiece('tenis')));
+      await act(async () => result.current.form.assignPiece(0, makePiece('casaco')));
+      await act(async () => result.current.form.assignPiece(1, makePiece('camisa')));
+      await act(async () => result.current.title.field.onChange('Look de teste'));
+      await act(async () => {
+        await result.current.form.saveLook(null, jest.fn());
+      });
+
+      expect(jest.mocked(createLook).mock.calls[0][0].items).toEqual([
+        { wardrobeItemId: 'casaco' },
+        { wardrobeItemId: 'camisa' },
+        { wardrobeItemId: 'tenis' },
+      ]);
+    });
+
+    it('does not call the API while the look still has empty slots', async () => {
+      const { result } = await renderForm();
+
+      await act(async () => result.current.form.choosePieceCount(3));
+      await act(async () => result.current.form.assignPiece(0, makePiece('casaco')));
+      await act(async () => result.current.title.field.onChange('Look de teste'));
+      await act(async () => {
+        await result.current.form.saveLook(null, jest.fn());
+      });
+
+      expect(createLook).not.toHaveBeenCalled();
+    });
   });
 });
