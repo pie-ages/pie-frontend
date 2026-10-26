@@ -26,13 +26,6 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
     flexShrink: 1,
   },
-  action: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    transform: [{ translateX: 16 }, { translateY: -4 }],
-  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',

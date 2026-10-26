@@ -59,15 +59,7 @@ export default function ProfileScreen() {
           <Feather name="x" size={24} color={Colors.brand.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Perfil</Text>
-        <TouchableOpacity
-          onPress={() => router.push('/(screens)/EditProfile')}
-          style={styles.headerButton}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="Editar perfil"
-        >
-          <Feather name="edit-2" size={18} color={Colors.brand.primary} />
-        </TouchableOpacity>
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView
@@ -79,6 +71,7 @@ export default function ProfileScreen() {
           status={currentUser.status}
           user={currentUser.user}
           onRetry={currentUser.retry}
+          onEdit={() => router.push('/(screens)/EditProfile')}
         />
 
         <ProfileColorSection
@@ -87,6 +80,7 @@ export default function ProfileScreen() {
           status={preferences.status}
           colors={preferences.highlightColors}
           action={{
+            title: 'Refazer',
             label: 'Refazer colorimetria',
             icon: 'refresh-cw',
             onPress: () => router.push('/(screens)/ColorimetryResult'),
@@ -101,6 +95,7 @@ export default function ProfileScreen() {
           status={preferences.status}
           colors={preferences.favoriteColors}
           action={{
+            title: 'Editar',
             label: 'Editar cores favoritas',
             icon: 'edit-2',
             onPress: () => router.push('/(screens)/EditFavoriteColors'),
@@ -114,6 +109,7 @@ export default function ProfileScreen() {
           status={favoriteStyles.status}
           favoriteStyles={favoriteStyles.favoriteStyles}
           action={{
+            title: 'Editar',
             label: 'Editar estilos',
             icon: 'edit-2',
             onPress: () => router.push('/(screens)/EditStyles'),
@@ -153,6 +149,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  headerSpacer: {
+    width: 40,
+  },
   headerTitle: {
     flex: 1,
     textAlign: 'center',
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
     paddingBottom: Spacing.four,
-    gap: Spacing.three,
+    gap: Spacing.four,
   },
   footer: {
     paddingHorizontal: Spacing.three,

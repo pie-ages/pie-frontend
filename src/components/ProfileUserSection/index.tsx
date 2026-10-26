@@ -1,4 +1,5 @@
-import { ActivityIndicator, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { ErrorState } from '@/components/ErrorState';
 import { ProfileAvatar } from '@/components/ProfileAvatar';
@@ -13,24 +14,34 @@ type ProfileUserSectionProps = {
   status: ProfileStatus;
   user: CurrentUser | null;
   onRetry: () => void;
+  onEdit?: () => void;
 };
 
-export function ProfileUserSection({ status, user, onRetry }: ProfileUserSectionProps) {
+export function ProfileUserSection({ status, user, onRetry, onEdit }: ProfileUserSectionProps) {
   if (status === ProfileStatus.Success && user) {
     return (
       <ProfileSectionCard style={styles.card}>
         <View style={styles.row}>
           <ProfileAvatar name={user.name} photoUrl={user.photoUrl} />
           <View style={styles.info}>
-            <Text style={styles.text} numberOfLines={1}>
-              <Text style={styles.label}>Nome: </Text>
+            <Text style={styles.name} numberOfLines={1}>
               {user.name}
             </Text>
-            <Text style={styles.text} numberOfLines={1}>
-              <Text style={styles.label}>Email: </Text>
+            <Text style={styles.email} numberOfLines={1}>
               {user.email}
             </Text>
           </View>
+
+          {onEdit ? (
+            <Pressable
+              onPress={onEdit}
+              accessibilityRole="button"
+              accessibilityLabel="Editar perfil"
+              style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
+            >
+              <Feather name="edit-2" size={18} color={Colors.brand.primary} />
+            </Pressable>
+          ) : null}
         </View>
       </ProfileSectionCard>
     );

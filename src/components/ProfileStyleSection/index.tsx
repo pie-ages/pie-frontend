@@ -38,13 +38,13 @@ export function ProfileStyleSection({
     <ProfileSectionCard title="Estilo" action={action}>
       <View style={styles.list}>
         {favoriteStyles.map((style) => (
-          <Text key={style} style={styles.item}>
-            {IDENTIFIED_STYLE_INFO[style].label}
-          </Text>
+          <View key={style} style={styles.pill}>
+            <Text style={styles.item}>{IDENTIFIED_STYLE_INFO[style].label}</Text>
+          </View>
         ))}
       </View>
       <ThemedText type="small" style={styles.caption}>
-        Baseado nas respostas do seu quiz
+        Baseado nas escolhas do seu quiz.
       </ThemedText>
     </ProfileSectionCard>
   );

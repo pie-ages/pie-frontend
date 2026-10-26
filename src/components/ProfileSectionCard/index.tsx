@@ -1,17 +1,12 @@
-import { Feather } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
-import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
+import { View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { SectionActionButton, type SectionAction } from '@/components/SectionActionButton';
 import { ThemedText } from '@/components/ThemedText';
-import { Colors } from '@/constants/Theme';
 
 import { styles } from './styles';
 
-export type ProfileSectionAction = {
-  label: string;
-  icon: string;
-  onPress: () => void;
-};
+export type ProfileSectionAction = SectionAction;
 
 type ProfileSectionCardProps = {
   title?: string;
@@ -29,16 +24,7 @@ export function ProfileSectionCard({ title, action, style, children }: ProfileSe
             {title}
           </ThemedText>
 
-          {action && (
-            <Pressable
-              onPress={action.onPress}
-              style={styles.action}
-              accessibilityRole="button"
-              accessibilityLabel={action.label}
-            >
-              <Feather name={action.icon as never} size={18} color={Colors.brand.primary} />
-            </Pressable>
-          )}
+          {action && <SectionActionButton {...action} />}
         </View>
       ) : null}
       {children}
