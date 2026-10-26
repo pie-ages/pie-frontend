@@ -81,6 +81,11 @@ export default function ProfileScreen() {
           caption={preferences.highlightCaption}
           status={preferences.status}
           colors={preferences.highlightColors}
+          action={{
+            label: 'Refazer colorimetria',
+            icon: 'refresh-cw',
+            onPress: () => router.push('/(screens)/ColorimetryResult'),
+          }}
           errorTitle="Não foi possível carregar sua colorimetria"
           emptyTitle="Você ainda não fez sua colorimetria."
           onRetry={preferences.retry}
