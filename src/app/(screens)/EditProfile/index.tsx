@@ -17,12 +17,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { Colors, Spacing } from '@/constants/Theme';
-import { mockUserProfile } from '@/mocks/profileMocks';
+import { useEditProfile } from '@/hooks/UseEditProfile';
+import { useSessionExpiredRedirect } from '@/hooks/UseSessionExpiredRedirect';
 
 export default function EditProfileScreen() {
-  const [name, setName] = useState(mockUserProfile.name);
-  const [email, setEmail] = useState(mockUserProfile.email);
-  const [photoUri, setPhotoUri] = useState(mockUserProfile.avatarUrl);
+  const profile = useEditProfile();
+  const [pickedPhotoUri, setPickedPhotoUri] = useState<string | null>(null);
+  const photoUri = pickedPhotoUri ?? profile.user?.photoUrl ?? null;
+
+  useSessionExpiredRedirect(profile.sessionExpired);
 
   function handleClose() {
     if (router.canGoBack()) {
@@ -48,14 +51,8 @@ export default function EditProfileScreen() {
     });
 
     if (!result.canceled) {
-      setPhotoUri(result.assets[0].uri);
+      setPickedPhotoUri(result.assets[0].uri);
     }
-  }
-
-  function handleSave() {
-    // Aqui vai a interação com a API para salvar as alterações do perfil
-    console.log('Salvar:', { name, email, photoUri });
-    handleClose();
   }
 
   return (
@@ -75,7 +72,11 @@ export default function EditProfileScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.photoContainer}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+              {photoUri ? (
+                <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+              ) : (
+                <View style={styles.avatarImage} />
+              )}
               <TouchableOpacity
                 style={styles.editPhotoButton}
                 activeOpacity={0.8}
@@ -90,8 +91,9 @@ export default function EditProfileScreen() {
             <Text style={styles.label}>Nome</Text>
             <TextInput
               style={styles.input}
-              value={name}
-              onChangeText={setName}
+              value={profile.name}
+              onChangeText={profile.setName}
+              editable={!profile.isLoading && !profile.isSaving}
               placeholder="Seu nome"
               placeholderTextColor={Colors.light.textSecondary}
             />
@@ -101,18 +103,33 @@ export default function EditProfileScreen() {
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
-              value={email}
-              onChangeText={setEmail}
+              value={profile.email}
+              editable={false}
               keyboardType="email-address"
               autoCapitalize="none"
-              placeholder="seu.email@exemplo.com"
               placeholderTextColor={Colors.light.textSecondary}
             />
           </View>
+
+          {profile.hasLoadError ? (
+            <Text style={styles.errorText} accessibilityRole="alert">
+              Não foi possível carregar seus dados.
+            </Text>
+          ) : null}
+          {profile.error ? (
+            <Text style={styles.errorText} accessibilityRole="alert">
+              {profile.error}
+            </Text>
+          ) : null}
         </ScrollView>
 
         <View style={styles.footer}>
-          <ProductActionButton title="Salvar Alterações" onPress={handleSave} />
+          <ProductActionButton
+            title="Salvar Alterações"
+            onPress={profile.hasLoadError ? profile.retry : profile.save}
+            isLoading={profile.isSaving}
+            disabled={!profile.hasLoadError && !profile.canSave}
+          />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -120,6 +137,10 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  errorText: {
+    color: Colors.light.textSecondary,
+    fontSize: 14,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: Colors.white,
