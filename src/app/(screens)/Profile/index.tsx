@@ -22,6 +22,7 @@ export default function ProfileScreen() {
   const favoriteStyles = useFavoriteStyles(true);
 
   const { retry: reloadUser } = currentUser;
+  const { retry: reloadPreferences } = preferences;
   const { retry: reloadStyles } = favoriteStyles;
   const hasFocusedBefore = useRef(false);
 
@@ -29,10 +30,11 @@ export default function ProfileScreen() {
     useCallback(() => {
       if (hasFocusedBefore.current) {
         reloadUser();
+        reloadPreferences();
         reloadStyles();
       }
       hasFocusedBefore.current = true;
-    }, [reloadUser, reloadStyles]),
+    }, [reloadUser, reloadPreferences, reloadStyles]),
   );
 
   useSessionExpiredRedirect(
@@ -79,11 +81,6 @@ export default function ProfileScreen() {
           caption={preferences.highlightCaption}
           status={preferences.status}
           colors={preferences.highlightColors}
-          action={{
-            label: 'Refazer colorimetria',
-            icon: 'refresh-cw',
-            onPress: () => router.push('/(screens)/ColorimetryResult'),
-          }}
           errorTitle="Não foi possível carregar sua colorimetria"
           emptyTitle="Você ainda não fez sua colorimetria."
           onRetry={preferences.retry}
@@ -96,7 +93,7 @@ export default function ProfileScreen() {
           action={{
             label: 'Editar cores favoritas',
             icon: 'edit-2',
-            onPress: () => router.push('/(screens)/ColorimetryResult'),
+            onPress: () => router.push('/(screens)/EditFavoriteColors'),
           }}
           errorTitle="Não foi possível carregar suas cores favoritas"
           emptyTitle="Nenhuma cor favorita cadastrada."
