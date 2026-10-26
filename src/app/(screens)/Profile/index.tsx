@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -19,6 +20,20 @@ export default function ProfileScreen() {
   const currentUser = useCurrentUser(true);
   const preferences = useProfilePreferences(true);
   const favoriteStyles = useFavoriteStyles(true);
+
+  const { retry: reloadUser } = currentUser;
+  const { retry: reloadStyles } = favoriteStyles;
+  const hasFocusedBefore = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (hasFocusedBefore.current) {
+        reloadUser();
+        reloadStyles();
+      }
+      hasFocusedBefore.current = true;
+    }, [reloadUser, reloadStyles]),
+  );
 
   useSessionExpiredRedirect(
     currentUser.sessionExpired || preferences.sessionExpired || favoriteStyles.sessionExpired,
@@ -94,7 +109,7 @@ export default function ProfileScreen() {
           action={{
             label: 'Editar estilos',
             icon: 'edit-2',
-            onPress: () => router.push('/(screens)/StyleSelection'),
+            onPress: () => router.push('/(screens)/EditStyles'),
           }}
           onRetry={favoriteStyles.retry}
         />
