@@ -9,6 +9,7 @@ import {
   apiFetch,
   apiGetAuth,
   apiPostAuth,
+  apiPutAuth,
   isSessionExpiredError,
   parseResponse,
 } from '@/services/client';
@@ -69,6 +70,17 @@ export async function getFavoriteStyles(signal?: AbortSignal): Promise<Identifie
   let data: unknown;
   try {
     data = await apiGetAuth<unknown>('/api/users/me/style', signal);
+  } catch (error) {
+    throw toStyleError(error);
+  }
+
+  return parseResponse(favoriteStylesSchema, data, INVALID_STYLE_MESSAGE).styles;
+}
+
+export async function updateFavoriteStyles(styles: IdentifiedStyle[]): Promise<IdentifiedStyle[]> {
+  let data: unknown;
+  try {
+    data = await apiPutAuth<unknown>('/api/users/me/style', { styles });
   } catch (error) {
     throw toStyleError(error);
   }

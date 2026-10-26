@@ -13,11 +13,18 @@ export const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.two,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.four,
+    gap: Spacing.two,
+  },
   title: {
     color: '#292524',
     fontSize: 16,
     lineHeight: 22,
-    paddingHorizontal: Spacing.four,
+    flexShrink: 1,
   },
   row: {
     flexDirection: 'row',

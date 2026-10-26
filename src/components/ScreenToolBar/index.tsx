@@ -1,11 +1,10 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useCallback, useState } from 'react';
+import { router } from 'expo-router';
+import { useCallback } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { ProfileSheet } from '@/components/ProfileSheet';
 import { Colors } from '@/constants/Theme';
-import { useAuth } from '@/contexts/AuthContext';
 import { useOnboardingTarget } from '@/hooks/UseOnboardingTarget';
 import type { OnboardingTargetId } from '@/types/Onboarding';
 
@@ -89,9 +88,6 @@ export function ScreenToolBar({
   showProfile = true,
   profileOnboardingTargetId,
 }: ScreenToolBarProps) {
-  const { signOut } = useAuth();
-  const [isProfileSheetVisible, setProfileSheetVisible] = useState(false);
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -113,23 +109,12 @@ export function ScreenToolBar({
             icon="user"
             iconSet="feather"
             isProfile
-            onPress={() => setProfileSheetVisible(true)}
+            onPress={() => router.push('/Profile')}
             accessibilityLabel="Perfil"
             onboardingTargetId={profileOnboardingTargetId}
           />
         ) : null}
       </View>
-
-      {showProfile ? (
-        <ProfileSheet
-          visible={isProfileSheetVisible}
-          onClose={() => setProfileSheetVisible(false)}
-          onSignOut={() => {
-            setProfileSheetVisible(false);
-            signOut();
-          }}
-        />
-      ) : null}
     </View>
   );
 }
