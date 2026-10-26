@@ -1,4 +1,7 @@
-export const STYLES = [
+export type Style =
+  'romantico' | 'criativo' | 'casual' | 'classico' | 'refinado' | 'dramatico' | 'sensual';
+
+export const STYLES: Style[] = [
   'romantico',
   'criativo',
   'casual',
@@ -6,9 +9,7 @@ export const STYLES = [
   'refinado',
   'dramatico',
   'sensual',
-] as const;
-
-export type Style = (typeof STYLES)[number];
+];
 
 export const STYLE_LABELS: Record<Style, string> = {
   romantico: 'Romântico',
