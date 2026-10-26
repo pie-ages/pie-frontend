@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, FlatList, ActivityIndicator, Pressable } from 'react-native';
 
 import { ClothingCard } from '@/components/ClothingCard';
+import type { WardrobePiece } from '@/types/Look';
 import type { WardrobeRow } from '@/utils/wardrobe-rows';
 
 import { styles } from './styles';
@@ -10,9 +11,10 @@ interface CategoryRowProps {
   data: WardrobeRow;
   onEndReached: (rowId: string) => void;
   onRetry: (rowId: string) => void;
+  onRemoveItem?: (item: WardrobePiece) => void;
 }
 
-export function CategoryRow({ data, onEndReached, onRetry }: CategoryRowProps) {
+export function CategoryRow({ data, onEndReached, onRetry, onRemoveItem }: CategoryRowProps) {
   const footer =
     data.status === 'loadingMore' ? (
       <View style={styles.footer}>
@@ -44,7 +46,7 @@ export function CategoryRow({ data, onEndReached, onRetry }: CategoryRowProps) {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => <ClothingCard item={item} />}
+        renderItem={({ item }) => <ClothingCard item={item} onRemove={onRemoveItem} />}
         onEndReached={() => onEndReached(data.id)}
         onEndReachedThreshold={0.5}
         ListFooterComponent={footer}

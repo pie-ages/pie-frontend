@@ -10,12 +10,14 @@ import { LoadingState } from '@/components/LoadingState';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { StorefrontFilterChips } from '@/components/StorefrontFilterChips';
 import { StorefrontFilterSheet } from '@/components/StorefrontFilterSheet';
+import { StorefrontNotice } from '@/components/StorefrontNotice';
 import { StorefrontProductGrid } from '@/components/StorefrontProductGrid';
 import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useOnboardingTarget } from '@/hooks/UseOnboardingTarget';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
+import { useStorefrontNotice } from '@/hooks/UseStorefrontNotice';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
 
 export default function StorefrontScreen() {
@@ -39,6 +41,8 @@ export default function StorefrontScreen() {
   } = useStorefrontFilters();
   const { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing } =
     useStorefrontCatalog(catalogParams);
+
+  const { message: noticeMessage } = useStorefrontNotice();
 
   const renderFiltersSpotlight = useCallback(
     () => (
@@ -118,6 +122,8 @@ export default function StorefrontScreen() {
             />
           </View>
         </View>
+
+        {noticeMessage && <StorefrontNotice message={noticeMessage} />}
 
         <View style={styles.body}>
           {isLoading && <LoadingState text="Carregando produtos..." />}

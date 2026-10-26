@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
@@ -8,11 +9,13 @@ import { ProductHeader } from '@/components/ProductHeader';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
-import { BrandColors, Spacing } from '@/constants/Theme';
+import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useAddToWardrobe } from '@/hooks/UseAddToWardrobe';
 import { useProductDetails } from '@/hooks/UseProductDetails';
 import { useTheme } from '@/hooks/UseTheme';
 import type { CatalogItem, ProductPublicDetail } from '@/schemas/productSchema';
+import { isHttpUrl } from '@/utils/external-url';
 
 function toWishlistItem(detail: ProductPublicDetail): CatalogItem {
   return {
@@ -41,6 +44,8 @@ function ProductDetails({ id }: { id?: string }) {
   const theme = useTheme();
   const { product, isLoading, error } = useProductDetails(id);
   const { toggle, isInWishlist } = useWishlist();
+  const wardrobe = useAddToWardrobe(product);
+  const [storeError, setStoreError] = useState<string | null>(null);
 
   function handleClose() {
     if (router.canGoBack()) {
@@ -48,9 +53,27 @@ function ProductDetails({ id }: { id?: string }) {
     }
   }
 
-  async function handlePurchase() {
-    if (!product?.purchaseUrl) return;
-    await WebBrowser.openBrowserAsync(product.purchaseUrl);
+  async function handleAddToWardrobe() {
+    if (!product) return;
+
+    const added = await wardrobe.add();
+    if (!added) return;
+
+    router.dismissTo({
+      pathname: '/Storefront',
+      params: { notice: `"${product.name}" foi adicionada ao seu closet!` },
+    });
+  }
+
+  async function handleOpenStore() {
+    if (!isHttpUrl(product?.purchaseUrl)) return;
+
+    setStoreError(null);
+    try {
+      await WebBrowser.openBrowserAsync(product.purchaseUrl);
+    } catch {
+      setStoreError('Não foi possível abrir a loja parceira. Tente novamente.');
+    }
   }
 
   if (isLoading) {
@@ -75,6 +98,9 @@ function ProductDetails({ id }: { id?: string }) {
       </SafeAreaView>
     );
   }
+
+  const canOpenStore = product.available && isHttpUrl(product.purchaseUrl);
+  const storeName = product.companyName ?? 'parceira';
 
   const formattedPrice = product.price.toLocaleString('pt-BR', {
     style: 'currency',
@@ -136,11 +162,9 @@ function ProductDetails({ id }: { id?: string }) {
             <ThemedText type="smallBold" style={styles.sectionLabel} allowFontScaling={false}>
               Loja
             </ThemedText>
-            <Pressable onPress={handlePurchase}>
-              <ThemedText type="small" style={styles.storeValue} allowFontScaling={false}>
-                {product.companyName ?? ''}
-              </ThemedText>
-            </Pressable>
+            <ThemedText type="small" style={styles.storeValue} allowFontScaling={false}>
+              {product.companyName ?? ''}
+            </ThemedText>
           </View>
 
           {!product.available && (
@@ -151,11 +175,44 @@ function ProductDetails({ id }: { id?: string }) {
         </View>
       </ScrollView>
 
-      {product.available && (
-        <View style={styles.footer}>
-          <ProductActionButton title="Já tenho! Adicionar ao closet" />
-        </View>
-      )}
+      <View style={styles.footer}>
+        {(wardrobe.error ?? storeError) && (
+          <ThemedText
+            accessibilityRole="alert"
+            type="small"
+            style={[styles.feedback, styles.errorText]}
+          >
+            {wardrobe.error ?? storeError}
+          </ThemedText>
+        )}
+
+        <ProductActionButton
+          title={
+            wardrobe.isInWardrobe
+              ? 'Esta peça já está no seu closet'
+              : 'Já tenho! Adicionar ao closet'
+          }
+          iconName={wardrobe.isInWardrobe ? 'check' : 'plus'}
+          variant={wardrobe.isInWardrobe ? 'done' : 'primary'}
+          isLoading={wardrobe.isChecking || wardrobe.isAdding}
+          disabled={wardrobe.isInWardrobe}
+          onPress={() => void handleAddToWardrobe()}
+        />
+
+        {canOpenStore && (
+          <>
+            <ProductActionButton
+              title={`Comprar na loja ${storeName}`}
+              iconName="external-link"
+              variant="outline"
+              onPress={() => void handleOpenStore()}
+            />
+            <ThemedText type="small" themeColor="textSecondary" style={styles.storeHint}>
+              Você será direcionado para o site da loja parceira.
+            </ThemedText>
+          </>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -217,6 +274,15 @@ const styles = StyleSheet.create({
     fontSize: 17,
     lineHeight: 17,
     fontWeight: '700',
+  },
+  feedback: {
+    textAlign: 'center',
+  },
+  errorText: {
+    color: Colors.error,
+  },
+  storeHint: {
+    textAlign: 'center',
   },
   footer: {
     gap: Spacing.two,

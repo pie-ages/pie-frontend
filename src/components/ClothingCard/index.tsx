@@ -1,5 +1,6 @@
+import { Feather } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { View, Text, Image, ActivityIndicator } from 'react-native';
+import { View, Text, Image, ActivityIndicator, Pressable } from 'react-native';
 
 import type { WardrobePiece } from '@/types/Look';
 
@@ -7,9 +8,10 @@ import { styles } from './styles';
 
 interface ClothingCardProps {
   item: WardrobePiece;
+  onRemove?: (item: WardrobePiece) => void;
 }
 
-export function ClothingCard({ item }: ClothingCardProps) {
+export function ClothingCard({ item, onRemove }: ClothingCardProps) {
   const [isLoading, setIsLoading] = useState(Boolean(item.imageUrl));
   const [hasError, setHasError] = useState(false);
 
@@ -31,6 +33,18 @@ export function ClothingCard({ item }: ClothingCardProps) {
           />
         ) : null}
       </View>
+
+      {onRemove ? (
+        <Pressable
+          onPress={() => onRemove(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`Remover ${item.name} do closet`}
+          hitSlop={8}
+          style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
+        >
+          <Feather name="x" size={14} color="#661414" />
+        </Pressable>
+      ) : null}
 
       <Text style={styles.name} numberOfLines={2}>
         {item.name}

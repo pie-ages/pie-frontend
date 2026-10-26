@@ -7,8 +7,9 @@ import {
   type WardrobeImageAnalysis,
   type WardrobeItemDTO,
 } from '@/schemas/wardrobeSchema';
-import { apiGetAuth, apiUploadAuth, parseResponse } from '@/services/client';
+import { apiDeleteAuth, apiGetAuth, apiUploadAuth, parseResponse } from '@/services/client';
 import type { WardrobePiece } from '@/types/Look';
+import { buildWardrobeItemFromProduct } from '@/utils/wardrobe-product';
 import { groupWardrobePieces, type WardrobeFetch } from '@/utils/wardrobe-rows';
 
 export type { WardrobeImageAnalysis, WardrobeItemDTO };
@@ -61,6 +62,26 @@ export async function createWardrobeItem(
     wardrobeItemSchema,
     await apiUploadAuth('/api/users/me/wardrobe/items', formData),
   );
+}
+
+export async function deleteWardrobeItem(itemId: string): Promise<void> {
+  await apiDeleteAuth(`/api/users/me/wardrobe/items/${encodeURIComponent(itemId)}`);
+}
+
+export async function fetchWardrobeProductIds(signal?: AbortSignal): Promise<Set<string>> {
+  const items = parseResponse(
+    z.array(wardrobeItemSchema),
+    await apiGetAuth('/api/users/me/wardrobe/items', signal),
+    'Resposta inválida ao carregar o guarda-roupa.',
+  );
+  return new Set(items.flatMap((item) => (item.productId ? [item.productId] : [])));
+}
+
+export async function addProductToWardrobe(
+  product: Parameters<typeof buildWardrobeItemFromProduct>[0],
+): Promise<WardrobeItemDTO> {
+  const { payload, image } = buildWardrobeItemFromProduct(product);
+  return createWardrobeItem(payload, image);
 }
 
 export async function analyzeWardrobeImage(
