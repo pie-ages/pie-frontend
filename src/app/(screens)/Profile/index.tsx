@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { ProfileColorSection } from '@/components/ProfileColorSection';
@@ -17,6 +17,7 @@ import { useSessionExpiredRedirect } from '@/hooks/UseSessionExpiredRedirect';
 
 export default function ProfileScreen() {
   const { signOut } = useAuth();
+  const insets = useSafeAreaInsets();
   const currentUser = useCurrentUser(true);
   const preferences = useProfilePreferences(true);
   const favoriteStyles = useFavoriteStyles(true);
@@ -46,7 +47,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={handleClose}
@@ -69,7 +70,11 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <ProfileUserSection
           status={currentUser.status}
           user={currentUser.user}
@@ -115,9 +120,16 @@ export default function ProfileScreen() {
           }}
           onRetry={favoriteStyles.retry}
         />
-
-        <ProductActionButton title="Sair" onPress={signOut} />
       </ScrollView>
+
+      <View
+        style={[
+          styles.footer,
+          { paddingBottom: Math.max(insets.bottom + Spacing.two, Spacing.four) },
+        ]}
+      >
+        <ProductActionButton title="Sair" onPress={signOut} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -148,10 +160,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.light.text,
   },
+  scroll: {
+    flex: 1,
+  },
   content: {
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
-    paddingBottom: Spacing.six,
+    paddingBottom: Spacing.four,
     gap: Spacing.three,
+  },
+  footer: {
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
+    backgroundColor: Colors.white,
   },
 });
