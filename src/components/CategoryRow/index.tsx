@@ -32,7 +32,7 @@ export function CategoryRow({ data, onEndReached, onRetry, onRemoveItem }: Categ
           <Text style={styles.retryText}>Tentar novamente</Text>
         </Pressable>
       </View>
-    ) : null;
+    ) : undefined;
 
   return (
     <View style={styles.container}>

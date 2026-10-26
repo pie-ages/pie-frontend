@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import type { View } from 'react-native';
+import type { ViewInstance } from 'react-native';
 
 import { useOptionalOnboarding } from '@/contexts/OnboardingContext';
 import type { OnboardingTargetId } from '@/types/Onboarding';
@@ -9,7 +9,7 @@ export function useOnboardingTarget(
   renderSpotlight: () => ReactNode,
 ) {
   const onboarding = useOptionalOnboarding();
-  const [node, setTargetNode] = useState<View | null>(null);
+  const [node, setTargetNode] = useState<ViewInstance | null>(null);
 
   const registerTarget = onboarding?.registerTarget;
   const unregisterTarget = onboarding?.unregisterTarget;

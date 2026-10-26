@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render, renderHook } from '@testing-library/react-native';
 import { useEffect, type PropsWithChildren } from 'react';
-import type { View } from 'react-native';
+import type { ViewInstance } from 'react-native';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
@@ -25,7 +25,7 @@ function createNode(frame: [number, number, number, number]) {
   return {
     measureInWindow: (callback: (x: number, y: number, w: number, h: number) => void) =>
       callback(...frame),
-  } as unknown as View;
+  } as unknown as ViewInstance;
 }
 
 async function renderTarget(id: OnboardingTargetId | undefined) {
