@@ -8,6 +8,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   Text,
   TextInput,
   View,
@@ -41,7 +42,7 @@ export function SaveLookSheet({
   onConfirm,
 }: SaveLookSheetProps) {
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const [page, setPage] = useState(0);
   const [pageWidth, setPageWidth] = useState(0);
   const [pageHeights, setPageHeights] = useState<[number, number]>([0, 0]);

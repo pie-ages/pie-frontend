@@ -2,7 +2,14 @@ import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { TabTriggerSlotProps } from 'expo-router/ui';
 import { forwardRef, useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, View, type LayoutRectangle, type ViewProps } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  View,
+  type LayoutRectangle,
+  type PressableInstance,
+  type ViewProps,
+} from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -26,7 +33,7 @@ type TabBarButtonProps = TabTriggerSlotProps & {
   iconSet?: IconSet;
 };
 
-export const TabBarButton = forwardRef<View, TabBarButtonProps>(function TabBarButton(
+export const TabBarButton = forwardRef<PressableInstance, TabBarButtonProps>(function TabBarButton(
   { label, icon, iconSet = 'feather', isFocused, ...props },
   ref,
 ) {
