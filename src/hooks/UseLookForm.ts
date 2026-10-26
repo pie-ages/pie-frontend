@@ -9,7 +9,8 @@ import {
   uploadLookImage,
   type LookImageAsset,
 } from '@/services/looks';
-import { MAX_LOOK_PIECES, type WardrobePiece } from '@/types/Look';
+import { buildLookItemRefs, MAX_LOOK_PIECES, type WardrobePiece } from '@/types/Look';
+import { sortLookPieces } from '@/utils/look-order';
 
 export function useLookForm() {
   const [suggestion, setSuggestion] = useState<WardrobePiece[] | null>(null);
@@ -33,11 +34,9 @@ export function useLookForm() {
   const items = useWatch({ control, name: 'items' });
 
   function updateSlots(next: (WardrobePiece | null)[]) {
-    setSlots(next);
-    setValue(
-      'items',
-      next.filter((item): item is WardrobePiece => item !== null),
-    );
+    const sorted = sortLookPieces(next.filter((item): item is WardrobePiece => item !== null));
+    setSlots(Array.from({ length: next.length }, (_, index) => sorted[index] ?? null));
+    setValue('items', sorted);
     clearErrors('items');
   }
 
@@ -123,12 +122,7 @@ export function useLookForm() {
           const look = await createLook({
             title,
             occasion: occasion || undefined,
-            wardrobeItemIds: pieces
-              .map((item) => item.wardrobeItemId)
-              .filter((id): id is string => Boolean(id)),
-            productIds: pieces
-              .filter((item) => !item.wardrobeItemId && item.productId)
-              .map((item) => item.productId as string),
+            items: buildLookItemRefs(pieces),
           });
           lookId = look.id;
           createdLookId.current = lookId;

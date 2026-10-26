@@ -6,40 +6,11 @@ import { AuthButton } from '@/components/AuthButton';
 import { LookPieceCard } from '@/components/LookPieceCard';
 import { Colors } from '@/constants/Theme';
 import type { WardrobePiece } from '@/types/Look';
+import { lookPieceRank } from '@/utils/look-order';
 
 import { styles } from './styles';
 
 type WardrobeStatus = 'loading' | 'success' | 'error' | 'empty';
-
-function categoryRank(category: string): number {
-  const c = category.toLowerCase();
-  if (c.includes('cima')) return 0;
-  if (c.includes('casaco') || c.includes('jaqueta') || c.includes('blazer')) return 1;
-  if (c.includes('vestido') || c.includes('macac')) return 2;
-  if (
-    c.includes('calçado') ||
-    c.includes('calcado') ||
-    c.includes('sapat') ||
-    c.includes('tênis') ||
-    c.includes('tenis') ||
-    c.includes('sandal') ||
-    c.includes('scarpin') ||
-    c.includes('bota')
-  ) {
-    return 4;
-  }
-  if (
-    c.includes('baixo') ||
-    c.includes('calça') ||
-    c.includes('calca') ||
-    c.includes('saia') ||
-    c.includes('short') ||
-    c.includes('bermuda')
-  ) {
-    return 3;
-  }
-  return 5;
-}
 
 type WardrobePickerModalProps = {
   visible: boolean;
@@ -62,7 +33,7 @@ export function WardrobePickerModal({
 }: WardrobePickerModalProps) {
   const insets = useSafeAreaInsets();
   const categories = [...new Set(pieces.map((piece) => piece.category))].sort(
-    (a, b) => categoryRank(a) - categoryRank(b) || a.localeCompare(b),
+    (a, b) => lookPieceRank(a) - lookPieceRank(b) || a.localeCompare(b),
   );
 
   return (
