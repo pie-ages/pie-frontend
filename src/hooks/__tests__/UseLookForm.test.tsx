@@ -57,7 +57,7 @@ describe('useLookForm', () => {
       await result.current.requestSuggestion();
     });
 
-    expect(fetchLookSuggestion).toHaveBeenCalledWith(3);
+    expect(fetchLookSuggestion).toHaveBeenCalledWith();
     expect(result.current.suggestion).toHaveLength(3);
 
     await act(async () => result.current.acceptSuggestion());

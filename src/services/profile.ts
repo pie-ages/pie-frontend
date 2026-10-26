@@ -1,6 +1,5 @@
-import { profileSchema, userProductStylesSchema } from '@/schemas/profileSchema';
+import { userProductStylesSchema } from '@/schemas/profileSchema';
 import { apiGetAuth, apiPutAuth, parseResponse } from '@/services/client';
-import type { Profile } from '@/types/Profile';
 import { STYLES, type Style } from '@/types/Style';
 
 function normalizeStyles(styles: string[]): Style[] {
@@ -9,10 +8,6 @@ function normalizeStyles(styles: string[]): Style[] {
     if (!normalized) throw new Error('A API retornou um estilo inválido.');
     return normalized;
   });
-}
-
-export async function fetchProfile(): Promise<Profile> {
-  return parseResponse(profileSchema, await apiGetAuth('/api/users/me'));
 }
 
 export async function fetchUserProductStyles(): Promise<Style[]> {

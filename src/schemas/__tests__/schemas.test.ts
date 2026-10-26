@@ -1,10 +1,11 @@
 import { describe, expect, it } from '@jest/globals';
 
 import { loginResponseSchema, registerSchema } from '@/schemas/authSchema';
-import { styleIdentificationSchema } from '@/schemas/styleSchema';
+import { colorimetryPreferencesSchema } from '@/schemas/colorimetrySchema';
+import { lookFormSchema } from '@/schemas/lookSchema';
+import { favoriteStylesSchema, styleIdentificationSchema } from '@/schemas/styleSchema';
+import { currentUserSchema } from '@/schemas/userSchema';
 import { addPieceSchema, wardrobeImageAnalysisSchema } from '@/schemas/wardrobeSchema';
-
-import { lookFormSchema } from '../lookSchema';
 
 const validLoginResponse = {
   accessToken: 'eyJhbGciOiJIUzI1NiJ9.payload.sig',
@@ -98,5 +99,79 @@ describe('response schemas', () => {
     expect(styleIdentificationSchema.safeParse({ styles: ['BOHO'] }).success).toBe(true);
     expect(styleIdentificationSchema.safeParse({ styles: ['BOHO', 'CASUAL'] }).success).toBe(false);
     expect(styleIdentificationSchema.safeParse({ styles: ['PUNK'] }).success).toBe(false);
+  });
+});
+
+describe('currentUserSchema', () => {
+  const user = {
+    id: '6f1c2b0e-1a2b-4c3d-9e8f-001122334455',
+    name: 'Ana Souza',
+    email: 'ana@pie.com.br',
+    photoUrl: 'https://cdn.pie.com.br/ana.png',
+    createdAt: '2026-01-10T12:00:00Z',
+    updatedAt: '2026-01-10T12:00:00Z',
+  };
+
+  it('accepts the /users/me response', () => {
+    expect(currentUserSchema.parse(user)).toEqual(user);
+  });
+
+  it('accepts null or missing photo and dates', () => {
+    expect(
+      currentUserSchema.safeParse({ ...user, photoUrl: null, createdAt: null, updatedAt: null })
+        .success,
+    ).toBe(true);
+    expect(
+      currentUserSchema.safeParse({ id: user.id, name: user.name, email: user.email }).success,
+    ).toBe(true);
+  });
+
+  it('rejects a response without name or email', () => {
+    expect(currentUserSchema.safeParse({ ...user, name: undefined }).success).toBe(false);
+    expect(currentUserSchema.safeParse({ ...user, email: null }).success).toBe(false);
+  });
+});
+
+describe('favoriteStylesSchema', () => {
+  it('accepts an empty list', () => {
+    expect(favoriteStylesSchema.parse({ styles: [] }).styles).toEqual([]);
+  });
+
+  it('accepts more than one known style', () => {
+    expect(favoriteStylesSchema.parse({ styles: ['CASUAL', 'ROMANTICO'] }).styles).toEqual([
+      'CASUAL',
+      'ROMANTICO',
+    ]);
+  });
+
+  it('ignores unknown styles instead of rejecting the response', () => {
+    expect(favoriteStylesSchema.parse({ styles: ['DRAMATICO'] }).styles).toEqual([]);
+  });
+
+  it('keeps the known styles when the list also has unknown ones', () => {
+    expect(favoriteStylesSchema.parse({ styles: ['CASUAL', 'DRAMATICO', 'BOHO'] }).styles).toEqual([
+      'CASUAL',
+      'BOHO',
+    ]);
+  });
+});
+
+describe('colorimetryPreferencesSchema', () => {
+  const colors = { highlightColors: ['#FFB58C'], avoidColors: ['#00C48C'], favoriteColors: [] };
+
+  it('accepts preferences before any analysis, without a season', () => {
+    expect(colorimetryPreferencesSchema.safeParse(colors).success).toBe(true);
+    expect(colorimetryPreferencesSchema.safeParse({ ...colors, season: null }).success).toBe(true);
+  });
+
+  it('keeps the analyzed season label and captions', () => {
+    const season = {
+      id: 'soft_autumn',
+      label: 'Outono Suave',
+      highlightCaption: 'Tons quentes e suaves valorizam sua pele.',
+      avoidCaption: 'Tons frios e vivos competem com a sua coloração natural.',
+    };
+    const result = colorimetryPreferencesSchema.safeParse({ ...colors, season });
+    expect(result.success && result.data.season?.label).toBe('Outono Suave');
   });
 });

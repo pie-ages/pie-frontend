@@ -1,9 +1,17 @@
 import {
+  favoriteStylesSchema,
   styleIdentificationSchema,
   styleQuizResponseSchema,
   type StyleQuizQuestion,
 } from '@/schemas/styleSchema';
-import { ApiError, apiFetch, apiGetAuth, apiPostAuth, parseResponse } from '@/services/client';
+import {
+  ApiError,
+  apiFetch,
+  apiGetAuth,
+  apiPostAuth,
+  isSessionExpiredError,
+  parseResponse,
+} from '@/services/client';
 import type { IdentifiedStyle } from '@/types/IdentifiedStyle';
 import type { StyleQuizSubmission } from '@/types/StyleQuiz';
 
@@ -15,12 +23,7 @@ export class StyleSessionError extends Error {}
 
 function toStyleError(error: unknown): unknown {
   if (!(error instanceof ApiError)) return error;
-  if (
-    error.status === 401 ||
-    (error.status === 404 && error.serverMessage?.startsWith('Usuário não encontrado'))
-  ) {
-    return new StyleSessionError(SESSION_MESSAGE);
-  }
+  if (isSessionExpiredError(error)) return new StyleSessionError(SESSION_MESSAGE);
   return new Error(error.serverMessage ?? ERROR_MESSAGE);
 }
 
@@ -60,4 +63,15 @@ export async function getIdentifiedStyle(): Promise<IdentifiedStyle | null> {
   }
 
   return readStyles(data)[0] ?? null;
+}
+
+export async function getFavoriteStyles(signal?: AbortSignal): Promise<IdentifiedStyle[]> {
+  let data: unknown;
+  try {
+    data = await apiGetAuth<unknown>('/api/users/me/style', signal);
+  } catch (error) {
+    throw toStyleError(error);
+  }
+
+  return parseResponse(favoriteStylesSchema, data, INVALID_STYLE_MESSAGE).styles;
 }

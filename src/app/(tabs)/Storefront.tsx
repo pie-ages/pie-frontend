@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,6 +13,7 @@ import { StorefrontFilterSheet } from '@/components/StorefrontFilterSheet';
 import { StorefrontProductGrid } from '@/components/StorefrontProductGrid';
 import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
+import { useOnboardingTarget } from '@/hooks/UseOnboardingTarget';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
@@ -38,6 +39,22 @@ export default function StorefrontScreen() {
   } = useStorefrontFilters();
   const { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing } =
     useStorefrontCatalog(catalogParams);
+
+  const renderFiltersSpotlight = useCallback(
+    () => (
+      <StorefrontFilterChips
+        groups={filterGroups}
+        selectedIds={appliedFilterIds}
+        onToggle={() => {}}
+        onOpenSheet={() => {}}
+      />
+    ),
+    [filterGroups, appliedFilterIds],
+  );
+  const { setTargetNode: setFiltersNode, onLayout: onFiltersLayout } = useOnboardingTarget(
+    'filters',
+    renderFiltersSpotlight,
+  );
 
   const handleStoreFrontPress = (productId: string) => {
     try {
@@ -81,8 +98,10 @@ export default function StorefrontScreen() {
                   iconSet: 'material-community',
                   onPress: () => router.push('/Wishlist'),
                   accessibilityLabel: 'Wishlist',
+                  onboardingTargetId: 'wishlist',
                 },
               ]}
+              profileOnboardingTargetId="profile"
             />
           </View>
           <StorefrontSearchBar
@@ -90,12 +109,14 @@ export default function StorefrontScreen() {
             onChangeText={setSearchInput}
             onClear={clearSearch}
           />
-          <StorefrontFilterChips
-            groups={filterGroups}
-            selectedIds={appliedFilterIds}
-            onToggle={toggleAppliedFilter}
-            onOpenSheet={handleOpenSheet}
-          />
+          <View ref={setFiltersNode} onLayout={onFiltersLayout} collapsable={false}>
+            <StorefrontFilterChips
+              groups={filterGroups}
+              selectedIds={appliedFilterIds}
+              onToggle={toggleAppliedFilter}
+              onOpenSheet={handleOpenSheet}
+            />
+          </View>
         </View>
 
         <View style={styles.body}>

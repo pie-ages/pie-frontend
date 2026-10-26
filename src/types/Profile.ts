@@ -1,5 +1,6 @@
-export type Profile = {
-  name: string;
-  email: string;
-  photoUrl: string | null;
-};
+export enum ProfileStatus {
+  Loading = 'loading',
+  Success = 'success',
+  Error = 'error',
+  Empty = 'empty',
+}

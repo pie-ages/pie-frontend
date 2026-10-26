@@ -12,7 +12,6 @@ export type LookImageAsset = WardrobeImageAsset;
 
 type CreateLookPayload = {
   title: string;
-  pieceCount: number;
   description?: string;
   occasion?: string;
   wardrobeItemIds: string[];
@@ -38,10 +37,10 @@ export async function createLook(payload: CreateLookPayload): Promise<LookRespon
   );
 }
 
-export async function fetchLookSuggestion(size: number): Promise<WardrobePiece[]> {
+export async function fetchLookSuggestion(): Promise<WardrobePiece[]> {
   const data = parseResponse(
     lookSuggestionResponseSchema,
-    await apiGetAuth(`/api/users/me/looks/suggestion?size=${size}`),
+    await apiGetAuth('/api/users/me/looks/suggestion'),
     'Resposta inválida ao carregar a sugestão de look.',
   );
 

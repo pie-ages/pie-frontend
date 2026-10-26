@@ -78,7 +78,7 @@ export function useLookForm() {
     setError(null);
     setOperation('suggest');
     try {
-      const result = await fetchLookSuggestion(size);
+      const result = await fetchLookSuggestion();
       const suggestions = result.slice(0, size);
       if (suggestions.length === 0) {
         setError('Não há peças disponíveis para sugerir. Adicione peças ao seu closet.');
@@ -122,7 +122,6 @@ export function useLookForm() {
         if (!lookId) {
           const look = await createLook({
             title,
-            pieceCount: pieces.length,
             occasion: occasion || undefined,
             wardrobeItemIds: pieces
               .map((item) => item.wardrobeItemId)

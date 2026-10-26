@@ -15,6 +15,8 @@ const mockGetStoredToken = jest.mocked(storage.getStoredToken);
 const mockGetStoredRefreshToken = jest.mocked(storage.getStoredRefreshToken);
 const mockGetStoredExpiresAt = jest.mocked(storage.getStoredExpiresAt);
 const mockClearSession = jest.mocked(storage.clearSession);
+const mockGetStoredUserId = jest.mocked(storage.getStoredUserId);
+const mockStoreUserId = jest.mocked(storage.storeUserId);
 
 const validSession = {
   accessToken: 'access-token',
@@ -33,11 +35,12 @@ beforeEach(() => {
   mockGetStoredToken.mockResolvedValue(null);
   mockGetStoredRefreshToken.mockResolvedValue(null);
   mockGetStoredExpiresAt.mockResolvedValue(null);
+  mockGetStoredUserId.mockResolvedValue(null);
 });
 
 describe('AuthContext — init', () => {
   it('starts unauthenticated when no token stored', async () => {
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -49,7 +52,7 @@ describe('AuthContext — init', () => {
     mockGetStoredToken.mockResolvedValue('access-token');
     mockGetStoredExpiresAt.mockResolvedValue(Date.now() + 3_600_000);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -63,7 +66,7 @@ describe('AuthContext — init', () => {
     mockApiPost.mockResolvedValue(validSession);
     mockStoreSession.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -79,7 +82,7 @@ describe('AuthContext — init', () => {
     mockGetStoredRefreshToken.mockResolvedValue('bad-refresh');
     mockApiPost.mockRejectedValue(new Error('401'));
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {});
 
@@ -93,7 +96,7 @@ describe('AuthContext — signIn', () => {
     mockApiPost.mockResolvedValue(validSession);
     mockStoreSession.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
     await act(async () => {
@@ -114,14 +117,18 @@ describe('AuthContext — signIn', () => {
       new client.ApiError('Credenciais inválidas', 401, 'Invalid credentials'),
     );
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
-    await expect(
-      act(async () => {
+    let thrownError: unknown;
+    await act(async () => {
+      try {
         await result.current.signIn({ email: 'wrong@pie.com.br', password: 'bad' });
-      }),
-    ).rejects.toThrow();
+      } catch (e) {
+        thrownError = e;
+      }
+    });
+    expect(thrownError).toBeInstanceOf(client.ApiError);
   });
 });
 
@@ -132,7 +139,7 @@ describe('AuthContext — signOut', () => {
     mockApiPostAuth.mockResolvedValue(undefined);
     mockClearSession.mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useAuth(), { wrapper });
+    const { result } = await renderHook(() => useAuth(), { wrapper });
     await act(async () => {});
 
     expect(result.current.isAuthenticated).toBe(true);
@@ -144,5 +151,62 @@ describe('AuthContext — signOut', () => {
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.user).toBeNull();
     expect(mockClearSession).toHaveBeenCalled();
+  });
+});
+
+describe('AuthContext — userId', () => {
+  it('restores the user id along with a valid stored token', async () => {
+    mockGetStoredToken.mockResolvedValue('access-token');
+    mockGetStoredExpiresAt.mockResolvedValue(Date.now() + 3_600_000);
+    mockGetStoredUserId.mockResolvedValue('uid-1');
+
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await act(async () => {});
+
+    expect(result.current.userId).toBe('uid-1');
+  });
+
+  it('stores the user id on sign in', async () => {
+    mockApiPost.mockResolvedValue(validSession);
+    mockStoreSession.mockResolvedValue(undefined);
+
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await act(async () => {});
+    await act(async () => {
+      await result.current.signIn({ email: 'anna@pie.com.br', password: '123456' });
+    });
+
+    expect(mockStoreUserId).toHaveBeenCalledWith('uid-1');
+    expect(result.current.userId).toBe('uid-1');
+  });
+
+  it('uses the returned user id when refreshing an expired token', async () => {
+    mockGetStoredToken.mockResolvedValue('old-access');
+    mockGetStoredExpiresAt.mockResolvedValue(Date.now() - 1000);
+    mockGetStoredRefreshToken.mockResolvedValue('refresh-token');
+    mockApiPost.mockResolvedValue(validSession);
+    mockStoreSession.mockResolvedValue(undefined);
+
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await act(async () => {});
+
+    expect(mockStoreUserId).toHaveBeenCalledWith('uid-1');
+    expect(result.current.userId).toBe('uid-1');
+  });
+
+  it('clears the user id on sign out', async () => {
+    mockGetStoredToken.mockResolvedValue('access-token');
+    mockGetStoredExpiresAt.mockResolvedValue(Date.now() + 3_600_000);
+    mockGetStoredUserId.mockResolvedValue('uid-1');
+    mockApiPostAuth.mockResolvedValue(undefined);
+    mockClearSession.mockResolvedValue(undefined);
+
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await act(async () => {});
+    await act(async () => {
+      await result.current.signOut();
+    });
+
+    expect(result.current.userId).toBeNull();
   });
 });

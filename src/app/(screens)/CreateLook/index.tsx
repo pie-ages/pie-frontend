@@ -46,17 +46,22 @@ export default function CreateLookScreen() {
   const [areaHeight, setAreaHeight] = useState(0);
   const gap = Spacing.two;
   const padding = Spacing.three;
-  const rowCount = form.pieceCount === 4 ? 2 : (form.pieceCount ?? 3);
   const contentWidth = areaWidth ? areaWidth - padding * 2 : windowWidth - padding * 2;
-  const widthCap =
+  const widthCap = Math.min(
+    form.pieceCount === 4 ? contentWidth : windowWidth * 0.6,
+    form.pieceCount === 4 ? 420 : 240,
+    contentWidth,
+  );
+  const availableHeight = areaHeight ? areaHeight - padding * 2 : windowHeight * 0.7;
+  const rowCount = form.pieceCount ?? 3;
+  const maxSlotHeight =
     form.pieceCount === 4
-      ? (Math.min(contentWidth, 380) - gap) / 2
-      : Math.min(windowWidth * 0.6, 240);
-  const maxSlotHeight = areaHeight
-    ? (areaHeight - padding * 2 - gap * (rowCount - 1)) / rowCount
-    : widthCap / LOOK_PIECE_ASPECT_RATIO;
+      ? (availableHeight - gap * 2) / 2.75
+      : (availableHeight - gap * (rowCount - 1)) / rowCount;
   const slotHeight = Math.max(Math.min(widthCap / LOOK_PIECE_ASPECT_RATIO, maxSlotHeight), 0);
   const slotWidth = slotHeight * LOOK_PIECE_ASPECT_RATIO;
+  const topSlotWidth = Math.max((slotWidth - gap) / 2, 0);
+  const topSlotHeight = topSlotWidth;
   const emptyAddHeight = slotHeight * 3 + gap * 2;
 
   const goBack = () => {
@@ -131,11 +136,7 @@ export default function CreateLookScreen() {
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={styles.title}>Criar Look</Text>
-          <Text style={styles.subtitle}>
-            {form.pieceCount === null
-              ? 'Selecione peças do seu closet para montar seu look.'
-              : `Escolha ${form.pieceCount} ${form.pieceCount === 1 ? 'peça' : 'peças'} para o look.`}
-          </Text>
+          <Text style={styles.subtitle}>Selecione peças do seu closet para montar seu look</Text>
           {form.pieceCount !== null ? (
             <Pressable
               onPress={() => setIsChoosingQuantity(true)}
@@ -149,36 +150,6 @@ export default function CreateLookScreen() {
               </Text>
             </Pressable>
           ) : null}
-        </View>
-        <View style={styles.headerActions}>
-          <Pressable
-            onPress={goBack}
-            accessibilityRole="button"
-            accessibilityLabel="Fechar"
-            hitSlop={8}
-            style={({ pressed }) => [styles.close, pressed && styles.closePressed]}
-          >
-            <Feather name="x" size={20} color={Colors.light.text} />
-          </Pressable>
-          <Pressable
-            onPress={() => setIsSaving(true)}
-            disabled={!form.isComplete || busy}
-            accessibilityRole="button"
-            accessibilityLabel="Salvar look"
-            accessibilityState={{ disabled: !form.isComplete || busy }}
-            hitSlop={6}
-            style={({ pressed }) => [
-              styles.saveIcon,
-              (!form.isComplete || busy) && styles.saveIconDisabled,
-              pressed && form.isComplete && !busy && styles.pressed,
-            ]}
-          >
-            <Feather
-              name="check"
-              size={22}
-              color={form.isComplete && !busy ? Colors.white : Colors.iconMuted}
-            />
-          </Pressable>
         </View>
       </View>
 
@@ -209,7 +180,13 @@ export default function CreateLookScreen() {
           form.slots.map((piece, index) => (
             <View
               key={piece?.id ?? `empty-${index}`}
-              style={[styles.slot, { width: slotWidth, height: slotHeight }]}
+              style={[
+                styles.slot,
+                {
+                  width: form.pieceCount === 4 && index < 2 ? topSlotWidth : slotWidth,
+                  height: form.pieceCount === 4 && index < 2 ? topSlotHeight : slotHeight,
+                },
+              ]}
             >
               {piece ? (
                 <>
@@ -260,7 +237,7 @@ export default function CreateLookScreen() {
       <View
         style={[
           styles.footer,
-          { paddingBottom: Math.max(insets.bottom + Spacing.two, Spacing.four) },
+          { paddingBottom: Math.max(insets.bottom + Spacing.four, Spacing.five) },
         ]}
       >
         {form.error && !isSaving ? (
@@ -268,6 +245,11 @@ export default function CreateLookScreen() {
             {form.error}
           </Text>
         ) : null}
+        <AuthButton
+          title="Salvar look"
+          onPress={() => setIsSaving(true)}
+          disabled={!form.isComplete || busy}
+        />
         {canSuggest ? (
           <AuthButton
             title={form.pieceCount ? 'Sugerir peças com IA' : 'Sugerir look com IA'}
@@ -431,11 +413,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: Spacing.one,
   },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one,
-  },
   title: {
     fontSize: 28,
     fontWeight: '700',
@@ -468,17 +445,6 @@ const styles = StyleSheet.create({
   closePressed: {
     opacity: 0.7,
   },
-  saveIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.brand.primary,
-  },
-  saveIconDisabled: {
-    backgroundColor: Colors.light.backgroundElement,
-  },
   composition: {
     flex: 1,
     minHeight: 0,
@@ -491,6 +457,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignContent: 'center',
+    justifyContent: 'center',
   },
   slot: {
     borderRadius: 16,

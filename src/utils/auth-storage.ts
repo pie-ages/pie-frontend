@@ -5,6 +5,7 @@ const KEYS = {
   access: 'pie_auth_token',
   refresh: 'pie_refresh_token',
   expiresAt: 'pie_expires_at',
+  userId: 'pie_user_id',
 };
 
 async function get(key: string): Promise<string | null> {
@@ -56,6 +57,20 @@ export async function getStoredExpiresAt(): Promise<number | null> {
   return isNaN(n) ? null : n;
 }
 
+export async function storeUserId(userId: string | null): Promise<void> {
+  if (userId === null) return remove(KEYS.userId);
+  return set(KEYS.userId, userId);
+}
+
+export async function getStoredUserId(): Promise<string | null> {
+  return get(KEYS.userId);
+}
+
 export async function clearSession(): Promise<void> {
-  await Promise.all([remove(KEYS.access), remove(KEYS.refresh), remove(KEYS.expiresAt)]);
+  await Promise.all([
+    remove(KEYS.access),
+    remove(KEYS.refresh),
+    remove(KEYS.expiresAt),
+    remove(KEYS.userId),
+  ]);
 }

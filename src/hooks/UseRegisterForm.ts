@@ -4,10 +4,11 @@ import { useForm } from 'react-hook-form';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { registerSchema, type RegisterFormData } from '@/schemas/authSchema';
-import { ApiError, apiPost } from '@/services/client';
+import { ApiError } from '@/services/client';
+import { createUser } from '@/services/users';
 
 export function useRegisterForm() {
-  const { completeMockSignUp } = useAuth();
+  const { completeSignUp } = useAuth();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,23 +34,23 @@ export function useRegisterForm() {
     setError(null);
 
     try {
-      await apiPost('/api/users', { name, email, password });
-    } catch (registerError) {
+      await createUser({ name, email, password });
+    } catch (createError) {
       setError(
-        registerError instanceof ApiError
-          ? registerError.message
+        createError instanceof ApiError && createError.serverMessage
+          ? createError.serverMessage
           : 'Ocorreu um erro ao criar a conta. Tente novamente.',
       );
       return;
     }
 
     try {
-      await completeMockSignUp({ email, password });
+      await completeSignUp({ email, password });
     } catch (registerError) {
       setError(
         registerError instanceof ApiError
           ? registerError.message
-          : 'Não foi possível iniciar sua sessão. Tente novamente.',
+          : 'Conta criada, mas não foi possível iniciar sua sessão. Faça login para continuar.',
       );
     }
   });

@@ -7,18 +7,21 @@ import {
   getStoredExpiresAt,
   getStoredRefreshToken,
   getStoredToken,
+  getStoredUserId,
   storeSession,
+  storeUserId,
 } from '@/utils/auth-storage';
 
 type SessionUser = NonNullable<LoginResponse['user']>;
 
 type AuthContextValue = {
   user: SessionUser | null;
+  userId: string | null;
   isAuthenticated: boolean;
   isInitializing: boolean;
   pendingStyleQuiz: boolean;
   signIn: (payload: LoginFormData) => Promise<void>;
-  completeMockSignUp: (payload: LoginFormData) => Promise<void>;
+  completeSignUp: (payload: LoginFormData) => Promise<void>;
   completeStyleQuiz: () => void;
   signOut: () => Promise<void>;
 };
@@ -28,6 +31,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: PropsWithChildren) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [pendingStyleQuiz, setPendingStyleQuiz] = useState(false);
 
@@ -42,6 +46,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
       const data = result.data;
       await storeSession(data.accessToken, data.refreshToken, data.expiresIn);
+      if (data.user) await storeUserId(data.user.id);
       return { token: data.accessToken, user: data.user ?? null };
     } catch {
       await clearSession();
@@ -65,11 +70,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
           if (isActive) {
             setToken(refreshed?.token ?? null);
             setUser(refreshed?.user ?? null);
+            setUserId(refreshed ? (refreshed.user?.id ?? (await getStoredUserId())) : null);
           }
           return;
         }
 
-        if (isActive) setToken(storedToken);
+        const storedUserId = await getStoredUserId();
+        if (isActive) {
+          setToken(storedToken);
+          setUserId(storedUserId ?? null);
+        }
       } catch {
         if (isActive) setToken(null);
       } finally {
@@ -99,11 +109,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     const data = result.data;
     await storeSession(data.accessToken, data.refreshToken, data.expiresIn);
+    await storeUserId(data.user?.id ?? null);
     setToken(data.accessToken);
     setUser(data.user ?? null);
+    setUserId(data.user?.id ?? null);
   }
 
-  async function completeMockSignUp(payload: LoginFormData) {
+  async function completeSignUp(payload: LoginFormData) {
     await signIn(payload);
     setPendingStyleQuiz(true);
   }
@@ -112,6 +124,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const currentToken = token;
     setToken(null);
     setUser(null);
+    setUserId(null);
     setPendingStyleQuiz(false);
 
     if (currentToken) {
@@ -127,11 +140,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const value: AuthContextValue = {
     user,
+    userId,
     isAuthenticated: token !== null,
     isInitializing,
     pendingStyleQuiz,
     signIn,
-    completeMockSignUp,
+    completeSignUp,
     completeStyleQuiz,
     signOut,
   };
