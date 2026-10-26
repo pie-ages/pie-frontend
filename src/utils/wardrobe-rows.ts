@@ -43,7 +43,8 @@ export type WardrobeAction =
   | { type: 'loadFailed' }
   | { type: 'pageStart'; rowId: string }
   | { type: 'pageLoaded'; rowId: string; page: number; items: WardrobePiece[]; hasNext: boolean }
-  | { type: 'pageFailed'; rowId: string };
+  | { type: 'pageFailed'; rowId: string }
+  | { type: 'itemRemoved'; itemId: string };
 
 export const INITIAL_WARDROBE_STATE: WardrobeState = { status: 'loading', rowIds: [], rows: {} };
 
@@ -103,6 +104,19 @@ export function wardrobeReducer(state: WardrobeState, action: WardrobeAction): W
       }));
     case 'pageFailed':
       return updateRow(state, action.rowId, (row) => ({ ...row, status: 'error' }));
+    case 'itemRemoved': {
+      const rowId = state.rowIds.find((id) =>
+        state.rows[id].items.some((piece) => piece.id === action.itemId),
+      );
+      if (rowId === undefined) return state;
+
+      const items = state.rows[rowId].items.filter((piece) => piece.id !== action.itemId);
+      if (items.length > 0) return updateRow(state, rowId, (row) => ({ ...row, items }));
+
+      const { [rowId]: _removedRow, ...rows } = state.rows;
+      const rowIds = state.rowIds.filter((id) => id !== rowId);
+      return { status: rowIds.length === 0 ? 'empty' : state.status, rowIds, rows };
+    }
   }
 }
 
@@ -191,6 +205,7 @@ export function createWardrobeStore(fetchWardrobe: WardrobeFetch) {
     },
     loadInitial,
     loadMore,
+    removeItem: (itemId: string) => dispatch({ type: 'itemRemoved', itemId }),
     retryRow: (rowId: string) => loadMore(rowId, { retry: true }),
     abortAll,
   };
