@@ -16,11 +16,13 @@ import { CategoryRow } from '@/components/CategoryRow';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
 import { BottomTabInset, Spacing } from '@/constants/Theme';
 import { useWardrobeRows } from '@/hooks/UseWardrobeRows';
+import type { WardrobePiece } from '@/types/Look';
+import { confirmAction, showMessage } from '@/utils/confirm';
 
 export default function ClosetScreen() {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
-  const { status, rows, retry, loadMore, retryRow } = useWardrobeRows();
+  const { status, rows, retry, loadMore, retryRow, removeItem } = useWardrobeRows();
   const isFirstFocus = useRef(true);
 
   useFocusEffect(
@@ -32,6 +34,21 @@ export default function ClosetScreen() {
       void retry();
     }, [retry]),
   );
+
+  async function handleRemoveItem(item: WardrobePiece) {
+    const confirmed = await confirmAction({
+      title: 'Remover do closet',
+      message: `Deseja remover "${item.name}" do seu closet?`,
+      confirmLabel: 'Remover',
+    });
+    if (!confirmed) return;
+
+    try {
+      await removeItem(item.id);
+    } catch {
+      showMessage('Não foi possível remover', 'Não foi possível remover a peça. Tente novamente.');
+    }
+  }
 
   if (status === 'loading') {
     return (
@@ -104,6 +121,7 @@ export default function ClosetScreen() {
                   data={row}
                   onEndReached={(rowId) => void loadMore(rowId)}
                   onRetry={(rowId) => void retryRow(rowId)}
+                  onRemoveItem={(item) => void handleRemoveItem(item)}
                 />
               ))
             )}

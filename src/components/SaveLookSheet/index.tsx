@@ -97,10 +97,11 @@ export function SaveLookSheet({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
         <View
+          testID="save-look-sheet"
           style={[
             styles.sheet,
             {
-              marginBottom: keyboardHeight,
+              marginBottom: Platform.OS === 'android' ? 0 : keyboardHeight,
               paddingBottom: keyboardHeight > 0 ? 16 : insets.bottom + 16,
             },
           ]}
