@@ -1,19 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import { ProfileSheet } from '@/components/ProfileSheet';
 import { Colors } from '@/constants/Theme';
-import { useAuth } from '@/contexts/AuthContext';
 
 import { styles } from './styles';
 
 export function StorefrontToolBar() {
   const router = useRouter();
-  const { signOut } = useAuth();
-  const [isProfileSheetVisible, setProfileSheetVisible] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -28,7 +23,7 @@ export function StorefrontToolBar() {
         </Pressable>
 
         <Pressable
-          onPress={() => setProfileSheetVisible(true)}
+          onPress={() => router.push('/Profile')}
           style={({ pressed }) => [
             styles.iconButton,
             styles.profileButton,
@@ -38,15 +33,6 @@ export function StorefrontToolBar() {
           <Feather name="user" size={18} color={Colors.light.text} />
         </Pressable>
       </View>
-
-      <ProfileSheet
-        visible={isProfileSheetVisible}
-        onClose={() => setProfileSheetVisible(false)}
-        onSignOut={() => {
-          setProfileSheetVisible(false);
-          signOut();
-        }}
-      />
     </View>
   );
 }

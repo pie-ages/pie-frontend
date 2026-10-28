@@ -15,6 +15,14 @@ export class ApiError extends Error {
   }
 }
 
+export function isSessionExpiredError(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.status === 401 ||
+      (error.status === 404 && !!error.serverMessage?.startsWith('Usuário não encontrado')))
+  );
+}
+
 export function parseResponse<T>(
   schema: z.ZodType<T>,
   data: unknown,
@@ -26,7 +34,7 @@ export function parseResponse<T>(
 }
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PUT';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
   auth?: boolean;
   signal?: AbortSignal;
@@ -59,8 +67,7 @@ async function parse<T>(response: Response): Promise<T> {
     try {
       const body = (await response.json()) as { message?: string };
       message = body.message;
-    } catch {
-    }
+    } catch {}
     throw new ApiError(
       message ?? `API error: ${response.status} ${response.statusText}`,
       response.status,
@@ -88,6 +95,10 @@ export function apiGetAuth<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export function apiPostAuth<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, { method: 'POST', body, auth: true });
+}
+
+export function apiDeleteAuth(path: string): Promise<void> {
+  return request<void>(path, { method: 'DELETE', auth: true });
 }
 
 export function apiPutAuth<T>(path: string, body: unknown): Promise<T> {

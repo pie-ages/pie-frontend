@@ -34,6 +34,7 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { isAuthenticated, isInitializing, pendingStyleQuiz } = useAuth();
+
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_700Bold,
@@ -63,6 +64,10 @@ function RootNavigator() {
 
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(screens)/Profile/index" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(screens)/EditProfile/index" />
+        <Stack.Screen name="(screens)/EditStyles/index" />
+        <Stack.Screen name="(screens)/EditFavoriteColors/index" />
         <Stack.Screen name="(screens)/MyStyle/index" />
         <Stack.Screen name="(screens)/StyleQuiz/index" />
         <Stack.Screen name="(screens)/StyleSelection/index" />

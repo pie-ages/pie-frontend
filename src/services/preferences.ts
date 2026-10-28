@@ -2,10 +2,25 @@ import {
   colorimetryPreferencesSchema,
   type ColorimetryPreferences,
 } from '@/schemas/colorimetrySchema';
-import { apiGetAuth, apiPutAuth, parseResponse } from '@/services/client';
+import { apiGetAuth, apiPutAuth, apiUploadAuth, parseResponse } from '@/services/client';
+import { imageFormData, type WardrobeImageAsset } from '@/services/wardrobe';
 
-export async function fetchPreferences(): Promise<ColorimetryPreferences> {
-  return parseResponse(colorimetryPreferencesSchema, await apiGetAuth('/api/users/me/preferences'));
+export async function fetchPreferences(signal?: AbortSignal): Promise<ColorimetryPreferences> {
+  return parseResponse(
+    colorimetryPreferencesSchema,
+    await apiGetAuth('/api/users/me/preferences', signal),
+  );
+}
+
+export async function analyzeColorimetry(
+  photo: WardrobeImageAsset,
+  signal?: AbortSignal,
+): Promise<ColorimetryPreferences> {
+  const formData = await imageFormData(photo, signal, `colorimetry-${Date.now()}.jpg`);
+  return parseResponse(
+    colorimetryPreferencesSchema,
+    await apiUploadAuth('/api/users/me/colorimetry', formData, signal),
+  );
 }
 
 export async function updateFavoriteColors(

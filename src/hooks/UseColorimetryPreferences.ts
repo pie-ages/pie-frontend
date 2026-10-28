@@ -1,45 +1,53 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { ColorimetryPreferences } from '@/schemas/colorimetrySchema';
-import { fetchPreferences, updateFavoriteColors } from '@/services/preferences';
+import { ApiError } from '@/services/client';
+import { analyzeColorimetry, updateFavoriteColors } from '@/services/preferences';
+import type { WardrobeImageAsset } from '@/services/wardrobe';
 
 export type ColorimetryStatus = 'loading' | 'success' | 'error';
 
-export function useColorimetryPreferences(enabled = true, minimumLoadingMs = 0) {
+export function useColorimetryPreferences(photo: WardrobeImageAsset | null, minimumLoadingMs = 0) {
   const [preferences, setPreferences] = useState<ColorimetryPreferences | null>(null);
   const [status, setStatus] = useState<ColorimetryStatus>('loading');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const savingRef = useRef(false);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!photo) return;
 
     let isActive = true;
+    const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     const delay = new Promise<void>((resolve) => {
       timer = setTimeout(resolve, minimumLoadingMs);
     });
 
-    Promise.all([fetchPreferences(), delay])
+    Promise.all([analyzeColorimetry(photo, controller.signal), delay])
       .then(([data]) => {
         if (!isActive) return;
         setPreferences(data);
         setStatus('success');
       })
-      .catch(() => {
-        if (isActive) setStatus('error');
+      .catch((error: unknown) => {
+        if (!isActive) return;
+        setErrorMessage(error instanceof ApiError ? (error.serverMessage ?? null) : null);
+        setStatus('error');
       });
 
     return () => {
       isActive = false;
+      controller.abort();
       clearTimeout(timer);
     };
-  }, [attempt, enabled, minimumLoadingMs]);
+  }, [attempt, photo, minimumLoadingMs]);
 
   const retry = useCallback(() => {
     setSaveError(null);
+    setErrorMessage(null);
     setStatus('loading');
     setAttempt((v) => v + 1);
   }, []);
@@ -67,5 +75,5 @@ export function useColorimetryPreferences(enabled = true, minimumLoadingMs = 0) 
     }
   }, []);
 
-  return { preferences, status, retry, isSaving, saveError, saveFavoriteColors };
+  return { preferences, status, errorMessage, retry, isSaving, saveError, saveFavoriteColors };
 }

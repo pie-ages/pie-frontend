@@ -37,7 +37,7 @@ export function LooksGrid({
     <Pressable accessibilityRole="button" onPress={() => onLoadMore(true)} style={styles.footer}>
       <Text style={styles.retryText}>Não foi possível carregar mais looks. Tentar novamente</Text>
     </Pressable>
-  ) : null;
+  ) : undefined;
 
   if (Platform.OS === 'web') {
     const rows: Look[][] = [];

@@ -8,6 +8,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   Text,
   TextInput,
   View,
@@ -41,7 +42,7 @@ export function SaveLookSheet({
   onConfirm,
 }: SaveLookSheetProps) {
   const insets = useSafeAreaInsets();
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const [page, setPage] = useState(0);
   const [pageWidth, setPageWidth] = useState(0);
   const [pageHeights, setPageHeights] = useState<[number, number]>([0, 0]);
@@ -97,10 +98,11 @@ export function SaveLookSheet({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
         <View
+          testID="save-look-sheet"
           style={[
             styles.sheet,
             {
-              marginBottom: keyboardHeight,
+              marginBottom: Platform.OS === 'android' ? 0 : keyboardHeight,
               paddingBottom: keyboardHeight > 0 ? 16 : insets.bottom + 16,
             },
           ]}

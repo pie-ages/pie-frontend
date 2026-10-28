@@ -1,11 +1,14 @@
 import { z } from 'zod';
 
-import type { WardrobePiece } from '@/types/Look';
+import { MAX_LOOK_PIECES, type WardrobePiece } from '@/types/Look';
 
 export const lookFormSchema = z.object({
   title: z.string().trim().min(1, 'Informe o nome do look.'),
   occasion: z.string().trim(),
-  items: z.array(z.custom<WardrobePiece>()).min(1, 'Adicione pelo menos uma peça ao look.'),
+  items: z
+    .array(z.custom<WardrobePiece>())
+    .min(1, 'Adicione pelo menos uma peça ao look.')
+    .max(MAX_LOOK_PIECES, `O look pode ter no máximo ${MAX_LOOK_PIECES} peças.`),
 });
 
 export type LookFormData = z.infer<typeof lookFormSchema>;

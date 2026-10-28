@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { IDENTIFIED_STYLES } from '@/types/IdentifiedStyle';
+import { IDENTIFIED_STYLES, type IdentifiedStyle } from '@/types/IdentifiedStyle';
 
 export const styleQuizOptionSchema = z.object({
   id: z.string(),
@@ -25,4 +25,12 @@ export type StyleQuizQuestion = z.infer<typeof styleQuizQuestionSchema>;
 
 export const styleIdentificationSchema = z.object({
   styles: z.array(z.enum(IDENTIFIED_STYLES)).max(1),
+});
+
+function isIdentifiedStyle(style: string): style is IdentifiedStyle {
+  return (IDENTIFIED_STYLES as readonly string[]).includes(style);
+}
+
+export const favoriteStylesSchema = z.object({
+  styles: z.array(z.string()).transform((styles) => styles.filter(isIdentifiedStyle)),
 });

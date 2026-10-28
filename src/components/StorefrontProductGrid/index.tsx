@@ -5,6 +5,7 @@ import {
   Platform,
   RefreshControl,
   ScrollView,
+  type ScrollViewInstance,
   View,
 } from 'react-native';
 
@@ -33,7 +34,7 @@ export function StorefrontProductGrid({
   refreshing,
 }: StorefrontProductGridProps) {
   const scrollTop = useRef(0);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
   useEffect(() => {
     if (Platform.OS !== 'web') return;
@@ -114,7 +115,7 @@ export function StorefrontProductGrid({
           <View style={styles.footer}>
             <ActivityIndicator />
           </View>
-        ) : null
+        ) : undefined
       }
       renderItem={({ item }) =>
         item ? (

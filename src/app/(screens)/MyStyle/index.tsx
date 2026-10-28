@@ -1,127 +1,138 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+  Platform,
+  StatusBar,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ProductActionButton } from '@/components/ProductActionButton';
-import { Spacing } from '@/constants/Theme';
-import { useAuth } from '@/contexts/AuthContext';
-import { useUserStyle } from '@/contexts/UserStyleContext';
-import { getIdentifiedStyle, StyleSessionError } from '@/services/style';
-import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
+import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
+import { availableStyles, mockUserIdentifiedStyles } from '@/mocks/styleMocks';
 
 export default function MyStyleScreen() {
-  const insets = useSafeAreaInsets();
-  const { identifiedStyle, setIdentifiedStyle } = useUserStyle();
-  const { signOut } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [reloadCount, setReloadCount] = useState(0);
+  const primaryStyleId = mockUserIdentifiedStyles[0];
+  const primaryStyleData = availableStyles.find((s) => s.id === primaryStyleId);
+
+  const secondaryStyle1 = availableStyles.find((s) => s.id === mockUserIdentifiedStyles[1]);
+  const secondaryStyle2 = availableStyles.find((s) => s.id === mockUserIdentifiedStyles[2]);
 
   useEffect(() => {
-    let active = true;
-
-    getIdentifiedStyle()
-      .then((style) => {
-        if (!active) return;
-        if (style) setIdentifiedStyle(style);
-        else {
-          setIdentifiedStyle(null);
-          router.replace('/StyleQuiz');
-        }
-      })
-      .catch(async (error: unknown) => {
-        if (!active) return;
-        if (error instanceof StyleSessionError) {
-          await signOut();
-          router.replace('/Login');
-          return;
-        }
-        setLoadError(
-          error instanceof Error ? error.message : 'Não foi possível carregar seu estilo.',
-        );
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [reloadCount, setIdentifiedStyle, signOut]);
-
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <View style={styles.centered}>
-        <Text>{loadError}</Text>
-        <ProductActionButton
-          title="Tentar novamente"
-          onPress={() => {
-            setLoadError(null);
-            setIsLoading(true);
-            setReloadCount((count) => count + 1);
-          }}
-        />
-      </View>
-    );
-  }
-
-  if (!identifiedStyle) return null;
-
-  const info = IDENTIFIED_STYLE_INFO[identifiedStyle];
+    StatusBar.setBarStyle('light-content');
+    return () => StatusBar.setBarStyle('dark-content');
+  }, []);
 
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingBottom: insets.bottom + Spacing.four, backgroundColor: info.background },
-      ]}
-    >
-      <Text style={[styles.title, { color: '#24312E' }]}>
-        Seu estilo é <Text style={[styles.highlight, { color: info.highlight }]}>{info.label}</Text>
-      </Text>
+    <View style={styles.container}>
+      <ImageBackground
+        source={{ uri: primaryStyleData?.bgImageUrl }}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay} />
 
-      <Text style={[styles.description, { color: '#24312E' }]}>{info.description}</Text>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.spacer} />
 
-      <ProductActionButton
-        title="Continuar"
-        style={styles.button}
-        onPress={() => router.push('/StyleSelection')}
-      />
+          <View style={styles.textArea}>
+            <Text style={styles.baseText}>
+              Seu estilo é <Text style={styles.highlightText}>{primaryStyleData?.label}</Text>
+              {'\n'}por essência, com toques{'\n'}
+              {secondaryStyle1 && (
+                <Text style={styles.highlightText}>{secondaryStyle1.label}s</Text>
+              )}
+              {secondaryStyle2 && (
+                <>
+                  {' '}
+                  e <Text style={styles.highlightText}>{secondaryStyle2.label}s</Text>
+                </>
+              )}
+            </Text>
+          </View>
+
+          <View style={styles.spacer} />
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.continueButton}
+              activeOpacity={0.8}
+              onPress={() => {
+                router.push('/(screens)/StyleSelection');
+              }}
+            >
+              <Text style={styles.continueButtonText}>Continuar</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </ImageBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.four },
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: '#000000',
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+  },
+  safeArea: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  spacer: {
+    flex: 1,
+  },
+  textArea: {
     paddingHorizontal: Spacing.four,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  title: {
+  baseText: {
+    fontFamily: FontFamilies.jakartaBold,
     fontSize: 28,
-    fontWeight: '700',
-    lineHeight: 36,
-    marginBottom: Spacing.five,
+    color: Colors.white,
+    textAlign: 'center',
+    lineHeight: 38,
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
-  highlight: {
-    fontWeight: '800',
+  highlightText: {
+    color: Colors.brand.secondary,
+    textShadowColor: 'rgba(203, 167, 144, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
-  description: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: Spacing.three,
+  footer: {
+    paddingHorizontal: Spacing.four,
+    paddingBottom: Platform.OS === 'ios' ? 34 : Spacing.four,
   },
-  button: {
-    marginTop: Spacing.two,
+  continueButton: {
+    height: 56,
+    backgroundColor: Colors.brand.primary,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  continueButtonText: {
+    fontFamily: FontFamilies.jakartaBold,
+    color: Colors.white,
+    fontSize: Spacing.three,
   },
 });

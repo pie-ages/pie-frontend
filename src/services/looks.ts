@@ -6,7 +6,7 @@ import {
 } from '@/schemas/lookSchema';
 import { apiGetAuth, apiPostAuth, apiUploadAuth, parseResponse } from '@/services/client';
 import { imageFormData, type WardrobeImageAsset } from '@/services/wardrobe';
-import { mapLook, type LooksPage, type WardrobePiece } from '@/types/Look';
+import { mapLook, type LookItemRef, type LooksPage, type WardrobePiece } from '@/types/Look';
 
 export type LookImageAsset = WardrobeImageAsset;
 
@@ -14,8 +14,8 @@ type CreateLookPayload = {
   title: string;
   description?: string;
   occasion?: string;
-  wardrobeItemIds: string[];
-  productIds: string[];
+  /** Peças na ordem definida pelo usuário; o backend preserva essa sequência. */
+  items: LookItemRef[];
 };
 
 export async function fetchLooks(page: number, signal?: AbortSignal): Promise<LooksPage> {

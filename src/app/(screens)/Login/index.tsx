@@ -104,7 +104,11 @@ export default function LoginScreen() {
               </View>
 
               <View style={styles.actions}>
-                <AuthButton title="Login" onPress={handleLogin} isLoading={isLoading} />
+                <AuthButton
+                  title="Login"
+                  onPress={() => void handleLogin()}
+                  isLoading={isLoading}
+                />
 
                 <AuthButton
                   title="Criar Conta"

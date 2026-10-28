@@ -114,7 +114,11 @@ export default function RegisterScreen() {
             </View>
 
             <View style={styles.actions}>
-              <AuthButton title="Criar conta" onPress={handleRegister} isLoading={isLoading} />
+              <AuthButton
+                title="Criar conta"
+                onPress={() => void handleRegister()}
+                isLoading={isLoading}
+              />
             </View>
           </View>
         </ScrollView>

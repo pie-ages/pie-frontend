@@ -12,6 +12,10 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
   },
+  outlined: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
   selected: {
     borderColor: Colors.brand.primary,
   },

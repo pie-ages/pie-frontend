@@ -25,6 +25,17 @@ export const registerSchema = z
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
+export type CreateUserPayload = Omit<RegisterFormData, 'confirmPassword'>;
+
+export const userResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  photoUrl: z.string().nullable(),
+});
+
+export type UserResponse = z.infer<typeof userResponseSchema>;
+
 export const forgotPasswordSchema = z.object({
   email: z.string().trim().min(1, 'Informe o e-mail.').email('Por favor, insira um e-mail válido.'),
 });

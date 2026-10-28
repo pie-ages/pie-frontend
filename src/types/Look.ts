@@ -63,4 +63,15 @@ export type LookDraft = {
   items: WardrobePiece[];
 };
 
-export const MAX_LOOK_PIECES = 3;
+export const MAX_LOOK_PIECES = 4;
+
+export type LookItemRef = { wardrobeItemId?: string; productId?: string };
+
+/** Converte as peças na ordem em que foram adicionadas para o payload ordenado da API. */
+export function buildLookItemRefs(pieces: WardrobePiece[]): LookItemRef[] {
+  return pieces.flatMap((piece): LookItemRef[] => {
+    if (piece.wardrobeItemId) return [{ wardrobeItemId: piece.wardrobeItemId }];
+    if (piece.productId) return [{ productId: piece.productId }];
+    return [];
+  });
+}

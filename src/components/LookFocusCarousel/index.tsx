@@ -5,6 +5,7 @@ import {
   type NativeSyntheticEvent,
   Platform,
   ScrollView,
+  type ScrollViewInstance,
   View,
 } from 'react-native';
 
@@ -50,7 +51,7 @@ export function LookFocusCarousel({
   onAddPhoto,
   maxHeight,
 }: LookFocusCarouselProps) {
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const scrollOffset = useRef(0);
   const [scrollX] = useState(() => new Animated.Value(0));
   const programmaticTarget = useRef<number | null>(null);
