@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-import { ProfileSectionCard } from '@/components/ProfileSectionCard';
+import { ProfileSectionCard, type ProfileSectionAction } from '@/components/ProfileSectionCard';
 import { ProfileSectionStatus } from '@/components/ProfileSectionStatus';
 import { ThemedText } from '@/components/ThemedText';
 import { IDENTIFIED_STYLE_INFO, type IdentifiedStyle } from '@/types/IdentifiedStyle';
@@ -11,13 +11,19 @@ import { styles } from './styles';
 type ProfileStyleSectionProps = {
   status: ProfileStatus;
   favoriteStyles: IdentifiedStyle[];
+  action?: ProfileSectionAction;
   onRetry: () => void;
 };
 
-export function ProfileStyleSection({ status, favoriteStyles, onRetry }: ProfileStyleSectionProps) {
+export function ProfileStyleSection({
+  status,
+  favoriteStyles,
+  action,
+  onRetry,
+}: ProfileStyleSectionProps) {
   if (status !== ProfileStatus.Success) {
     return (
-      <ProfileSectionCard title="Estilo">
+      <ProfileSectionCard title="Estilo" action={action}>
         <ProfileSectionStatus
           status={status}
           errorTitle="Não foi possível carregar seus estilos"
@@ -29,16 +35,16 @@ export function ProfileStyleSection({ status, favoriteStyles, onRetry }: Profile
   }
 
   return (
-    <ProfileSectionCard title="Estilo">
+    <ProfileSectionCard title="Estilo" action={action}>
       <View style={styles.list}>
         {favoriteStyles.map((style) => (
-          <Text key={style} style={styles.item}>
-            {IDENTIFIED_STYLE_INFO[style].label}
-          </Text>
+          <View key={style} style={styles.pill}>
+            <Text style={styles.item}>{IDENTIFIED_STYLE_INFO[style].label}</Text>
+          </View>
         ))}
       </View>
       <ThemedText type="small" style={styles.caption}>
-        Baseado nas respostas do seu quiz
+        Baseado nas escolhas do seu quiz.
       </ThemedText>
     </ProfileSectionCard>
   );

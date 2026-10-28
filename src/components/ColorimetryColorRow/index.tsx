@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Pressable, View } from 'react-native';
 
 import { ColorSwatch } from '@/components/ColorSwatch';
+import { SectionActionButton, type SectionAction } from '@/components/SectionActionButton';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Theme';
 
@@ -16,6 +17,7 @@ type ColorimetryColorRowProps = {
   compact?: boolean;
   onSlotPress?: (index: number) => void;
   onSlotRemove?: (index: number) => void;
+  action?: SectionAction;
 };
 
 export function ColorimetryColorRow({
@@ -27,12 +29,17 @@ export function ColorimetryColorRow({
   compact = false,
   onSlotPress,
   onSlotRemove,
+  action,
 }: ColorimetryColorRowProps) {
   return (
     <View style={styles.card}>
-      <ThemedText type="smallBold" style={styles.title}>
-        {title}
-      </ThemedText>
+      <View style={styles.header}>
+        <ThemedText type="smallBold" style={styles.title}>
+          {title}
+        </ThemedText>
+
+        {action && <SectionActionButton {...action} />}
+      </View>
 
       <View style={[styles.row, onSlotPress && styles.editableRow, compact && styles.rowCompact]}>
         {colors.map((color, index) => {

@@ -18,12 +18,24 @@ export const styles = StyleSheet.create({
     flex: 1,
     gap: Spacing.one,
   },
-  text: {
-    fontSize: 14,
-    lineHeight: 20,
+  name: {
+    fontSize: 20,
+    fontWeight: '700',
     color: Colors.light.text,
   },
-  label: {
-    fontWeight: '700',
+  email: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+  editButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.brand.tertiary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pressed: {
+    opacity: 0.8,
   },
 });

@@ -34,7 +34,7 @@ export function parseResponse<T>(
 }
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PUT';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
   auth?: boolean;
   signal?: AbortSignal;
@@ -95,6 +95,10 @@ export function apiGetAuth<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export function apiPostAuth<T>(path: string, body?: unknown): Promise<T> {
   return request<T>(path, { method: 'POST', body, auth: true });
+}
+
+export function apiDeleteAuth(path: string): Promise<void> {
+  return request<void>(path, { method: 'DELETE', auth: true });
 }
 
 export function apiPutAuth<T>(path: string, body: unknown): Promise<T> {

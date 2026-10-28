@@ -4,16 +4,24 @@ import { Colors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   list: {
-    gap: Spacing.one,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
     paddingHorizontal: Spacing.four,
+  },
+  pill: {
+    backgroundColor: Colors.brand.tertiary,
+    borderRadius: 999,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.one + 2,
   },
   item: {
     fontSize: 14,
-    lineHeight: 20,
-    color: Colors.light.text,
+    fontWeight: '600',
+    color: Colors.brand.primary,
   },
   caption: {
-    color: '#000000',
+    color: Colors.light.textSecondary,
     paddingHorizontal: Spacing.four,
   },
 });
