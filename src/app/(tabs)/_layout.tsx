@@ -2,7 +2,7 @@ import { BlurTargetView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { Tabs, TabList, TabSlot, TabTrigger } from 'expo-router/ui';
 import { useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, type ViewInstance } from 'react-native';
 
 import { BottomTabBar, TabBarButton } from '@/components/BottomTabBar';
 import { OnboardingOverlay } from '@/components/OnboardingOverlay';
@@ -21,7 +21,7 @@ export default function TabsLayout() {
 }
 
 function TabsNavigator() {
-  const blurTargetRef = useRef<View | null>(null);
+  const blurTargetRef = useRef<ViewInstance | null>(null);
   const router = useRouter();
   const { isVisible: isOnboardingVisible } = useOnboarding();
 
