@@ -116,8 +116,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function completeSignUp(payload: LoginFormData) {
-    await signIn(payload);
     setPendingStyleQuiz(true);
+    try {
+      await signIn(payload);
+    } catch (error) {
+      setPendingStyleQuiz(false);
+      throw error;
+    }
   }
 
   async function signOut() {
