@@ -116,8 +116,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }
 
   async function completeSignUp(payload: LoginFormData) {
-    await signIn(payload);
+    // Marca o quiz como pendente antes de autenticar, para que nenhum render
+    // veja o usuário autenticado sem quiz pendente e redirecione para a vitrine.
     setPendingStyleQuiz(true);
+    try {
+      await signIn(payload);
+    } catch (error) {
+      setPendingStyleQuiz(false);
+      throw error;
+    }
   }
 
   async function signOut() {
