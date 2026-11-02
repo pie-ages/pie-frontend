@@ -210,3 +210,49 @@ describe('AuthContext — userId', () => {
     expect(result.current.userId).toBeNull();
   });
 });
+
+describe('AuthContext — completeSignUp', () => {
+  it('never renders authenticated without the style quiz pending', async () => {
+    mockApiPost.mockResolvedValue(validSession);
+    mockStoreSession.mockResolvedValue(undefined);
+    mockStoreUserId.mockResolvedValue(undefined);
+
+    const renders: { isAuthenticated: boolean; pendingStyleQuiz: boolean }[] = [];
+    const { result } = await renderHook(
+      () => {
+        const auth = useAuth();
+        renders.push({
+          isAuthenticated: auth.isAuthenticated,
+          pendingStyleQuiz: auth.pendingStyleQuiz,
+        });
+        return auth;
+      },
+      { wrapper },
+    );
+    await act(async () => {});
+
+    await act(async () => {
+      await result.current.completeSignUp({ email: 'anna@pie.com.br', password: 'secret' });
+    });
+
+    expect(renders.filter((r) => r.isAuthenticated).every((r) => r.pendingStyleQuiz)).toBe(true);
+    expect(result.current.isAuthenticated).toBe(true);
+    expect(result.current.pendingStyleQuiz).toBe(true);
+  });
+
+  it('clears the pending style quiz when sign in fails', async () => {
+    mockApiPost.mockRejectedValue(new client.ApiError('Falhou', 401));
+
+    const { result } = await renderHook(() => useAuth(), { wrapper });
+    await act(async () => {});
+
+    await act(async () => {
+      await result.current
+        .completeSignUp({ email: 'anna@pie.com.br', password: 'secret' })
+        .catch(() => {});
+    });
+
+    expect(result.current.pendingStyleQuiz).toBe(false);
+    expect(result.current.isAuthenticated).toBe(false);
+  });
+});
