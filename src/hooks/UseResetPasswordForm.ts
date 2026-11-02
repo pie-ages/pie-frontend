@@ -1,18 +1,25 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Alert } from 'react-native';
 
-import { useAuth } from '@/contexts/AuthContext';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/schemas/authSchema';
-import { resetPassword } from '@/services/auth';
+import { revokeRecoverySession, updatePassword } from '@/services/auth';
 import { ApiError } from '@/services/client';
 
-export function useResetPasswordForm() {
+function getResetErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiError)) {
+    return 'Não foi possível conectar. Verifique sua conexão e tente novamente.';
+  }
+  if (error.status === 401) {
+    return 'Seu código expirou. Volte e solicite um novo código.';
+  }
+  return error.serverMessage ?? 'Não foi possível redefinir a senha. Tente novamente.';
+}
+
+export function useResetPasswordForm(recoveryToken: string) {
   const router = useRouter();
-  const { isAuthenticated, signOut } = useAuth();
-  const { token_hash: tokenHash } = useLocalSearchParams<{ token_hash?: string }>();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,25 +42,16 @@ export function useResetPasswordForm() {
   }
 
   const handleReset = handleSubmit(async ({ password }) => {
-    if (!tokenHash) return;
-
     setError(null);
 
     try {
-      await resetPassword(tokenHash, password);
+      await updatePassword(recoveryToken, password);
     } catch (resetError) {
-      setError(
-        resetError instanceof ApiError
-          ? (resetError.serverMessage ?? 'Não foi possível redefinir a senha. Tente novamente.')
-          : 'Não foi possível conectar. Verifique sua conexão e tente novamente.',
-      );
+      setError(getResetErrorMessage(resetError));
       return;
     }
 
-    if (isAuthenticated) {
-      await signOut();
-    }
-
+    revokeRecoverySession(recoveryToken).catch(() => {});
     router.dismissTo('/Login');
     Alert.alert('Senha redefinida!', 'Entre com a sua nova senha para acessar sua conta.');
   });
@@ -61,7 +59,6 @@ export function useResetPasswordForm() {
   return {
     control,
     errors,
-    hasToken: Boolean(tokenHash),
     isPasswordVisible,
     isConfirmPasswordVisible,
     isLoading: isSubmitting,

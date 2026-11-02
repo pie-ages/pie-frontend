@@ -11,7 +11,7 @@ import { useForgotPasswordForm } from '@/hooks/UseForgotPasswordForm';
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const { control, emailError, isLoading, error, sentTo, handleRecovery } = useForgotPasswordForm();
+  const { control, emailError, isLoading, error, handleRecovery } = useForgotPasswordForm();
 
   function handleBackToLogin() {
     router.dismissTo('/Login');
@@ -38,7 +38,8 @@ export default function ForgotPasswordScreen() {
               <Text style={styles.title}>Recuperar acesso</Text>
 
               <Text style={styles.description}>
-                Informe o e-mail da sua conta e enviaremos as instruções para redefinir sua senha.
+                Informe o e-mail da sua conta e enviaremos um código de 6 dígitos para redefinir sua
+                senha.
               </Text>
 
               <View style={styles.form}>
@@ -62,20 +63,13 @@ export default function ForgotPasswordScreen() {
                 />
 
                 {error && <Text style={styles.errorText}>{error}</Text>}
-
-                {sentTo && (
-                  <Text style={styles.successText}>
-                    Se houver uma conta com {sentTo}, você receberá um e-mail com as instruções.
-                    Confira também a caixa de spam.
-                  </Text>
-                )}
               </View>
             </View>
 
             <View style={styles.actions}>
               <AuthButton
-                title="Enviar instruções"
-                onPress={handleRecovery}
+                title="Enviar código"
+                onPress={() => void handleRecovery()}
                 isLoading={isLoading}
               />
 
@@ -144,13 +138,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: Colors.error,
-  },
-
-  successText: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '600',
-    color: Colors.light.text,
   },
 
   actions: {

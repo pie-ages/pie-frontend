@@ -42,6 +42,15 @@ export const forgotPasswordSchema = z.object({
 
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
+export const recoveryCodeSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Informe o código de 6 dígitos.'),
+});
+
+export type RecoveryCodeFormData = z.infer<typeof recoveryCodeSchema>;
+
 export const resetPasswordSchema = z
   .object({
     password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),

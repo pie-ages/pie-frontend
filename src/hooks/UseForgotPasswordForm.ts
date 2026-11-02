@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -7,8 +8,8 @@ import { requestPasswordRecovery } from '@/services/auth';
 import { ApiError } from '@/services/client';
 
 export function useForgotPasswordForm() {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [sentTo, setSentTo] = useState<string | null>(null);
 
   const {
     control,
@@ -21,19 +22,19 @@ export function useForgotPasswordForm() {
 
   const handleRecovery = handleSubmit(async ({ email }) => {
     setError(null);
-    setSentTo(null);
 
     try {
       await requestPasswordRecovery(email);
-      setSentTo(email);
     } catch (recoveryError) {
       setError(
         recoveryError instanceof ApiError
-          ? (recoveryError.serverMessage ??
-              'Não foi possível enviar as instruções. Tente novamente.')
+          ? (recoveryError.serverMessage ?? 'Não foi possível enviar o código. Tente novamente.')
           : 'Não foi possível conectar. Verifique sua conexão e tente novamente.',
       );
+      return;
     }
+
+    router.push({ pathname: '/ResetPassword', params: { email } });
   });
 
   return {
@@ -41,7 +42,6 @@ export function useForgotPasswordForm() {
     emailError: errors.email?.message,
     isLoading: isSubmitting,
     error,
-    sentTo,
     handleRecovery,
   };
 }

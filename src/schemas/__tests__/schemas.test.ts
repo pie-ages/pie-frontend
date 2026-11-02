@@ -3,6 +3,7 @@ import { describe, expect, it } from '@jest/globals';
 import {
   loginResponseSchema,
   forgotPasswordSchema,
+  recoveryCodeSchema,
   registerSchema,
   resetPasswordSchema,
 } from '@/schemas/authSchema';
@@ -71,6 +72,18 @@ describe('forgotPasswordSchema', () => {
   it('rejects a malformed email', () => {
     const result = forgotPasswordSchema.safeParse({ email: 'anna@' });
     expect(result.error?.issues[0].message).toBe('Por favor, insira um e-mail válido.');
+  });
+});
+
+describe('recoveryCodeSchema', () => {
+  it('accepts a six-digit code, trimming spaces', () => {
+    const result = recoveryCodeSchema.safeParse({ code: ' 123456 ' });
+    expect(result.success && result.data.code).toBe('123456');
+  });
+
+  it.each(['', '12345', '1234567', '12a456'])('rejects %p', (code) => {
+    const result = recoveryCodeSchema.safeParse({ code });
+    expect(result.error?.issues[0].message).toBe('Informe o código de 6 dígitos.');
   });
 });
 

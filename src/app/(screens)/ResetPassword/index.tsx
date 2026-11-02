@@ -1,36 +1,45 @@
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
+import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
 import { Colors } from '@/constants/Theme';
+import { useRecoveryCodeForm } from '@/hooks/UseRecoveryCodeForm';
 import { useResetPasswordForm } from '@/hooks/UseResetPasswordForm';
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
-  const {
-    control,
-    errors,
-    hasToken,
-    isPasswordVisible,
-    isConfirmPasswordVisible,
-    isLoading,
-    error,
-    togglePasswordVisibility,
-    toggleConfirmPasswordVisibility,
-    handleReset,
-  } = useResetPasswordForm();
+  const { email } = useLocalSearchParams<{ email?: string }>();
+  const [recoveryToken, setRecoveryToken] = useState<string | null>(null);
 
-  function handleRequestNewLink() {
+  function handleRequestNewCode() {
     router.dismissTo('/ForgotPassword');
   }
 
-  const description = hasToken
-    ? 'Escolha uma nova senha para voltar a acessar sua conta.'
-    : 'Este link é inválido ou já expirou. Solicite a recuperação novamente.';
+  function renderStep() {
+    if (recoveryToken) return <NewPasswordStep recoveryToken={recoveryToken} />;
+    if (email) return <RecoveryCodeStep email={email} onVerified={setRecoveryToken} />;
+
+    return (
+      <>
+        <View>
+          <Text style={styles.title}>Recuperar acesso</Text>
+          <Text style={styles.description}>
+            Não encontramos o e-mail da recuperação. Solicite um novo código.
+          </Text>
+        </View>
+
+        <View style={styles.actions}>
+          <AuthButton title="Solicitar novo código" onPress={handleRequestNewCode} />
+        </View>
+      </>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -48,66 +57,156 @@ export default function ResetPasswordScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.container}>
-            <View>
-              <Text style={styles.title}>Nova senha</Text>
-
-              <Text style={styles.description}>{description}</Text>
-
-              {hasToken && (
-                <View style={styles.form}>
-                  <Controller
-                    name="password"
-                    control={control}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <AuthPasswordInput
-                        label="Senha"
-                        placeholder="**********"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        isVisible={isPasswordVisible}
-                        onToggleVisibility={togglePasswordVisibility}
-                        editable={!isLoading}
-                        error={errors.password?.message}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="confirmPassword"
-                    control={control}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <AuthPasswordInput
-                        label="Confirmar Senha"
-                        placeholder="**********"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        isVisible={isConfirmPasswordVisible}
-                        onToggleVisibility={toggleConfirmPasswordVisibility}
-                        editable={!isLoading}
-                        error={errors.confirmPassword?.message}
-                      />
-                    )}
-                  />
-
-                  {error && <Text style={styles.errorText}>{error}</Text>}
-                </View>
-              )}
-            </View>
-
-            <View style={styles.actions}>
-              {hasToken ? (
-                <AuthButton title="Salvar senha" onPress={handleReset} isLoading={isLoading} />
-              ) : (
-                <AuthButton title="Solicitar novo link" onPress={handleRequestNewLink} />
-              )}
-            </View>
-          </View>
+          <View style={styles.container}>{renderStep()}</View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+type RecoveryCodeStepProps = {
+  email: string;
+  onVerified: (recoveryToken: string) => void;
+};
+
+function RecoveryCodeStep({ email, onVerified }: RecoveryCodeStepProps) {
+  const {
+    control,
+    codeError,
+    isLoading,
+    isResending,
+    error,
+    hasResent,
+    handleVerify,
+    handleResend,
+  } = useRecoveryCodeForm(email, onVerified);
+
+  return (
+    <>
+      <View>
+        <Text style={styles.title}>Verificar código</Text>
+
+        <Text style={styles.description}>
+          Se houver uma conta com {email}, você receberá um código de 6 dígitos. Confira também a
+          caixa de spam.
+        </Text>
+
+        <View style={styles.form}>
+          <Controller
+            name="code"
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AuthInput
+                label="Código"
+                placeholder="000000"
+                keyboardType="number-pad"
+                textContentType="oneTimeCode"
+                autoComplete="one-time-code"
+                maxLength={6}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                editable={!isLoading}
+                error={codeError}
+              />
+            )}
+          />
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
+          {hasResent && (
+            <Text style={styles.successText}>Novo código solicitado. Confira seu e-mail.</Text>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.actions}>
+        <AuthButton
+          title="Verificar código"
+          onPress={() => void handleVerify()}
+          isLoading={isLoading}
+          disabled={isResending}
+        />
+
+        <AuthButton
+          title="Reenviar código"
+          variant="secondary"
+          onPress={handleResend}
+          isLoading={isResending}
+          disabled={isLoading}
+        />
+      </View>
+    </>
+  );
+}
+
+function NewPasswordStep({ recoveryToken }: { recoveryToken: string }) {
+  const {
+    control,
+    errors,
+    isPasswordVisible,
+    isConfirmPasswordVisible,
+    isLoading,
+    error,
+    togglePasswordVisibility,
+    toggleConfirmPasswordVisibility,
+    handleReset,
+  } = useResetPasswordForm(recoveryToken);
+
+  return (
+    <>
+      <View>
+        <Text style={styles.title}>Nova senha</Text>
+
+        <Text style={styles.description}>
+          Escolha uma nova senha para voltar a acessar sua conta.
+        </Text>
+
+        <View style={styles.form}>
+          <Controller
+            name="password"
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AuthPasswordInput
+                label="Senha"
+                placeholder="**********"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                isVisible={isPasswordVisible}
+                onToggleVisibility={togglePasswordVisibility}
+                editable={!isLoading}
+                error={errors.password?.message}
+              />
+            )}
+          />
+
+          <Controller
+            name="confirmPassword"
+            control={control}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AuthPasswordInput
+                label="Confirmar Senha"
+                placeholder="**********"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                isVisible={isConfirmPasswordVisible}
+                onToggleVisibility={toggleConfirmPasswordVisibility}
+                editable={!isLoading}
+                error={errors.confirmPassword?.message}
+              />
+            )}
+          />
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
+        </View>
+      </View>
+
+      <View style={styles.actions}>
+        <AuthButton title="Salvar senha" onPress={() => void handleReset()} isLoading={isLoading} />
+      </View>
+    </>
   );
 }
 
@@ -160,7 +259,15 @@ const styles = StyleSheet.create({
 
   errorText: {
     fontSize: 14,
+    lineHeight: 20,
     color: Colors.error,
+  },
+
+  successText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '600',
+    color: Colors.light.text,
   },
 
   actions: {
