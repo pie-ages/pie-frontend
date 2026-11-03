@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import type { AccountSexChoice } from '@/constants/AccountSex';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerSchema, type RegisterFormData } from '@/schemas/authSchema';
 import { ApiError } from '@/services/client';
@@ -12,6 +13,7 @@ export function useRegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sexChoice, setSexChoice] = useState<AccountSexChoice>('');
 
   const {
     control,
@@ -65,5 +67,7 @@ export function useRegisterForm() {
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
     handleRegister,
+    sexChoice,
+    setSexChoice,
   };
 }

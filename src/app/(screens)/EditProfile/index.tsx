@@ -15,7 +15,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AccountSexField } from '@/components/AccountSexField';
 import { ProductActionButton } from '@/components/ProductActionButton';
+import { ACCOUNT_SEX_FIELD_ENABLED } from '@/constants/AccountSex';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useEditProfile } from '@/hooks/UseEditProfile';
 import { useSessionExpiredRedirect } from '@/hooks/UseSessionExpiredRedirect';
@@ -110,6 +112,16 @@ export default function EditProfileScreen() {
               placeholderTextColor={Colors.light.textSecondary}
             />
           </View>
+
+          {ACCOUNT_SEX_FIELD_ENABLED && (
+            <View style={styles.formGroup}>
+              <AccountSexField
+                value={profile.sexChoice}
+                onChange={profile.setSexChoice}
+                disabled={profile.isLoading || profile.isSaving || profile.hasLoadError}
+              />
+            </View>
+          )}
 
           {profile.hasLoadError ? (
             <Text style={styles.errorText} accessibilityRole="alert">

@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 
+import type { AccountSexChoice } from '@/constants/AccountSex';
 import { useCurrentUser } from '@/hooks/UseCurrentUser';
 import { ApiError, isSessionExpiredError } from '@/services/client';
 import { updateCurrentUser } from '@/services/user';
@@ -9,6 +10,7 @@ import { ProfileStatus } from '@/types/Profile';
 export function useEditProfile() {
   const currentUser = useCurrentUser(true);
   const [draftName, setDraftName] = useState<string | null>(null);
+  const [sexChoice, setSexChoice] = useState<AccountSexChoice>('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSessionExpired, setSaveSessionExpired] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,5 +53,7 @@ export function useEditProfile() {
     canSave,
     error,
     save,
+    sexChoice,
+    setSexChoice,
   };
 }
