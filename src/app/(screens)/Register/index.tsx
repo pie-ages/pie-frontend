@@ -7,7 +7,6 @@ import { AccountSexField } from '@/components/AccountSexField';
 import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
-import { ACCOUNT_SEX_FIELD_ENABLED } from '@/constants/AccountSex';
 import { Colors } from '@/constants/Theme';
 import { useRegisterForm } from '@/hooks/UseRegisterForm';
 
@@ -62,9 +61,7 @@ export default function RegisterScreen() {
                 )}
               />
 
-              {ACCOUNT_SEX_FIELD_ENABLED && (
-                <AccountSexField value={sexChoice} onChange={setSexChoice} disabled={isLoading} />
-              )}
+              <AccountSexField value={sexChoice} onChange={setSexChoice} disabled={isLoading} />
 
               <Controller
                 name="email"

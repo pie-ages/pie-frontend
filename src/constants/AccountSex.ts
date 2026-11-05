@@ -1,5 +1,3 @@
-export const ACCOUNT_SEX_FIELD_ENABLED = false;
-
 export const ACCOUNT_SEX_OPTIONS = [
   { value: 'masculino', label: 'Masculino' },
   { value: 'feminino', label: 'Feminino' },

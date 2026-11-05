@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { registerSchema, type RegisterFormData } from '@/schemas/authSchema';
 import { ApiError } from '@/services/client';
 import { createUser } from '@/services/users';
+import { toAccountSex } from '@/utils/account-sex';
 
 export function useRegisterForm() {
   const { completeSignUp } = useAuth();
@@ -36,7 +37,12 @@ export function useRegisterForm() {
     setError(null);
 
     try {
-      await createUser({ name, email, password });
+      await createUser({
+        name,
+        email,
+        password,
+        ...(sexChoice !== '' ? { sex: toAccountSex(sexChoice) } : {}),
+      });
     } catch (createError) {
       setError(
         createError instanceof ApiError && createError.serverMessage
