@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDebouncedValue } from '@/hooks/UseDebouncedValue';
-import type { FilterGroupId } from '@/types/Filter';
+import { PROFILE_COLORIMETRY, PROFILE_MATCHES, type FilterGroupId } from '@/types/Filter';
 import type { CatalogParams } from '@/types/Product';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -15,6 +15,8 @@ function createEmptyFilters(): FiltersByGroup {
     cores: new Set(),
     materiais: new Set(),
     lojas: new Set(),
+    generos: new Set(),
+    perfil: new Set(),
   };
 }
 
@@ -53,6 +55,8 @@ export function useStorefrontFilters() {
       cores: new Set(appliedFiltersByGroup.cores),
       lojas: new Set(appliedFiltersByGroup.lojas),
       materiais: new Set(appliedFiltersByGroup.materiais),
+      generos: new Set(appliedFiltersByGroup.generos),
+      perfil: new Set(appliedFiltersByGroup.perfil),
     });
   }, [appliedFiltersByGroup]);
 
@@ -91,6 +95,8 @@ export function useStorefrontFilters() {
         ...appliedFiltersByGroup.cores,
         ...appliedFiltersByGroup.lojas,
         ...appliedFiltersByGroup.materiais,
+        ...appliedFiltersByGroup.generos,
+        ...appliedFiltersByGroup.perfil,
       ]),
     [appliedFiltersByGroup],
   );
@@ -107,6 +113,10 @@ export function useStorefrontFilters() {
         appliedFiltersByGroup.lojas.size > 0 ? [...appliedFiltersByGroup.lojas] : undefined,
       materials:
         appliedFiltersByGroup.materiais.size > 0 ? [...appliedFiltersByGroup.materiais] : undefined,
+      genders:
+        appliedFiltersByGroup.generos.size > 0 ? [...appliedFiltersByGroup.generos] : undefined,
+      colorimetry: appliedFiltersByGroup.perfil.has(PROFILE_COLORIMETRY) || undefined,
+      matchesProfile: appliedFiltersByGroup.perfil.has(PROFILE_MATCHES) || undefined,
     }),
     [debouncedSearch, appliedFiltersByGroup],
   );

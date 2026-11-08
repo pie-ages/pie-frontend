@@ -8,4 +8,7 @@ export type CatalogParams = {
   size?: number;
   sort?: string;
   materials?: string[];
+  genders?: string[];
+  colorimetry?: boolean;
+  matchesProfile?: boolean;
 };
