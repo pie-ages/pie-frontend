@@ -27,6 +27,7 @@ export const catalogPageSchema = z.object({
   total: z.number(),
   page: z.number(),
   size: z.number(),
+  ignoredFilters: z.array(z.string()).default([]),
 });
 
 export const productPublicDetailSchema = z.object({

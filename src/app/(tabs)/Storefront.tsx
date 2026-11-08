@@ -20,6 +20,16 @@ import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
 import { useStorefrontNotice } from '@/hooks/UseStorefrontNotice';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
 
+const IGNORED_FILTER_LABELS: Record<string, string> = {
+  colorimetry: 'colorimetria',
+  matchesProfile: 'Combinam com você',
+};
+
+function profileNotice(ignored: string[]): string {
+  const names = ignored.map((id) => IGNORED_FILTER_LABELS[id] ?? id).join(' e ');
+  return `Não aplicamos o filtro de ${names}: complete seu perfil (estilos e cores) e entre na sua conta para usá-lo.`;
+}
+
 export default function StorefrontScreen() {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
@@ -39,8 +49,16 @@ export default function StorefrontScreen() {
     clearSearch,
     catalogParams,
   } = useStorefrontFilters();
-  const { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing } =
-    useStorefrontCatalog(catalogParams);
+  const {
+    status,
+    products,
+    ignoredFilters,
+    retry,
+    loadNextPage,
+    isFetchingNextPage,
+    refresh,
+    refreshing,
+  } = useStorefrontCatalog(catalogParams);
 
   const { message: noticeMessage } = useStorefrontNotice();
 
@@ -124,6 +142,9 @@ export default function StorefrontScreen() {
         </View>
 
         {noticeMessage && <StorefrontNotice message={noticeMessage} />}
+        {!isLoading && ignoredFilters.length > 0 && (
+          <StorefrontNotice message={profileNotice(ignoredFilters)} />
+        )}
 
         <View style={styles.body}>
           {isLoading && <LoadingState text="Carregando produtos..." />}
