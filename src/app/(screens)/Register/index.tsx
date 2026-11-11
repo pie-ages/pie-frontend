@@ -3,6 +3,7 @@ import { Controller } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AccountSexField } from '@/components/AccountSexField';
 import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
@@ -20,6 +21,8 @@ export default function RegisterScreen() {
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
     handleRegister,
+    sexChoice,
+    setSexChoice,
   } = useRegisterForm();
 
   return (
@@ -57,6 +60,8 @@ export default function RegisterScreen() {
                   />
                 )}
               />
+
+              <AccountSexField value={sexChoice} onChange={setSexChoice} disabled={isLoading} />
 
               <Controller
                 name="email"

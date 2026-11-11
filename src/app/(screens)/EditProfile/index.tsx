@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AccountSexField } from '@/components/AccountSexField';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useEditProfile } from '@/hooks/UseEditProfile';
@@ -108,6 +109,14 @@ export default function EditProfileScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               placeholderTextColor={Colors.light.textSecondary}
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <AccountSexField
+              value={profile.sexChoice}
+              onChange={profile.setSexChoice}
+              disabled={profile.isLoading || profile.isSaving || profile.hasLoadError}
             />
           </View>
 
