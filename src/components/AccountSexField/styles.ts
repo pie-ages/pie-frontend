@@ -24,6 +24,11 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: Colors.white,
   },
+  trigger: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   selectedOption: {
     borderColor: Colors.brand.primary,
     backgroundColor: Colors.brand.tertiary,

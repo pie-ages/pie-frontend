@@ -17,6 +17,9 @@ describe('AccountSexField', () => {
   it('não seleciona uma opção automaticamente quando o valor está vazio', async () => {
     const screen = await render(<AccountSexField value="" onChange={jest.fn()} />);
 
+    expect(screen.queryByRole('radio')).toBeNull();
+    await fireEvent.press(screen.getByRole('combobox', { name: 'Sexo: Selecione' }));
+
     for (const option of ACCOUNT_SEX_OPTIONS) {
       expect(
         screen.getByRole('radio', { name: option.label }).props.accessibilityState.checked,
@@ -27,9 +30,13 @@ describe('AccountSexField', () => {
   it('permite trocar a seleção mantendo somente uma opção selecionada', async () => {
     const screen = await render(<ControlledField />);
 
+    await fireEvent.press(screen.getByRole('combobox'));
     await fireEvent.press(screen.getByRole('radio', { name: 'Masculino' }));
+    expect(screen.queryByRole('radio')).toBeNull();
+    await fireEvent.press(screen.getByRole('combobox', { name: 'Sexo: Masculino' }));
     await fireEvent.press(screen.getByRole('radio', { name: 'Feminino' }));
 
+    await fireEvent.press(screen.getByRole('combobox', { name: 'Sexo: Feminino' }));
     expect(screen.getByRole('radio', { name: 'Masculino' }).props.accessibilityState.checked).toBe(
       false,
     );
@@ -43,6 +50,7 @@ describe('AccountSexField', () => {
       <AccountSexField value="prefiro_nao_informar" onChange={jest.fn()} />,
     );
 
+    await fireEvent.press(screen.getByRole('combobox', { name: 'Sexo: Prefiro não informar' }));
     expect(
       screen.getByRole('radio', { name: 'Prefiro não informar' }).props.accessibilityState.checked,
     ).toBe(true);
@@ -52,8 +60,8 @@ describe('AccountSexField', () => {
     const onChange = jest.fn();
     const screen = await render(<AccountSexField value="" onChange={onChange} disabled />);
 
-    await fireEvent.press(screen.getByRole('radio', { name: 'Feminino' }));
-
+    await fireEvent.press(screen.getByRole('combobox'));
+    expect(screen.queryByRole('radio')).toBeNull();
     expect(onChange).not.toHaveBeenCalled();
   });
 
