@@ -3,6 +3,7 @@ import { describe, expect, it } from '@jest/globals';
 import { loginResponseSchema, registerSchema } from '@/schemas/authSchema';
 import { colorimetryPreferencesSchema } from '@/schemas/colorimetrySchema';
 import { lookFormSchema } from '@/schemas/lookSchema';
+import { catalogItemSchema } from '@/schemas/productSchema';
 import { favoriteStylesSchema, styleIdentificationSchema } from '@/schemas/styleSchema';
 import { currentUserSchema } from '@/schemas/userSchema';
 import { addPieceSchema, wardrobeImageAnalysisSchema } from '@/schemas/wardrobeSchema';
@@ -173,5 +174,32 @@ describe('colorimetryPreferencesSchema', () => {
     };
     const result = colorimetryPreferencesSchema.safeParse({ ...colors, season });
     expect(result.success && result.data.season?.label).toBe('Outono Suave');
+  });
+});
+
+describe('catalogItemSchema', () => {
+  const item = {
+    id: 'prod-1',
+    name: 'Blusa Floral',
+    category: 'Blusas',
+    color: 'Azul',
+    price: 99.9,
+    imageUrl: null,
+    purchaseUrl: null,
+    companyName: 'Loja Aurora',
+    status: 'PUBLISHED',
+    styles: [],
+    sizes: [],
+    materials: [],
+  };
+
+  it('accepts items without the company logo field', () => {
+    expect(catalogItemSchema.safeParse(item).success).toBe(true);
+    expect(catalogItemSchema.safeParse({ ...item, companyPhotoUrl: null }).success).toBe(true);
+  });
+
+  it('keeps the company logo url when provided', () => {
+    const result = catalogItemSchema.parse({ ...item, companyPhotoUrl: 'https://cdn/logo.png' });
+    expect(result.companyPhotoUrl).toBe('https://cdn/logo.png');
   });
 });

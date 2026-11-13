@@ -3,6 +3,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
+import { StoreLogo } from '@/components/StoreLogo';
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/schemas/productSchema';
@@ -35,6 +36,14 @@ export function StorefrontProductCard({ product, onPress }: StorefrontProductCar
             <Feather name="image" size={28} color="#B0B4BA" />
           </View>
         )}
+
+        {product.companyName || product.companyPhotoUrl ? (
+          <StoreLogo
+            companyName={product.companyName}
+            logoUrl={product.companyPhotoUrl}
+            style={styles.storeLogo}
+          />
+        ) : null}
 
         <Pressable
           onPress={() => toggle(product)}
