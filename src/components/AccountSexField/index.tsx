@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { type ElementRef, useRef, useState } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 
 import { ACCOUNT_SEX_OPTIONS, type AccountSexChoice } from '@/constants/AccountSex';
@@ -23,7 +23,7 @@ export function AccountSexField({
   const [dropdownTop, setDropdownTop] = useState(0);
   const [dropdownLeft, setDropdownLeft] = useState(0);
   const [dropdownWidth, setDropdownWidth] = useState(0);
-  const triggerRef = useRef<View>(null);
+  const triggerRef = useRef<ElementRef<typeof View>>(null);
 
   const expanded = open && !disabled;
   const label = ACCOUNT_SEX_OPTIONS.find((option) => option.value === value)?.label ?? 'Selecione';
