@@ -36,6 +36,33 @@ export const userResponseSchema = z.object({
 
 export type UserResponse = z.infer<typeof userResponseSchema>;
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().min(1, 'Informe o e-mail.').email('Por favor, insira um e-mail válido.'),
+});
+
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+export const recoveryCodeSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Informe o código de 6 dígitos.'),
+});
+
+export type RecoveryCodeFormData = z.infer<typeof recoveryCodeSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),
+    confirmPassword: z.string().min(1, 'Confirme a senha.'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'As senhas não coincidem.',
+    path: ['confirmPassword'],
+  });
+
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+
 export const loginResponseSchema = z.object({
   accessToken: z.string().min(1),
   refreshToken: z.string().min(1),

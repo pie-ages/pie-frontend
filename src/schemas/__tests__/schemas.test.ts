@@ -1,6 +1,12 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { loginResponseSchema, registerSchema } from '@/schemas/authSchema';
+import {
+  loginResponseSchema,
+  forgotPasswordSchema,
+  recoveryCodeSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from '@/schemas/authSchema';
 import { colorimetryPreferencesSchema } from '@/schemas/colorimetrySchema';
 import { lookFormSchema } from '@/schemas/lookSchema';
 import { favoriteStylesSchema, styleIdentificationSchema } from '@/schemas/styleSchema';
@@ -53,6 +59,48 @@ describe('registerSchema', () => {
 
   it('flags confirmPassword when passwords differ', () => {
     const result = registerSchema.safeParse({ ...validRegister, confirmPassword: 'outra' });
+    expect(result.error?.issues[0].path).toEqual(['confirmPassword']);
+  });
+});
+
+describe('forgotPasswordSchema', () => {
+  it('trims the email', () => {
+    const result = forgotPasswordSchema.safeParse({ email: ' anna@pie.com.br ' });
+    expect(result.success && result.data.email).toBe('anna@pie.com.br');
+  });
+
+  it('rejects a malformed email', () => {
+    const result = forgotPasswordSchema.safeParse({ email: 'anna@' });
+    expect(result.error?.issues[0].message).toBe('Por favor, insira um e-mail válido.');
+  });
+});
+
+describe('recoveryCodeSchema', () => {
+  it('accepts a six-digit code, trimming spaces', () => {
+    const result = recoveryCodeSchema.safeParse({ code: ' 123456 ' });
+    expect(result.success && result.data.code).toBe('123456');
+  });
+
+  it.each(['', '12345', '1234567', '12a456'])('rejects %p', (code) => {
+    const result = recoveryCodeSchema.safeParse({ code });
+    expect(result.error?.issues[0].message).toBe('Informe o código de 6 dígitos.');
+  });
+});
+
+describe('resetPasswordSchema', () => {
+  const validReset = { password: '123456', confirmPassword: '123456' };
+
+  it('accepts matching passwords', () => {
+    expect(resetPasswordSchema.safeParse(validReset).success).toBe(true);
+  });
+
+  it('rejects passwords shorter than six characters', () => {
+    const result = resetPasswordSchema.safeParse({ password: '12345', confirmPassword: '12345' });
+    expect(result.error?.issues[0].message).toBe('A senha deve ter pelo menos 6 caracteres.');
+  });
+
+  it('flags confirmPassword when passwords differ', () => {
+    const result = resetPasswordSchema.safeParse({ ...validReset, confirmPassword: 'outra' });
     expect(result.error?.issues[0].path).toEqual(['confirmPassword']);
   });
 });

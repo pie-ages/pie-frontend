@@ -37,18 +37,17 @@ type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
   auth?: boolean;
+  token?: string;
   signal?: AbortSignal;
 };
 
 async function request<T>(
   path: string,
-  { method = 'GET', body, auth = false, signal }: RequestOptions = {},
+  { method = 'GET', body, auth = false, token, signal }: RequestOptions = {},
 ): Promise<T> {
   const headers: Record<string, string> = {};
-  if (auth) {
-    const token = await getStoredToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
+  const bearerToken = token ?? (auth ? await getStoredToken() : null);
+  if (bearerToken) headers.Authorization = `Bearer ${bearerToken}`;
   const isJson = body !== undefined && !(body instanceof FormData);
   if (isJson) headers['Content-Type'] = 'application/json';
 
@@ -103,6 +102,14 @@ export function apiDeleteAuth(path: string): Promise<void> {
 
 export function apiPutAuth<T>(path: string, body: unknown): Promise<T> {
   return request<T>(path, { method: 'PUT', body, auth: true });
+}
+
+export function apiPostWithToken<T>(path: string, token: string, body?: unknown): Promise<T> {
+  return request<T>(path, { method: 'POST', body, token });
+}
+
+export function apiPutWithToken<T>(path: string, token: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: 'PUT', body, token });
 }
 
 export async function apiUploadAuth<T>(
