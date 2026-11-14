@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import Animated, { LinearTransition, ReduceMotion } from 'react-native-reanimated';
 
 import { styles } from './styles';
 
@@ -13,8 +14,9 @@ export function LookFocusPagination({ count, activeIndex }: LookFocusPaginationP
   return (
     <View style={styles.container}>
       {Array.from({ length: count }).map((_, index) => (
-        <View
+        <Animated.View
           key={`dot-${index}`}
+          layout={LinearTransition.duration(220).reduceMotion(ReduceMotion.System)}
           style={[styles.dot, index === activeIndex && styles.dotActive]}
         />
       ))}

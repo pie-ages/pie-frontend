@@ -10,7 +10,10 @@ export function createStyles(s: ScaleFn) {
     dim: {
       position: 'absolute',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.15)',
+      backgroundColor: 'rgba(255, 255, 255, 0.72)',
+    },
+    dimAndroid: {
+      backgroundColor: 'rgba(255, 255, 255, 0.88)',
     },
     content: {
       flex: 1,
@@ -48,6 +51,15 @@ export function createStyles(s: ScaleFn) {
       color: Colors.light.text,
       textAlign: 'center',
     },
+    multiSelectionCard: {
+      width: s(315),
+      gap: s(16),
+      padding: s(16),
+      borderRadius: s(24),
+      backgroundColor: Colors.white,
+      boxShadow: '0px 12px 32px rgba(0, 0, 0, 0.14)',
+      alignItems: 'center',
+    },
     title: {
       ...SystemFonts.bold,
       fontSize: s(22),
@@ -58,18 +70,17 @@ export function createStyles(s: ScaleFn) {
     row: {
       flexDirection: 'row',
       gap: s(12),
-      width: contentWidth,
+      width: '100%',
     },
     dimmed: {
-      opacity: 0.5,
+      opacity: 0.55,
     },
     smallCard: {
       flex: 1,
       gap: s(8),
       padding: s(8),
       borderRadius: s(16),
-      backgroundColor: Colors.white,
-      boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
+      backgroundColor: Colors.light.backgroundElement,
     },
     smallLabel: {
       fontFamily: FontFamilies.jakartaBold,

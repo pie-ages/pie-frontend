@@ -1,8 +1,11 @@
 import { Feather } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
+import { EmptyState } from '@/components/EmptyState';
 import { LookPieceCard } from '@/components/LookPieceCard';
 import { Colors } from '@/constants/Theme';
 import type { WardrobePiece } from '@/types/Look';
@@ -37,9 +40,12 @@ export function WardrobePickerModal({
   );
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <View style={styles.container}>
+        <Animated.View
+          entering={FadeInDown.duration(260).reduceMotion(ReduceMotion.System)}
+          style={styles.container}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>Selecionar peças</Text>
             <Pressable
@@ -56,7 +62,7 @@ export function WardrobePickerModal({
 
           {status === 'loading' ? (
             <View style={styles.state}>
-              <ActivityIndicator size="large" color={Colors.brand.accent} />
+              <ActivityIndicator size="large" color={Colors.brand.primary} />
               <Text style={styles.stateText}>Carregando peças...</Text>
             </View>
           ) : null}
@@ -70,10 +76,17 @@ export function WardrobePickerModal({
           ) : null}
 
           {status === 'empty' ? (
-            <View style={styles.state}>
-              <Feather name="inbox" size={32} color={Colors.iconMuted} />
-              <Text style={styles.stateText}>Você ainda não tem peças no guarda-roupa.</Text>
-            </View>
+            <EmptyState
+              icon={
+                <MaterialCommunityIcons
+                  name="wardrobe-outline"
+                  size={34}
+                  color={Colors.brand.primary}
+                />
+              }
+              title="Seu closet está vazio"
+              subtitle="Você ainda não tem peças no guarda-roupa para selecionar."
+            />
           ) : null}
 
           {status === 'success' ? (
@@ -104,7 +117,7 @@ export function WardrobePickerModal({
           <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
             <AuthButton title="Concluir" onPress={onClose} />
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

@@ -54,26 +54,48 @@ function RootNavigator() {
     <Stack
       screenOptions={{
         headerShown: false,
+        animation: 'fade_from_bottom',
       }}
     >
       <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen name="(screens)/Login/index" />
-        <Stack.Screen name="(screens)/Register/index" />
-        <Stack.Screen name="(screens)/ForgotPassword/index" />
-        <Stack.Screen name="(screens)/ResetPassword/index" />
+        <Stack.Screen name="(screens)/Login/index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(screens)/Register/index" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen
+          name="(screens)/ForgotPassword/index"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="(screens)/ResetPassword/index"
+          options={{ animation: 'slide_from_right' }}
+        />
       </Stack.Protected>
 
       <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         <Stack.Screen name="(screens)/Profile/index" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="(screens)/EditProfile/index" />
-        <Stack.Screen name="(screens)/EditStyles/index" />
-        <Stack.Screen name="(screens)/EditFavoriteColors/index" />
-        <Stack.Screen name="(screens)/MyStyle/index" />
-        <Stack.Screen name="(screens)/StyleQuiz/index" />
-        <Stack.Screen name="(screens)/StyleSelection/index" />
-        <Stack.Screen name="(screens)/ColorimetryResult/index" />
-        <Stack.Screen name="(screens)/CreateLook/index" />
+        <Stack.Screen
+          name="(screens)/EditProfile/index"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="(screens)/EditStyles/index"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="(screens)/EditFavoriteColors/index"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen name="(screens)/MyStyle/index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(screens)/StyleQuiz/index" options={{ animation: 'fade' }} />
+        <Stack.Screen name="(screens)/StyleSelection/index" options={{ animation: 'fade' }} />
+        <Stack.Screen
+          name="(screens)/ColorimetryResult/index"
+          options={{ animation: 'slide_from_right' }}
+        />
+        <Stack.Screen
+          name="(screens)/CreateLook/index"
+          options={{ animation: 'slide_from_bottom' }}
+        />
         <Stack.Screen name="(screens)/AddPiece/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(screens)/ProductDetails/index" options={{ presentation: 'modal' }} />
         <Stack.Screen name="(screens)/Wishlist/index" options={{ presentation: 'modal' }} />

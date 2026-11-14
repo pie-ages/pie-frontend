@@ -22,7 +22,8 @@ import { styles } from './styles';
 
 const CARD_WIDTH_RATIO = 0.67;
 const CARD_GAP = Spacing.four;
-const INACTIVE_OPACITY = 0.4;
+const INACTIVE_OPACITY = 0.45;
+const INACTIVE_SCALE = 0.92;
 
 function getMaxCardWidthForHeight(looks: Look[], maxHeight: number) {
   const maxPieces = Math.max(0, ...looks.map((look) => look.items.length));
@@ -155,9 +156,19 @@ export function LookFocusCarousel({
       >
         {cardWidth > 0 &&
           looks.map((look, index) => {
+            const inputRange = [
+              (index - 1) * itemPitch,
+              index * itemPitch,
+              (index + 1) * itemPitch,
+            ];
             const opacity = scrollX.interpolate({
-              inputRange: [(index - 1) * itemPitch, index * itemPitch, (index + 1) * itemPitch],
+              inputRange,
               outputRange: [INACTIVE_OPACITY, 1, INACTIVE_OPACITY],
+              extrapolate: 'clamp',
+            });
+            const scale = scrollX.interpolate({
+              inputRange,
+              outputRange: [INACTIVE_SCALE, 1, INACTIVE_SCALE],
               extrapolate: 'clamp',
             });
 
@@ -165,7 +176,7 @@ export function LookFocusCarousel({
               <Animated.View
                 key={look.id}
                 style={[
-                  { width: cardWidth, opacity },
+                  { width: cardWidth, opacity, transform: [{ scale }] },
                   index < looks.length - 1 && { marginRight: CARD_GAP },
                 ]}
               >

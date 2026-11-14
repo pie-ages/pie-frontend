@@ -3,6 +3,8 @@ import { Image } from 'expo-image';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, type Control } from 'react-hook-form';
 import {
+  Animated,
+  Easing,
   Keyboard,
   Modal,
   Platform,
@@ -48,6 +50,7 @@ export function SaveLookSheet({
   const [pageHeights, setPageHeights] = useState<[number, number]>([0, 0]);
   const [wasVisible, setWasVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [slideAnim] = useState(() => new Animated.Value(visible ? 0 : 40));
   const isLastPage = page >= 1;
 
   const setPageHeight = (index: 0 | 1, height: number) =>
@@ -91,19 +94,29 @@ export function SaveLookSheet({
   }
 
   useEffect(() => {
-    if (visible) scrollRef.current?.scrollTo({ x: 0, animated: false });
-  }, [visible]);
+    if (visible) {
+      scrollRef.current?.scrollTo({ x: 0, animated: false });
+      slideAnim.setValue(36);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [slideAnim, visible]);
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
-        <View
+        <Animated.View
           testID="save-look-sheet"
           style={[
             styles.sheet,
             {
               marginBottom: Platform.OS === 'android' ? 0 : keyboardHeight,
               paddingBottom: keyboardHeight > 0 ? 16 : insets.bottom + 16,
+              transform: [{ translateY: slideAnim }],
             },
           ]}
         >
@@ -241,7 +254,7 @@ export function SaveLookSheet({
               <View key={index} style={[styles.dot, index === page && styles.dotActive]} />
             ))}
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

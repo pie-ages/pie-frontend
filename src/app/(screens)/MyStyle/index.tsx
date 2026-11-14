@@ -9,6 +9,7 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
+import Animated, { FadeInDown, FadeInUp, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
@@ -38,7 +39,10 @@ export default function MyStyleScreen() {
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.spacer} />
 
-          <View style={styles.textArea}>
+          <Animated.View
+            entering={FadeInDown.duration(500).delay(100).reduceMotion(ReduceMotion.System)}
+            style={styles.textArea}
+          >
             <Text style={styles.baseText}>
               Seu estilo é <Text style={styles.highlightText}>{primaryStyleData?.label}</Text>
               {'\n'}por essência, com toques{'\n'}
@@ -52,11 +56,14 @@ export default function MyStyleScreen() {
                 </>
               )}
             </Text>
-          </View>
+          </Animated.View>
 
           <View style={styles.spacer} />
 
-          <View style={styles.footer}>
+          <Animated.View
+            entering={FadeInUp.duration(450).delay(280).reduceMotion(ReduceMotion.System)}
+            style={styles.footer}
+          >
             <TouchableOpacity
               style={styles.continueButton}
               activeOpacity={0.8}
@@ -66,7 +73,7 @@ export default function MyStyleScreen() {
             >
               <Text style={styles.continueButtonText}>Continuar</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </SafeAreaView>
       </ImageBackground>
     </View>

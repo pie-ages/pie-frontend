@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, Text, View } from 'react-native';
 
 import { LookImage } from '@/components/LookImage';
 import { LookPiecesStack } from '@/components/LookPiecesStack';
@@ -21,6 +21,7 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
   const [flipped, setFlipped] = useState(false);
   const [wasInteractive, setWasInteractive] = useState(interactive);
   const [rotation] = useState(() => new Animated.Value(0));
+  const isInitialMount = useRef(true);
 
   if (wasInteractive !== interactive) {
     setWasInteractive(interactive);
@@ -28,9 +29,14 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
   }
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     Animated.timing(rotation, {
       toValue: flipped ? 1 : 0,
-      duration: 350,
+      duration: 380,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
   }, [flipped, rotation]);

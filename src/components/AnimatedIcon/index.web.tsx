@@ -7,8 +7,8 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import classes from './styles.module.css';
 const DURATION = 300;
-const SPLASH_DURATION = 600;
-const HOLD_DURATION = 3000;
+const SPLASH_DURATION = 500;
+const HOLD_DURATION = 550;
 
 const MIN_SPLASH_IMAGE_SIZE = 150;
 const MAX_SPLASH_IMAGE_SIZE = 280;
@@ -30,17 +30,15 @@ export function AnimatedSplashOverlay() {
       transform: [{ scale: 1 }],
       opacity: 1,
     },
-    20: {
+    30: {
+      transform: [{ scale: 1.03 }],
       opacity: 1,
-    },
-    70: {
-      opacity: 0,
-      easing: Easing.elastic(0.7),
+      easing: Easing.out(Easing.quad),
     },
     100: {
       opacity: 0,
-      transform: [{ scale: 1 }],
-      easing: Easing.elastic(0.7),
+      transform: [{ scale: 0.96 }],
+      easing: Easing.out(Easing.cubic),
     },
   });
 

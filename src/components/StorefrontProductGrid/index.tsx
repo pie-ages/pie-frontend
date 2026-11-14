@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { StorefrontProductCard } from '@/components/StorefrontProductCard';
+import { Colors } from '@/constants/Theme';
 import type { CatalogItem } from '@/schemas/productSchema';
 
 import { styles } from './styles';
@@ -68,11 +69,18 @@ export function StorefrontProductGrid({
           }
         }}
         scrollEventThrottle={200}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.brand.primary}
+            colors={[Colors.brand.primary]}
+          />
+        }
       >
         {refreshing && (
           <View style={styles.refreshIndicator}>
-            <ActivityIndicator />
+            <ActivityIndicator color={Colors.brand.primary} />
           </View>
         )}
         {rows.map((row, rowIndex) => (
@@ -89,7 +97,7 @@ export function StorefrontProductGrid({
         ))}
         {isFetchingNextPage && (
           <View style={styles.footer}>
-            <ActivityIndicator />
+            <ActivityIndicator color={Colors.brand.primary} />
           </View>
         )}
       </ScrollView>
@@ -109,11 +117,18 @@ export function StorefrontProductGrid({
       showsVerticalScrollIndicator={false}
       onEndReached={onEndReached}
       onEndReachedThreshold={0.2}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={Colors.brand.primary}
+          colors={[Colors.brand.primary]}
+        />
+      }
       ListFooterComponent={
         isFetchingNextPage ? (
           <View style={styles.footer}>
-            <ActivityIndicator />
+            <ActivityIndicator color={Colors.brand.primary} />
           </View>
         ) : undefined
       }

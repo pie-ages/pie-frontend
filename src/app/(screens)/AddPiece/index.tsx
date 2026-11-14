@@ -16,12 +16,20 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
+  ReduceMotion,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
 import { FormInput } from '@/components/FormInput';
 import { FormSelect } from '@/components/FormSelect';
 import { ImagePickerArea } from '@/components/ImagePickerArea';
+import { Colors } from '@/constants/Theme';
 import { useAddPieceForm } from '@/hooks/UseAddPieceForm';
 import { fetchTaxonomy, type TaxonomyTerm } from '@/services/taxonomy';
 
@@ -175,15 +183,24 @@ export default function AddPieceScreen() {
           ) : null}
 
           {form.operation === 'analyze' && (
-            <View style={styles.analysisStatus}>
-              <ActivityIndicator color="#661414" />
+            <Animated.View
+              entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}
+              exiting={FadeOut.duration(180).reduceMotion(ReduceMotion.System)}
+              layout={LinearTransition.duration(220).reduceMotion(ReduceMotion.System)}
+              style={styles.analysisStatus}
+            >
+              <ActivityIndicator color={Colors.brand.primary} />
               <Text accessibilityLiveRegion="polite" style={styles.analysisText}>
                 Identificando tipo, estilo e cor da peça...
               </Text>
-            </View>
+            </Animated.View>
           )}
           {form.analysisError && (
-            <View style={styles.analysisStatus}>
+            <Animated.View
+              entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}
+              layout={LinearTransition.duration(220).reduceMotion(ReduceMotion.System)}
+              style={styles.analysisStatus}
+            >
               <Text accessibilityRole="alert" style={styles.errorText}>
                 {form.analysisError}
               </Text>
@@ -197,10 +214,15 @@ export default function AddPieceScreen() {
                 disabled={form.operation !== null}
                 accessibilityRole="button"
               />
-            </View>
+            </Animated.View>
           )}
           {form.isAnalyzed && (
-            <Text style={styles.analysisText}>Confira os dados identificados antes de salvar.</Text>
+            <Animated.Text
+              entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}
+              style={styles.analysisText}
+            >
+              Confira os dados identificados antes de salvar.
+            </Animated.Text>
           )}
 
           <Controller
@@ -279,38 +301,49 @@ export default function AddPieceScreen() {
         <Modal
           visible={selection !== null}
           transparent
-          animationType="none"
+          animationType="fade"
           onRequestClose={() => setSelection(null)}
         >
-          <Pressable style={styles.selectionBackdrop} onPress={() => setSelection(null)}>
-            <Pressable style={styles.selectionSheet} onPress={(event) => event.stopPropagation()}>
-              <View style={styles.selectionHeader}>
-                <Text style={styles.selectionTitle}>{selection?.title}</Text>
-                <Pressable
-                  onPress={() => setSelection(null)}
-                  accessibilityRole="button"
-                  accessibilityLabel="Fechar opções"
-                  hitSlop={8}
-                >
-                  <Feather name="x" size={22} color="#111827" />
-                </Pressable>
-              </View>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {selection?.options.map((option) => (
+          <View style={styles.selectionBackdrop}>
+            <Pressable
+              style={StyleSheet.absoluteFill}
+              onPress={() => setSelection(null)}
+              accessibilityRole="button"
+              accessibilityLabel="Fechar opções"
+            />
+            {selection !== null && (
+              <Animated.View
+                entering={FadeInDown.duration(260).reduceMotion(ReduceMotion.System)}
+                style={styles.selectionSheet}
+              >
+                <View style={styles.selectionHeader}>
+                  <Text style={styles.selectionTitle}>{selection?.title}</Text>
                   <Pressable
-                    key={option.id}
-                    style={({ pressed }) => [styles.selectionOption, pressed && styles.pressed]}
-                    onPress={() => {
-                      selection.onSelect(option.id);
-                      setSelection(null);
-                    }}
+                    onPress={() => setSelection(null)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Fechar opções"
+                    hitSlop={8}
                   >
-                    <Text style={styles.selectionOptionText}>{option.name}</Text>
+                    <Feather name="x" size={22} color="#111827" />
                   </Pressable>
-                ))}
-              </ScrollView>
-            </Pressable>
-          </Pressable>
+                </View>
+                <ScrollView style={{ flexGrow: 0 }} showsVerticalScrollIndicator={false}>
+                  {selection?.options.map((option) => (
+                    <Pressable
+                      key={option.id}
+                      style={({ pressed }) => [styles.selectionOption, pressed && styles.pressed]}
+                      onPress={() => {
+                        selection.onSelect(option.id);
+                        setSelection(null);
+                      }}
+                    >
+                      <Text style={styles.selectionOptionText}>{option.name}</Text>
+                    </Pressable>
+                  ))}
+                </ScrollView>
+              </Animated.View>
+            )}
+          </View>
         </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>

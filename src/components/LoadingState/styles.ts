@@ -9,9 +9,17 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.two,
     paddingVertical: Spacing.six,
+    paddingHorizontal: Spacing.four,
+  },
+  compactContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.one,
+    paddingVertical: Spacing.one,
   },
   text: {
     fontSize: 14,
     color: Colors.light.textSecondary,
+    textAlign: 'center',
   },
 });

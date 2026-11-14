@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { View, Text, Image, ActivityIndicator, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Animated, Easing, View, Text, Image, ActivityIndicator, Pressable } from 'react-native';
 
 import type { WardrobePiece } from '@/types/Look';
 
@@ -14,13 +14,23 @@ interface ClothingCardProps {
 export function ClothingCard({ item, onRemove }: ClothingCardProps) {
   const [isLoading, setIsLoading] = useState(Boolean(item.imageUrl));
   const [hasError, setHasError] = useState(false);
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 220,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <View style={styles.hangerHook} />
 
       <View style={styles.imageContainer}>
-        {isLoading && !hasError && <ActivityIndicator style={styles.loader} color="#000" />}
+        {isLoading && !hasError && <ActivityIndicator style={styles.loader} color="#661414" />}
         {item.imageUrl ? (
           <Image
             source={{ uri: item.imageUrl }}
@@ -49,6 +59,6 @@ export function ClothingCard({ item, onRemove }: ClothingCardProps) {
       <Text style={styles.name} numberOfLines={2}>
         {item.name}
       </Text>
-    </View>
+    </Animated.View>
   );
 }

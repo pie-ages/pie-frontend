@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, Text, View } from 'react-native';
 
 import { LookImage } from '@/components/LookImage';
 import { Colors } from '@/constants/Theme';
@@ -16,14 +16,20 @@ type LookCardProps = {
 export function LookCard({ look, onPress }: LookCardProps) {
   const [showPhoto, setShowPhoto] = useState(false);
   const [rotation] = useState(() => new Animated.Value(0));
+  const isInitialMount = useRef(true);
   const hasPhoto = Boolean(look.imageUrl);
   const pieceCount = look.items.length;
   const pieceLabel = `${pieceCount} ${pieceCount === 1 ? 'peça' : 'peças'}`;
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     Animated.timing(rotation, {
       toValue: showPhoto ? 1 : 0,
-      duration: 350,
+      duration: 380,
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start();
   }, [showPhoto, rotation]);
