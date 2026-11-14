@@ -11,8 +11,20 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.light.text,
   },
+  backdrop: {
+    flex: 1,
+  },
   options: {
+    position: 'absolute',
     gap: 8,
+    padding: 4,
+    backgroundColor: Colors.white,
+    borderRadius: 8,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   option: {
     minHeight: 48,
