@@ -39,13 +39,23 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   collageCell: {
-    width: '50%',
-    height: '50%',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.white,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: Colors.light.backgroundSelected,
+  },
+  collageCellFull: {
+    width: '100%',
+    height: '100%',
+  },
+  collageCellWideHalf: {
+    width: '100%',
+    height: '50%',
+  },
+  collageCellQuarter: {
+    width: '50%',
+    height: '50%',
   },
   collageImage: {
     width: '100%',

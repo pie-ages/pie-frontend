@@ -8,20 +8,19 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end',
   },
-  panel: {
-    maxHeight: '80%',
-    backgroundColor: Colors.white,
-    borderTopLeftRadius: Spacing.four,
-    borderTopRightRadius: Spacing.four,
-    paddingTop: Spacing.three,
+  backdrop: {
+    flex: 1,
+    width: '100%',
   },
-  grabber: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.border,
-    alignSelf: 'center',
-    marginBottom: Spacing.three,
+  panel: {
+    maxHeight: '82%',
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: Spacing.four,
+  },
+  scroll: {
+    flexGrow: 0,
   },
   toolbar: {
     flexDirection: 'row',
@@ -31,22 +30,22 @@ export const styles = StyleSheet.create({
     paddingBottom: Spacing.three,
   },
   title: {
-    fontSize: 15,
+    fontSize: 22,
     fontWeight: '700',
     color: Colors.light.text,
   },
-  iconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  closeButton: {
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: Colors.brand.tertiary,
   },
   content: {
     paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.one,
+    paddingBottom: Spacing.four,
     gap: Spacing.four,
     alignItems: 'center',
   },
@@ -55,7 +54,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   groupLabel: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: Colors.light.text,
   },
@@ -91,17 +90,46 @@ export const styles = StyleSheet.create({
   chipLabelSelected: {
     color: Colors.white,
   },
-  clearButton: {
-    alignSelf: 'center',
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: Colors.border,
+    paddingTop: Spacing.three,
     paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
+    backgroundColor: Colors.white,
+  },
+  clearButton: {
+    flex: 1,
+    height: 50,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.brand.tertiary,
+  },
+  clearButtonDisabled: {
+    backgroundColor: Colors.light.backgroundElement,
   },
   clearLabel: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
+    color: Colors.brand.primary,
+  },
+  clearLabelDisabled: {
     color: Colors.light.textSecondary,
   },
   applyButton: {
+    flex: 1.4,
+    height: 50,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: Colors.brand.primary,
+  },
+  applyLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.white,
   },
 });

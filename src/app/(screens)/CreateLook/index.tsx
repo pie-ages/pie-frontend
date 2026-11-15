@@ -14,6 +14,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import Animated, { FadeIn, LinearTransition, ReduceMotion, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -135,7 +136,19 @@ export default function CreateLookScreen() {
     >
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={styles.title}>Criar Look</Text>
+          <View style={styles.headerTopRow}>
+            <Pressable
+              onPress={goBack}
+              disabled={busy}
+              accessibilityRole="button"
+              accessibilityLabel="Voltar para meus looks"
+              hitSlop={8}
+              style={({ pressed }) => [styles.backButton, pressed && styles.closePressed]}
+            >
+              <Feather name="arrow-left" size={20} color={Colors.brand.primary} />
+            </Pressable>
+            <Text style={styles.title}>Criar Look</Text>
+          </View>
           <Text style={styles.subtitle}>Selecione peças do seu closet para montar seu look</Text>
           {form.pieceCount !== null ? (
             <Pressable
@@ -161,25 +174,29 @@ export default function CreateLookScreen() {
         }}
       >
         {form.pieceCount === null ? (
-          <Pressable
-            onPress={() => setIsChoosingQuantity(true)}
-            disabled={busy}
-            accessibilityRole="button"
-            accessibilityLabel="Escolher quantidade de peças"
-            style={({ pressed }) => [
-              styles.addSlot,
-              { width: slotWidth, height: emptyAddHeight },
-              pressed && styles.pressed,
-            ]}
-          >
-            <View style={styles.addCircle}>
-              <Feather name="plus" size={24} color={Colors.icon} />
-            </View>
-          </Pressable>
+          <Animated.View entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}>
+            <Pressable
+              onPress={() => setIsChoosingQuantity(true)}
+              disabled={busy}
+              accessibilityRole="button"
+              accessibilityLabel="Escolher quantidade de peças"
+              style={({ pressed }) => [
+                styles.addSlot,
+                { width: slotWidth, height: emptyAddHeight },
+                pressed && styles.pressed,
+              ]}
+            >
+              <View style={styles.addCircle}>
+                <Feather name="plus" size={24} color={Colors.icon} />
+              </View>
+            </Pressable>
+          </Animated.View>
         ) : (
           form.slots.map((piece, index) => (
-            <View
+            <Animated.View
               key={piece?.id ?? `empty-${index}`}
+              entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}
+              layout={LinearTransition.duration(220).reduceMotion(ReduceMotion.System)}
               style={[
                 styles.slot,
                 {
@@ -229,7 +246,7 @@ export default function CreateLookScreen() {
                   </View>
                 </Pressable>
               )}
-            </View>
+            </Animated.View>
           ))
         )}
       </View>
@@ -285,43 +302,48 @@ export default function CreateLookScreen() {
         }}
       >
         <View style={styles.quantityBackdrop}>
-          <View style={styles.quantityCard}>
-            <Text style={styles.quantityTitle}>Quantas peças terá o look?</Text>
-            <View style={styles.quantityOptions}>
-              {Array.from({ length: MAX_LOOK_PIECES }, (_, index) => index + 1).map((count) => (
-                <Pressable
-                  key={count}
-                  onPress={() => chooseQuantity(count)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: form.pieceCount === count }}
-                  style={({ pressed }) => [
-                    styles.quantityOption,
-                    form.pieceCount === count && styles.quantityOptionSelected,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.quantityOptionText,
-                      form.pieceCount === count && styles.quantityOptionTextSelected,
+          {isChoosingQuantity && (
+            <Animated.View
+              entering={ZoomIn.duration(220).reduceMotion(ReduceMotion.System)}
+              style={styles.quantityCard}
+            >
+              <Text style={styles.quantityTitle}>Quantas peças terá o look?</Text>
+              <View style={styles.quantityOptions}>
+                {Array.from({ length: MAX_LOOK_PIECES }, (_, index) => index + 1).map((count) => (
+                  <Pressable
+                    key={count}
+                    onPress={() => chooseQuantity(count)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: form.pieceCount === count }}
+                    style={({ pressed }) => [
+                      styles.quantityOption,
+                      form.pieceCount === count && styles.quantityOptionSelected,
+                      pressed && styles.pressed,
                     ]}
                   >
-                    {count} {count === 1 ? 'peça' : 'peças'}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-            <Pressable
-              onPress={() => {
-                setIsChoosingQuantity(false);
-                setPendingSuggestion(false);
-              }}
-              accessibilityRole="button"
-              style={styles.quantityCancel}
-            >
-              <Text style={styles.quantityCancelText}>Cancelar</Text>
-            </Pressable>
-          </View>
+                    <Text
+                      style={[
+                        styles.quantityOptionText,
+                        form.pieceCount === count && styles.quantityOptionTextSelected,
+                      ]}
+                    >
+                      {count} {count === 1 ? 'peça' : 'peças'}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              <Pressable
+                onPress={() => {
+                  setIsChoosingQuantity(false);
+                  setPendingSuggestion(false);
+                }}
+                accessibilityRole="button"
+                style={styles.quantityCancel}
+              >
+                <Text style={styles.quantityCancelText}>Cancelar</Text>
+              </Pressable>
+            </Animated.View>
+          )}
         </View>
       </Modal>
 
@@ -382,14 +404,19 @@ export default function CreateLookScreen() {
 
       <Modal visible={saved} transparent animationType="fade" onRequestClose={goBack}>
         <View style={styles.successBackdrop}>
-          <View style={styles.successCard}>
-            <View style={styles.successCircle}>
-              <Feather name="check" size={32} color={Colors.white} />
-            </View>
-            <Text style={styles.successTitle}>Look salvo!</Text>
-            <Text style={styles.successMessage}>Seu look foi criado com sucesso.</Text>
-            <AuthButton title="Ver meus looks" onPress={goBack} />
-          </View>
+          {saved && (
+            <Animated.View
+              entering={ZoomIn.duration(240).reduceMotion(ReduceMotion.System)}
+              style={styles.successCard}
+            >
+              <View style={styles.successCircle}>
+                <Feather name="check" size={32} color={Colors.white} />
+              </View>
+              <Text style={styles.successTitle}>Look salvo!</Text>
+              <Text style={styles.successMessage}>Seu look foi criado com sucesso.</Text>
+              <AuthButton title="Ver meus looks" onPress={goBack} />
+            </Animated.View>
+          )}
         </View>
       </Modal>
     </View>
@@ -413,6 +440,19 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: Spacing.one,
   },
+  headerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.brand.tertiary,
+  },
   title: {
     fontSize: 28,
     fontWeight: '700',
@@ -435,12 +475,12 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   close: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.light.backgroundElement,
+    backgroundColor: Colors.brand.tertiary,
   },
   closePressed: {
     opacity: 0.7,

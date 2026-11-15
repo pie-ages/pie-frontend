@@ -56,7 +56,7 @@ export function ProfileUserSection({ status, user, onRetry, onEdit }: ProfileUse
           onRetry={onRetry}
         />
       ) : (
-        <ActivityIndicator color={Colors.brand.accent} />
+        <ActivityIndicator color={Colors.brand.primary} />
       )}
     </ProfileSectionCard>
   );

@@ -12,6 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -261,7 +262,10 @@ export default function ColorimetryResultScreen() {
           </ThemedText>
         )}
 
-        <View style={styles.rows}>
+        <Animated.View
+          entering={FadeInDown.duration(380).delay(80).reduceMotion(ReduceMotion.System)}
+          style={styles.rows}
+        >
           <ColorimetryColorRow
             title="Suas cores de destaque"
             colors={preferences!.highlightColors}
@@ -284,7 +288,7 @@ export default function ColorimetryResultScreen() {
               setActiveSlot(index);
             }}
           />
-        </View>
+        </Animated.View>
 
         {favoriteError && (
           <ThemedText accessibilityRole="alert" style={styles.saveError} themeColor="textSecondary">

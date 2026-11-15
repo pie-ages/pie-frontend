@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { Text, View } from 'react-native';
+import { Text } from 'react-native';
+import Animated, { FadeInDown, FadeOutUp, ReduceMotion } from 'react-native-reanimated';
 
 import { BrandColors } from '@/constants/Theme';
 
@@ -11,9 +12,14 @@ type StorefrontNoticeProps = {
 
 export function StorefrontNotice({ message }: StorefrontNoticeProps) {
   return (
-    <View style={styles.container} accessibilityLiveRegion="polite">
+    <Animated.View
+      entering={FadeInDown.duration(240).reduceMotion(ReduceMotion.System)}
+      exiting={FadeOutUp.duration(200).reduceMotion(ReduceMotion.System)}
+      style={styles.container}
+      accessibilityLiveRegion="polite"
+    >
       <Feather name="check-circle" size={18} color={BrandColors.primary} />
       <Text style={styles.text}>{message}</Text>
-    </View>
+    </Animated.View>
   );
 }

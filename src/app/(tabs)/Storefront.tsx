@@ -157,9 +157,9 @@ export default function StorefrontScreen() {
           )}
           {!isLoading && status === 'empty' && (
             <EmptyState
-              icon={<Feather name="shopping-bag" size={32} color={Colors.iconMuted} />}
+              icon={<Feather name="shopping-bag" size={34} color={Colors.brand.primary} />}
               title="Nenhum produto encontrado"
-              subtitle="Tente ajustar os filtros ou volte mais tarde."
+              subtitle="Tente ajustar os filtros ou a busca para encontrar outras peças."
             />
           )}
           {!isLoading && status === 'success' && (
