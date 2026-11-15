@@ -25,6 +25,9 @@ function makeParamsKey(params: CatalogParams): string {
     [...(params.colors ?? [])].sort().join(','),
     [...(params.companies ?? [])].sort().join(','),
     [...(params.materials ?? [])].sort().join(','),
+    [...(params.genders ?? [])].sort().join(','),
+    params.colorimetry ? 1 : 0,
+    params.matchesProfile ? 1 : 0,
     params.size ?? 20,
     params.sort ?? 'name,ASC',
   ].join('|');
@@ -41,6 +44,7 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [ignoredFilters, setIgnoredFilters] = useState<string[]>([]);
 
   const isFetching = useRef(false);
   const generation = useRef(0);
@@ -73,6 +77,7 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
       .then((page) => {
         if (!isActive || generation.current !== gen) return;
         setProducts(page.items);
+        setIgnoredFilters(page.ignoredFilters);
         setHasNextPage((page.page + 1) * page.size < page.total);
         setCurrentPage(0);
         setStatus(page.items.length === 0 ? 'empty' : 'success');
@@ -125,6 +130,7 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
       .then((page) => {
         if (generation.current !== gen) return;
         setProducts(page.items);
+        setIgnoredFilters(page.ignoredFilters);
         setHasNextPage((page.page + 1) * page.size < page.total);
         setCurrentPage(0);
         setStatus(page.items.length === 0 ? 'empty' : 'success');
@@ -145,5 +151,14 @@ export function useStorefrontCatalog(params: CatalogParams = {}) {
     setAttempt((v) => v + 1);
   }, []);
 
-  return { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing };
+  return {
+    status,
+    products,
+    ignoredFilters,
+    retry,
+    loadNextPage,
+    isFetchingNextPage,
+    refresh,
+    refreshing,
+  };
 }
