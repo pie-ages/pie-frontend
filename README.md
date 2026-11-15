@@ -1,4 +1,6 @@
-# Welcome to your Expo app 👋
+# Piê — App Mobile
+
+> 📖 **Documentação do app:** estrutura, execução local, navegação, telas, estados, componentes, endpoints e mockups em [`docs/mobile/`](docs/mobile/README.md).
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
