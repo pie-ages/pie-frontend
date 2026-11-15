@@ -23,6 +23,7 @@ type StorefrontProductGridProps = {
   isFetchingNextPage: boolean;
   onRefresh: () => void;
   refreshing: boolean;
+  inClosetProductIds?: ReadonlySet<string>;
 };
 
 export function StorefrontProductGrid({
@@ -33,6 +34,7 @@ export function StorefrontProductGrid({
   isFetchingNextPage,
   onRefresh,
   refreshing,
+  inClosetProductIds,
 }: StorefrontProductGridProps) {
   const scrollTop = useRef(0);
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -90,6 +92,7 @@ export function StorefrontProductGrid({
                 key={item.id}
                 product={item}
                 onPress={() => onProductPress(item.id)}
+                isInCloset={inClosetProductIds?.has(item.id) ?? false}
               />
             ))}
             {row.length === 1 && <View style={{ flex: 1 }} />}
@@ -134,7 +137,11 @@ export function StorefrontProductGrid({
       }
       renderItem={({ item }) =>
         item ? (
-          <StorefrontProductCard product={item} onPress={() => onProductPress(item.id)} />
+          <StorefrontProductCard
+            product={item}
+            onPress={() => onProductPress(item.id)}
+            isInCloset={inClosetProductIds?.has(item.id) ?? false}
+          />
         ) : (
           <View style={{ flex: 1 }} />
         )
