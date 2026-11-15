@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
-import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
+import Animated, { ReduceMotion, SlideInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ColorPicker, { HueSlider, Panel1, type ColorFormatsObject } from 'reanimated-color-picker';
 
@@ -36,7 +36,7 @@ export function ColorPickerModal({
 
         {visible && (
           <Animated.View
-            entering={FadeInDown.duration(260).reduceMotion(ReduceMotion.System)}
+            entering={SlideInUp.duration(240).reduceMotion(ReduceMotion.System)}
             style={styles.sheet}
           >
             <VisualColorForm selectedColor={selectedColor} onSelect={onSelect} onClose={onClose} />

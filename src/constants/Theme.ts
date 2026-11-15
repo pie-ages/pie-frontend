@@ -1,5 +1,3 @@
-import '@/global.css';
-
 import { Platform, type TextStyle } from 'react-native';
 
 import type { Style } from '@/types/Style';

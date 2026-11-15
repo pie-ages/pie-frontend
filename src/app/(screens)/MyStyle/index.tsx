@@ -12,8 +12,8 @@ import {
 import Animated, { FadeInDown, FadeInUp, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
-import { availableStyles, mockUserIdentifiedStyles } from '@/mocks/styleMocks';
+import { Colors, FontFamilies, Spacing } from '../../../constants/Theme';
+import { availableStyles, mockUserIdentifiedStyles } from '../../../mocks/styleMocks';
 
 export default function MyStyleScreen() {
   const primaryStyleId = mockUserIdentifiedStyles[0];

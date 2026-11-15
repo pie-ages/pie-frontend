@@ -1,6 +1,13 @@
 import { Feather } from '@expo/vector-icons';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { LookImage } from '@/components/LookImage';
 import { LookPiecesStack } from '@/components/LookPiecesStack';
@@ -20,8 +27,7 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
   const hasPhoto = Boolean(look.imageUrl);
   const [flipped, setFlipped] = useState(false);
   const [wasInteractive, setWasInteractive] = useState(interactive);
-  const [rotation] = useState(() => new Animated.Value(0));
-  const isInitialMount = useRef(true);
+  const rotation = useSharedValue(0);
 
   if (wasInteractive !== interactive) {
     setWasInteractive(interactive);
@@ -29,26 +35,19 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
   }
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    Animated.timing(rotation, {
-      toValue: flipped ? 1 : 0,
+    rotation.value = withTiming(flipped ? 1 : 0, {
       duration: 380,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
+      reduceMotion: ReduceMotion.System,
+    });
   }, [flipped, rotation]);
 
-  const frontRotateY = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
-  const backRotateY = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['180deg', '360deg'],
-  });
+  const frontAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1000 }, { rotateY: `${rotation.value * 180}deg` }],
+  }));
+  const backAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1000 }, { rotateY: `${180 + rotation.value * 180}deg` }],
+  }));
 
   function handleFrontPress() {
     if (!interactive) {
@@ -68,7 +67,7 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
     <View>
       <Animated.View
         pointerEvents={flipped ? 'none' : 'auto'}
-        style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: frontRotateY }] }]}
+        style={[styles.face, frontAnimatedStyle]}
       >
         <Pressable
           onPress={handleFrontPress}
@@ -86,11 +85,7 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
 
       <Animated.View
         pointerEvents={flipped ? 'auto' : 'none'}
-        style={[
-          styles.face,
-          styles.back,
-          { transform: [{ perspective: 1000 }, { rotateY: backRotateY }] },
-        ]}
+        style={[styles.face, styles.back, backAnimatedStyle]}
       >
         {hasPhoto ? (
           <Pressable

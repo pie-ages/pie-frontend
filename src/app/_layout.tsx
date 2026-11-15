@@ -7,7 +7,7 @@ import { useFonts } from 'expo-font';
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { AnimatedSplashOverlay } from '@/components/AnimatedIcon';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -17,22 +17,25 @@ import { WishlistProvider } from '@/contexts/WishlistContext';
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [appReady, setAppReady] = useState(false);
+  const handleAppReady = useCallback(() => setAppReady(true), []);
+
   return (
     <AuthProvider>
       <WishlistProvider>
         <UserStyleProvider>
           <StatusBar style="dark" />
 
-          <AnimatedSplashOverlay />
+          <AnimatedSplashOverlay ready={appReady} />
 
-          <RootNavigator />
+          <RootNavigator onReady={handleAppReady} />
         </UserStyleProvider>
       </WishlistProvider>
     </AuthProvider>
   );
 }
 
-function RootNavigator() {
+function RootNavigator({ onReady }: { onReady: () => void }) {
   const { isAuthenticated, isInitializing, pendingStyleQuiz } = useAuth();
 
   const [fontsLoaded] = useFonts({
@@ -47,6 +50,12 @@ function RootNavigator() {
       router.replace('/StyleQuiz');
     }
   }, [isAuthenticated, pendingStyleQuiz]);
+
+  useEffect(() => {
+    if (!isInitializing && fontsLoaded) {
+      onReady();
+    }
+  }, [fontsLoaded, isInitializing, onReady]);
 
   if (isInitializing || !fontsLoaded) return null;
 

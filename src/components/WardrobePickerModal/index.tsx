@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
+import Animated, { ReduceMotion, SlideInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -43,7 +43,7 @@ export function WardrobePickerModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <Animated.View
-          entering={FadeInDown.duration(260).reduceMotion(ReduceMotion.System)}
+          entering={SlideInUp.duration(240).reduceMotion(ReduceMotion.System)}
           style={styles.container}
         >
           <View style={styles.header}>

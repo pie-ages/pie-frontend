@@ -3,8 +3,6 @@ import { Image } from 'expo-image';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, type Control } from 'react-hook-form';
 import {
-  Animated,
-  Easing,
   Keyboard,
   Modal,
   Platform,
@@ -15,6 +13,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Animated, {
+  Easing,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors } from '@/constants/Theme';
@@ -50,7 +55,7 @@ export function SaveLookSheet({
   const [pageHeights, setPageHeights] = useState<[number, number]>([0, 0]);
   const [wasVisible, setWasVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [slideAnim] = useState(() => new Animated.Value(visible ? 0 : 40));
+  const slideAnim = useSharedValue(visible ? 0 : 40);
   const isLastPage = page >= 1;
 
   const setPageHeight = (index: 0 | 1, height: number) =>
@@ -96,15 +101,18 @@ export function SaveLookSheet({
   useEffect(() => {
     if (visible) {
       scrollRef.current?.scrollTo({ x: 0, animated: false });
-      slideAnim.setValue(36);
-      Animated.timing(slideAnim, {
-        toValue: 0,
+      slideAnim.value = 36;
+      slideAnim.value = withTiming(0, {
         duration: 240,
         easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }).start();
+        reduceMotion: ReduceMotion.System,
+      });
     }
   }, [slideAnim, visible]);
+
+  const sheetAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: slideAnim.value }],
+  }));
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
@@ -113,10 +121,10 @@ export function SaveLookSheet({
           testID="save-look-sheet"
           style={[
             styles.sheet,
+            sheetAnimatedStyle,
             {
               marginBottom: Platform.OS === 'android' ? 0 : keyboardHeight,
               paddingBottom: keyboardHeight > 0 ? 16 : insets.bottom + 16,
-              transform: [{ translateY: slideAnim }],
             },
           ]}
         >

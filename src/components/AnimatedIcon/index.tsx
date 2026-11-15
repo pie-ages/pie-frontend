@@ -2,12 +2,11 @@ import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
 import { useState } from 'react';
 import { Dimensions, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { Easing, Keyframe } from 'react-native-reanimated';
+import Animated, { Easing, Keyframe, ReduceMotion } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 500;
-const HOLD_DURATION = 550;
 
 const MIN_SPLASH_IMAGE_SIZE = 150;
 const MAX_SPLASH_IMAGE_SIZE = 280;
@@ -16,11 +15,12 @@ function getSplashImageSize(windowWidth: number) {
   return Math.min(Math.max(windowWidth * 0.55, MIN_SPLASH_IMAGE_SIZE), MAX_SPLASH_IMAGE_SIZE);
 }
 
-export function AnimatedSplashOverlay() {
-  const [animate, setAnimate] = useState(false);
+export function AnimatedSplashOverlay({ ready }: { ready: boolean }) {
   const [visible, setVisible] = useState(true);
+  const [laidOut, setLaidOut] = useState(false);
   const { width } = useWindowDimensions();
   const imageSize = getSplashImageSize(width);
+  const animate = ready && laidOut;
 
   if (!visible) return null;
 
@@ -50,12 +50,15 @@ export function AnimatedSplashOverlay() {
 
   return animate ? (
     <Animated.View
-      entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
-        'worklet';
-        if (finished) {
-          scheduleOnRN(setVisible, false);
-        }
-      })}
+      entering={splashKeyframe
+        .duration(DURATION)
+        .reduceMotion(ReduceMotion.System)
+        .withCallback((finished) => {
+          'worklet';
+          if (finished) {
+            scheduleOnRN(setVisible, false);
+          }
+        })}
       style={styles.splashOverlay}
     >
       {image}
@@ -63,9 +66,7 @@ export function AnimatedSplashOverlay() {
   ) : (
     <View
       onLayout={() => {
-        SplashScreen.hideAsync().finally(() => {
-          setTimeout(() => setAnimate(true), HOLD_DURATION);
-        });
+        SplashScreen.hideAsync().finally(() => setLaidOut(true));
       }}
       style={styles.splashOverlay}
     >

@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Spacing } from '@/constants/Theme';
@@ -37,6 +38,7 @@ export function StorefrontFilterSheet({
 }: StorefrontFilterSheetProps) {
   const insets = useSafeAreaInsets();
   const [translateY] = useState(() => new RNAnimated.Value(300));
+  const reduceMotion = useReducedMotion();
 
   const selectedCount = Object.values(pendingFiltersByGroup).reduce(
     (sum, set) => sum + set.size,
@@ -47,15 +49,19 @@ export function StorefrontFilterSheet({
   useEffect(() => {
     if (visible) {
       translateY.setValue(300);
-      RNAnimated.spring(translateY, {
-        toValue: 0,
-        damping: 24,
-        stiffness: 240,
-        mass: 0.8,
-        useNativeDriver: true,
-      }).start();
+      if (reduceMotion) {
+        translateY.setValue(0);
+      } else {
+        RNAnimated.spring(translateY, {
+          toValue: 0,
+          damping: 24,
+          stiffness: 240,
+          mass: 0.8,
+          useNativeDriver: true,
+        }).start();
+      }
     }
-  }, [visible, translateY]);
+  }, [reduceMotion, visible, translateY]);
 
   const panResponder = useMemo(
     () =>
@@ -70,24 +76,33 @@ export function StorefrontFilterSheet({
         },
         onPanResponderRelease: (_, gestureState) => {
           if (gestureState.dy > 70 || gestureState.vy > 0.6) {
-            RNAnimated.timing(translateY, {
-              toValue: 500,
-              duration: 180,
-              useNativeDriver: true,
-            }).start(() => {
+            if (reduceMotion) {
+              translateY.setValue(500);
               onClose();
-            });
+            } else {
+              RNAnimated.timing(translateY, {
+                toValue: 500,
+                duration: 180,
+                useNativeDriver: true,
+              }).start(() => {
+                onClose();
+              });
+            }
           } else {
-            RNAnimated.spring(translateY, {
-              toValue: 0,
-              damping: 22,
-              stiffness: 260,
-              useNativeDriver: true,
-            }).start();
+            if (reduceMotion) {
+              translateY.setValue(0);
+            } else {
+              RNAnimated.spring(translateY, {
+                toValue: 0,
+                damping: 22,
+                stiffness: 260,
+                useNativeDriver: true,
+              }).start();
+            }
           }
         },
       }),
-    [onClose, translateY],
+    [onClose, reduceMotion, translateY],
   );
 
   return (
