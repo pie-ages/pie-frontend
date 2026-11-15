@@ -8,6 +8,19 @@ import type { LookFormData } from '@/schemas/lookSchema';
 
 import { SaveLookSheet } from '..';
 
+jest.mock('react-native-reanimated', () => {
+  const { View: mockView } = jest.requireActual('react-native');
+
+  return {
+    __esModule: true,
+    default: { View: mockView },
+    Easing: { out: (fn: unknown) => fn, cubic: (value: number) => value },
+    ReduceMotion: { System: 'system' },
+    useAnimatedStyle: (updater: () => Record<string, unknown>) => updater(),
+    useSharedValue: <T,>(value: T) => ({ value }),
+    withTiming: <T,>(value: T) => value,
+  };
+});
 jest.mock('@/global.css', () => ({}));
 
 const BOTTOM_INSET = 34;
