@@ -24,6 +24,14 @@ export function LookCard({ look, onPress }: LookCardProps) {
   const [showPhoto, setShowPhoto] = useState(false);
   const rotation = useSharedValue(0);
   const hasPhoto = Boolean(look.imageUrl);
+  const visibleItems = look.items.slice(0, 4);
+
+  function getCellLayoutStyle(count: number, index: number) {
+    if (count === 1) return styles.collageCellFull;
+    if (count === 2) return styles.collageCellWideHalf;
+    if (count === 3) return index < 2 ? styles.collageCellQuarter : styles.collageCellWideHalf;
+    return styles.collageCellQuarter;
+  }
   const pieceCount = look.items.length;
   const pieceLabel = `${pieceCount} ${pieceCount === 1 ? 'peça' : 'peças'}`;
 
@@ -53,9 +61,12 @@ export function LookCard({ look, onPress }: LookCardProps) {
         >
           <Animated.View style={[styles.face, frontAnimatedStyle]}>
             <View style={styles.collage}>
-              {look.items.length === 0 && <LookImage uri={null} style={styles.collageImage} />}
-              {look.items.slice(0, 4).map((item) => (
-                <View key={item.id} style={styles.collageCell}>
+              {visibleItems.length === 0 && <LookImage uri={null} style={styles.collageImage} />}
+              {visibleItems.map((item, index) => (
+                <View
+                  key={item.id}
+                  style={[styles.collageCell, getCellLayoutStyle(visibleItems.length, index)]}
+                >
                   <LookImage
                     uri={item.imageUrl}
                     style={styles.collageImage}

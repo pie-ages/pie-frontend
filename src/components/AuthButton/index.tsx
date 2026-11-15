@@ -13,8 +13,6 @@ import { Colors } from '@/constants/Theme';
 
 import { styles } from './styles';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 type AuthButtonProps = PressableProps & {
   title: string;
   variant?: 'primary' | 'secondary';
@@ -66,29 +64,30 @@ export function AuthButton({
   }
 
   return (
-    <AnimatedPressable
-      disabled={isDisabled}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      style={(state) => [
-        styles.button,
-        variant === 'primary' ? styles.primary : styles.secondary,
-        state.pressed && !isDisabled && styles.pressed,
-        isDisabled && styles.disabled,
-        typeof style === 'function' ? style(state) : style,
-        { transform: [{ scale: pressScale }] },
-      ]}
-      {...props}
-    >
-      {isLoading ? (
-        <ActivityIndicator color={variant === 'primary' ? Colors.white : Colors.brand.primary} />
-      ) : (
-        <Text
-          style={[styles.text, variant === 'primary' ? styles.primaryText : styles.secondaryText]}
-        >
-          {title}
-        </Text>
-      )}
-    </AnimatedPressable>
+    <Animated.View style={[styles.container, { transform: [{ scale: pressScale }] }]}>
+      <Pressable
+        disabled={isDisabled}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={(state) => [
+          styles.button,
+          variant === 'primary' ? styles.primary : styles.secondary,
+          state.pressed && !isDisabled && styles.pressed,
+          isDisabled && styles.disabled,
+          typeof style === 'function' ? style(state) : style,
+        ]}
+        {...props}
+      >
+        {isLoading ? (
+          <ActivityIndicator color={variant === 'primary' ? Colors.white : Colors.brand.primary} />
+        ) : (
+          <Text
+            style={[styles.text, variant === 'primary' ? styles.primaryText : styles.secondaryText]}
+          >
+            {title}
+          </Text>
+        )}
+      </Pressable>
+    </Animated.View>
   );
 }

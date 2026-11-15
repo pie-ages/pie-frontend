@@ -10,11 +10,7 @@ import {
 } from 'react-native';
 
 import { LookFlipCard } from '@/components/LookFlipCard';
-import {
-  LOOK_EMPTY_CARD_ASPECT_RATIO,
-  LOOK_PIECE_ASPECT_RATIO,
-  LOOK_PIECE_GAP,
-} from '@/components/LookPiecesStack/styles';
+import { LOOK_EMPTY_CARD_ASPECT_RATIO } from '@/components/LookPiecesStack/styles';
 import { Spacing } from '@/constants/Theme';
 import type { Look } from '@/types/Look';
 
@@ -25,16 +21,8 @@ const CARD_GAP = Spacing.four;
 const INACTIVE_OPACITY = 0.45;
 const INACTIVE_SCALE = 0.92;
 
-function getMaxCardWidthForHeight(looks: Look[], maxHeight: number) {
-  const maxPieces = Math.max(0, ...looks.map((look) => look.items.length));
-  const emptyLimit = looks.some((look) => look.items.length === 0)
-    ? maxHeight * LOOK_EMPTY_CARD_ASPECT_RATIO
-    : Infinity;
-  const piecesLimit =
-    maxPieces > 0
-      ? ((maxHeight - (maxPieces - 1) * LOOK_PIECE_GAP) * LOOK_PIECE_ASPECT_RATIO) / maxPieces
-      : Infinity;
-  return Math.max(Math.min(emptyLimit, piecesLimit), 0);
+function getMaxCardWidthForHeight(maxHeight: number) {
+  return Math.max(maxHeight * LOOK_EMPTY_CARD_ASPECT_RATIO, 0);
 }
 
 type LookFocusCarouselProps = {
@@ -62,7 +50,7 @@ export function LookFocusCarousel({
 
   const cardWidth =
     maxHeight > 0
-      ? Math.min(carouselWidth * CARD_WIDTH_RATIO, getMaxCardWidthForHeight(looks, maxHeight))
+      ? Math.min(carouselWidth * CARD_WIDTH_RATIO, getMaxCardWidthForHeight(maxHeight))
       : 0;
   const itemPitch = cardWidth + CARD_GAP;
   const sideInset = Math.max((carouselWidth - cardWidth) / 2, 0);
