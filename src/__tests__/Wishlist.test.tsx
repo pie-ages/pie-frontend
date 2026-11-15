@@ -11,6 +11,18 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ back: jest.fn(), canGoBack: () => true }),
 }));
 jest.mock('expo-web-browser', () => ({ openBrowserAsync: jest.fn() }));
+jest.mock('react-native-reanimated', () => {
+  const { View } = require('react-native');
+  const anim: unknown = new Proxy({}, { get: () => () => anim });
+  return {
+    __esModule: true,
+    default: { View },
+    FadeIn: anim,
+    FadeOut: anim,
+    LinearTransition: anim,
+    ReduceMotion: { System: 'system' },
+  };
+});
 jest.mock('@/contexts/WishlistContext');
 jest.mock('@/hooks/UseWardrobeProductIds');
 
