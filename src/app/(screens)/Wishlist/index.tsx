@@ -8,6 +8,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition, ReduceMotion } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
+import { InClosetBadge } from '@/components/InClosetBadge';
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useWardrobeProductIds } from '@/hooks/UseWardrobeProductIds';
@@ -67,36 +68,17 @@ export default function WishlistScreen() {
   );
 }
 
-function EmptyState({ onExplore }: { onExplore: () => void }) {
-  return (
-    <View style={styles.emptyContainer}>
-      <View style={styles.emptyIconCircle}>
-        <MaterialCommunityIcons name="heart" size={40} color={BrandColors.primary} />
-      </View>
-      <Text style={styles.emptyTitle}>Sua lista de desejos está vazia</Text>
-      <Text style={styles.emptySubtitle}>
-        Toque no ícone de prancheta nas peças da Vitrine para salvar seus itens favoritos aqui!
-      </Text>
-      <Pressable
-        onPress={onExplore}
-        style={({ pressed }) => [styles.exploreButton, pressed && styles.exploreButtonPressed]}
-      >
-        <Text style={styles.exploreButtonText}>Explorar Vitrine</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 type WishlistCardProps = {
   product: CatalogItem;
   onRemove: () => void;
   isInCloset: boolean;
 };
 
-function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: () => void }) {
+function WishlistCard({ product, onRemove, isInCloset }: WishlistCardProps) {
   async function handleViewInStore() {
     if (!product.purchaseUrl) return;
     await WebBrowser.openBrowserAsync(product.purchaseUrl);
+  }
 
   return (
     <Animated.View
