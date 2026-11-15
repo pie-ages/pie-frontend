@@ -1,6 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { LookImage } from '@/components/LookImage';
 import { Colors } from '@/constants/Theme';
@@ -15,27 +22,33 @@ type LookCardProps = {
 
 export function LookCard({ look, onPress }: LookCardProps) {
   const [showPhoto, setShowPhoto] = useState(false);
-  const [rotation] = useState(() => new Animated.Value(0));
+  const rotation = useSharedValue(0);
   const hasPhoto = Boolean(look.imageUrl);
+  const visibleItems = look.items.slice(0, 4);
+
+  function getCellLayoutStyle(count: number, index: number) {
+    if (count === 1) return styles.collageCellFull;
+    if (count === 2) return styles.collageCellWideHalf;
+    if (count === 3) return index < 2 ? styles.collageCellQuarter : styles.collageCellWideHalf;
+    return styles.collageCellQuarter;
+  }
   const pieceCount = look.items.length;
   const pieceLabel = `${pieceCount} ${pieceCount === 1 ? 'peça' : 'peças'}`;
 
   useEffect(() => {
-    Animated.timing(rotation, {
-      toValue: showPhoto ? 1 : 0,
-      duration: 350,
-      useNativeDriver: true,
-    }).start();
+    rotation.value = withTiming(showPhoto ? 1 : 0, {
+      duration: 380,
+      easing: Easing.out(Easing.cubic),
+      reduceMotion: ReduceMotion.System,
+    });
   }, [showPhoto, rotation]);
 
-  const frontRotateY = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
-  const backRotateY = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['180deg', '360deg'],
-  });
+  const frontAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1000 }, { rotateY: `${rotation.value * 180}deg` }],
+  }));
+  const backAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1000 }, { rotateY: `${180 + rotation.value * 180}deg` }],
+  }));
 
   return (
     <View style={styles.card}>
@@ -46,13 +59,14 @@ export function LookCard({ look, onPress }: LookCardProps) {
           accessibilityLabel={`Ver ${look.name}`}
           style={({ pressed }) => [styles.mediaTap, pressed && styles.pressed]}
         >
-          <Animated.View
-            style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: frontRotateY }] }]}
-          >
+          <Animated.View style={[styles.face, frontAnimatedStyle]}>
             <View style={styles.collage}>
-              {look.items.length === 0 && <LookImage uri={null} style={styles.collageImage} />}
-              {look.items.slice(0, 4).map((item) => (
-                <View key={item.id} style={styles.collageCell}>
+              {visibleItems.length === 0 && <LookImage uri={null} style={styles.collageImage} />}
+              {visibleItems.map((item, index) => (
+                <View
+                  key={item.id}
+                  style={[styles.collageCell, getCellLayoutStyle(visibleItems.length, index)]}
+                >
                   <LookImage
                     uri={item.imageUrl}
                     style={styles.collageImage}
@@ -64,12 +78,7 @@ export function LookCard({ look, onPress }: LookCardProps) {
           </Animated.View>
 
           {hasPhoto ? (
-            <Animated.View
-              style={[
-                styles.face,
-                { transform: [{ perspective: 1000 }, { rotateY: backRotateY }] },
-              ]}
-            >
+            <Animated.View style={[styles.face, backAnimatedStyle]}>
               <LookImage uri={look.imageUrl} style={styles.photo} accessibilityLabel={look.name} />
             </Animated.View>
           ) : null}

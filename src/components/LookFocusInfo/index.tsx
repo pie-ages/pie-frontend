@@ -1,4 +1,5 @@
-import { Text, View } from 'react-native';
+import { Text } from 'react-native';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 
 import type { Look } from '@/types/Look';
 
@@ -12,7 +13,11 @@ export function LookFocusInfo({ look }: LookFocusInfoProps) {
   const subtitle = [look.style, look.occasion].filter(Boolean).join(' · ');
 
   return (
-    <View style={styles.container}>
+    <Animated.View
+      key={look.id}
+      entering={FadeIn.duration(200).reduceMotion(ReduceMotion.System)}
+      style={styles.container}
+    >
       <Text style={styles.name} numberOfLines={1}>
         {look.name}
       </Text>
@@ -21,6 +26,6 @@ export function LookFocusInfo({ look }: LookFocusInfoProps) {
           {subtitle}
         </Text>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }

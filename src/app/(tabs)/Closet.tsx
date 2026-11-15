@@ -1,20 +1,15 @@
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useRef } from 'react';
-import {
-  ScrollView,
-  Text,
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  Platform,
-  useWindowDimensions,
-} from 'react-native';
+import { ScrollView, View, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CategoryRow } from '@/components/CategoryRow';
+import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { LoadingState } from '@/components/LoadingState';
 import { ScreenToolBar } from '@/components/ScreenToolBar';
-import { BottomTabInset, Spacing } from '@/constants/Theme';
+import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useWardrobeRows } from '@/hooks/UseWardrobeRows';
 import type { WardrobePiece } from '@/types/Look';
 import { confirmAction, showMessage } from '@/utils/confirm';
@@ -50,35 +45,6 @@ export default function ClosetScreen() {
     }
   }
 
-  if (status === 'loading') {
-    return (
-      <View
-        style={[styles.centerContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      >
-        <ActivityIndicator size="large" color="#000" />
-        <Text style={styles.statusText}>A carregar o seu guarda-roupa...</Text>
-      </View>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <View
-        style={[styles.centerContainer, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-      >
-        <Text style={styles.statusText}>Ocorreu um erro ao carregar as peças.</Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          activeOpacity={0.7}
-          onPress={() => void retry()}
-          accessibilityRole="button"
-        >
-          <Text style={styles.retryText}>Tentar novamente</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View
       style={[
@@ -102,20 +68,38 @@ export default function ClosetScreen() {
         </View>
 
         <View style={styles.body}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={[
-              styles.scrollContent,
-              status === 'empty' && styles.emptyContent,
-              { paddingBottom: insets.bottom + BottomTabInset + Spacing.three },
-            ]}
-          >
-            {status === 'empty' ? (
-              <View style={styles.centerFlex}>
-                <Text style={styles.statusText}>O seu guarda-roupa está vazio.</Text>
-              </View>
-            ) : (
-              rows.map((row) => (
+          {status === 'loading' && <LoadingState text="Carregando seu closet..." />}
+          {status === 'error' && (
+            <ErrorState
+              title="Não foi possível carregar o seu closet"
+              subtitle="Verifique sua conexão e tente novamente."
+              onRetry={() => void retry()}
+            />
+          )}
+          {status === 'empty' && (
+            <EmptyState
+              icon={
+                <MaterialCommunityIcons
+                  name="wardrobe-outline"
+                  size={36}
+                  color={Colors.brand.primary}
+                />
+              }
+              title="Seu closet está vazio"
+              subtitle="Adicione suas peças favoritas para organizar seu guarda-roupa e montar looks."
+              actionLabel="Adicionar peça"
+              onAction={() => router.push('/AddPiece')}
+            />
+          )}
+          {status === 'success' && (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={[
+                styles.scrollContent,
+                { paddingBottom: insets.bottom + BottomTabInset + Spacing.three },
+              ]}
+            >
+              {rows.map((row) => (
                 <CategoryRow
                   key={row.id}
                   data={row}
@@ -123,9 +107,9 @@ export default function ClosetScreen() {
                   onRetry={(rowId) => void retryRow(rowId)}
                   onRemoveItem={(item) => void handleRemoveItem(item)}
                 />
-              ))
-            )}
-          </ScrollView>
+              ))}
+            </ScrollView>
+          )}
         </View>
       </View>
     </View>
@@ -153,36 +137,5 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 16,
-  },
-  emptyContent: {
-    flexGrow: 1,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  centerFlex: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statusText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 22,
-    backgroundColor: '#111827',
-  },
-  retryText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
   },
 });

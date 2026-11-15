@@ -10,11 +10,13 @@ export const LOOK_PIECE_RADIUS = 12;
 export const styles = StyleSheet.create({
   container: {
     width: '100%',
+    aspectRatio: LOOK_EMPTY_CARD_ASPECT_RATIO,
     gap: LOOK_PIECE_GAP,
   },
   piece: {
     width: '100%',
-    aspectRatio: LOOK_PIECE_ASPECT_RATIO,
+    flex: 1,
+    minHeight: 0,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',

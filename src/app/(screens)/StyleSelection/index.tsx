@@ -9,6 +9,7 @@ import {
   StatusBar,
   Animated,
 } from 'react-native';
+import Reanimated, { FadeInDown, FadeInUp, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
@@ -90,14 +91,20 @@ export default function StyleSelectionScreen() {
       <View style={styles.overlay} />
 
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.headerArea}>
+        <Reanimated.View
+          entering={FadeInDown.duration(380).reduceMotion(ReduceMotion.System)}
+          style={styles.headerArea}
+        >
           <Text style={styles.headerTitle}>Caso você queira personalizar seu estilo</Text>
           <Text style={styles.headerSubtitle}>
             Escolha um estilo para começar. {'\n'}Você pode ajustar os detalhes depois.
           </Text>
-        </View>
+        </Reanimated.View>
 
-        <View style={styles.gridContainer}>
+        <Reanimated.View
+          entering={FadeInDown.duration(420).delay(100).reduceMotion(ReduceMotion.System)}
+          style={styles.gridContainer}
+        >
           {availableStyles.map((style) => {
             const isSelected = selectedStyleIds.includes(style.id);
 
@@ -122,9 +129,12 @@ export default function StyleSelectionScreen() {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </Reanimated.View>
 
-        <View style={styles.footer}>
+        <Reanimated.View
+          entering={FadeInUp.duration(380).delay(180).reduceMotion(ReduceMotion.System)}
+          style={styles.footer}
+        >
           <TouchableOpacity
             style={styles.continueButton}
             activeOpacity={0.8}
@@ -134,7 +144,7 @@ export default function StyleSelectionScreen() {
           >
             <Text style={styles.continueButtonText}>Continuar</Text>
           </TouchableOpacity>
-        </View>
+        </Reanimated.View>
       </SafeAreaView>
     </View>
   );
