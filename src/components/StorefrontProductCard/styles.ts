@@ -46,6 +46,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  inClosetBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+  },
   wishlistButtonActive: {
     backgroundColor: BrandColors.primary,
   },

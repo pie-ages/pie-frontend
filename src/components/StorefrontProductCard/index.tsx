@@ -3,6 +3,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
+import { InClosetBadge } from '@/components/InClosetBadge';
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/schemas/productSchema';
@@ -16,9 +17,14 @@ export { CARD_WIDTH };
 type StorefrontProductCardProps = {
   product: CatalogItem;
   onPress: () => void;
+  isInCloset?: boolean;
 };
 
-export function StorefrontProductCard({ product, onPress }: StorefrontProductCardProps) {
+export function StorefrontProductCard({
+  product,
+  onPress,
+  isInCloset = false,
+}: StorefrontProductCardProps) {
   const { toggle, isInWishlist } = useWishlist();
   const wishlisted = isInWishlist(product.id);
 
@@ -35,6 +41,8 @@ export function StorefrontProductCard({ product, onPress }: StorefrontProductCar
             <Feather name="image" size={28} color="#B0B4BA" />
           </View>
         )}
+
+        {isInCloset && <InClosetBadge style={styles.inClosetBadge} />}
 
         <Pressable
           onPress={() => toggle(product)}

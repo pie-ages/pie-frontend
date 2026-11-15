@@ -19,6 +19,7 @@ import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
 import { useStorefrontNotice } from '@/hooks/UseStorefrontNotice';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
+import { useWardrobeProductIds } from '@/hooks/UseWardrobeProductIds';
 
 const IGNORED_FILTER_LABELS: Record<string, string> = {
   colorimetry: 'colorimetria',
@@ -61,6 +62,7 @@ export default function StorefrontScreen() {
   } = useStorefrontCatalog(catalogParams);
 
   const { message: noticeMessage } = useStorefrontNotice();
+  const inClosetProductIds = useWardrobeProductIds();
 
   const renderFiltersSpotlight = useCallback(
     () => (
@@ -165,6 +167,7 @@ export default function StorefrontScreen() {
           {!isLoading && status === 'success' && (
             <StorefrontProductGrid
               products={products}
+              inClosetProductIds={inClosetProductIds}
               onProductPress={handleStoreFrontPress}
               contentBottomInset={insets.bottom + BottomTabInset + Spacing.three}
               onEndReached={loadNextPage}

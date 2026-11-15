@@ -6,8 +6,10 @@ import * as WebBrowser from 'expo-web-browser';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { InClosetBadge } from '@/components/InClosetBadge';
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useWardrobeProductIds } from '@/hooks/UseWardrobeProductIds';
 import type { CatalogItem } from '@/schemas/productSchema';
 import { formatColor } from '@/utils/format-color';
 import { formatPrice } from '@/utils/format-price';
@@ -15,6 +17,7 @@ import { formatPrice } from '@/utils/format-price';
 export default function WishlistScreen() {
   const router = useRouter();
   const { items, remove } = useWishlist();
+  const inClosetProductIds = useWardrobeProductIds();
 
   function handleClose() {
     if (router.canGoBack()) router.back();
@@ -42,7 +45,11 @@ export default function WishlistScreen() {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) =>
             item ? (
-              <WishlistCard product={item} onRemove={() => remove(item.id)} />
+              <WishlistCard
+                product={item}
+                onRemove={() => remove(item.id)}
+                isInCloset={inClosetProductIds.has(item.id)}
+              />
             ) : (
               <View style={styles.cardPlaceholder} />
             )
@@ -73,7 +80,13 @@ function EmptyState({ onExplore }: { onExplore: () => void }) {
   );
 }
 
-function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: () => void }) {
+type WishlistCardProps = {
+  product: CatalogItem;
+  onRemove: () => void;
+  isInCloset: boolean;
+};
+
+function WishlistCard({ product, onRemove, isInCloset }: WishlistCardProps) {
   async function handleViewInStore() {
     if (!product.purchaseUrl) return;
     await WebBrowser.openBrowserAsync(product.purchaseUrl);
@@ -91,6 +104,8 @@ function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: (
         )}
 
         {product.status !== 'PUBLISHED' && <View style={styles.unavailableOverlay} />}
+
+        {isInCloset && <InClosetBadge style={styles.inClosetBadge} />}
 
         <Pressable
           onPress={onRemove}
@@ -193,6 +208,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.35)',
+  },
+  inClosetBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
   },
   removeButton: {
     position: 'absolute',
