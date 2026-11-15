@@ -71,4 +71,71 @@ describe('useEditProfile', () => {
     expect(result.current.error).toBe('Nome inválido');
     expect(router.back).not.toHaveBeenCalled();
   });
+
+  it('preenche o sexo recebido da API', async () => {
+    mockFetchCurrentUser.mockResolvedValue({ ...currentUser, sex: 'FEMININO' });
+
+    const { result } = await renderHook(() => useEditProfile());
+
+    await waitFor(() => expect(result.current.sexChoice).toBe('feminino'));
+  });
+
+  it('envia o sexo selecionado no formato da API', async () => {
+    const { result } = await renderLoadedHook();
+
+    await act(async () => result.current.setSexChoice('prefiro_nao_informar'));
+    await act(async () => result.current.save());
+
+    expect(mockUpdateCurrentUser).toHaveBeenCalledWith('user-1', {
+      name: 'Marcos',
+      photoUrl: 'https://cdn.pie.com/marcos.jpg',
+      sex: 'PREFIRO_NAO_INFORMAR',
+    });
+  });
+
+  it('preserva o sexo carregado ao editar apenas o nome', async () => {
+    mockFetchCurrentUser.mockResolvedValue({ ...currentUser, sex: 'MASCULINO' });
+
+    const { result } = await renderHook(() => useEditProfile());
+
+    await waitFor(() => expect(result.current.sexChoice).toBe('masculino'));
+    await act(async () => result.current.setName('Marcos Atualizado'));
+    await act(async () => result.current.save());
+
+    expect(mockUpdateCurrentUser).toHaveBeenCalledWith('user-1', {
+      name: 'Marcos Atualizado',
+      photoUrl: 'https://cdn.pie.com/marcos.jpg',
+      sex: 'MASCULINO',
+    });
+  });
+
+  it('mantém cadastro com sexo nulo sem seleção e sem enviar o campo', async () => {
+    mockFetchCurrentUser.mockResolvedValue({ ...currentUser, sex: null });
+
+    const { result } = await renderHook(() => useEditProfile());
+
+    await waitFor(() => expect(result.current.user?.id).toBe('user-1'));
+    expect(result.current.sexChoice).toBe('');
+
+    await act(async () => result.current.save());
+
+    expect(mockUpdateCurrentUser).toHaveBeenCalledWith('user-1', {
+      name: 'Marcos',
+      photoUrl: 'https://cdn.pie.com/marcos.jpg',
+    });
+  });
+
+  it('mantém a escolha e permanece na tela quando o salvamento falha', async () => {
+    mockUpdateCurrentUser.mockRejectedValue(
+      new ApiError('Falha ao salvar', 500, 'Falha ao salvar'),
+    );
+    const { result } = await renderLoadedHook();
+
+    await act(async () => result.current.setSexChoice('feminino'));
+    await act(async () => result.current.save());
+
+    expect(result.current.sexChoice).toBe('feminino');
+    expect(result.current.error).toBe('Falha ao salvar');
+    expect(router.back).not.toHaveBeenCalled();
+  });
 });
