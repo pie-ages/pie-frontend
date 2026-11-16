@@ -1,9 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LoadingState } from '@/components/LoadingState';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { ProductHeader } from '@/components/ProductHeader';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
@@ -79,9 +80,8 @@ function ProductDetails({ id }: { id?: string }) {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.text} />
-        </View>
+        <ProductHeader title="" onClose={handleClose} />
+        <LoadingState text="Carregando produto..." />
       </SafeAreaView>
     );
   }

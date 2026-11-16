@@ -1,8 +1,10 @@
 import { router } from 'expo-router';
 import { useCallback, useMemo, useReducer, useState } from 'react';
-import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LoadingState } from '@/components/LoadingState';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { StyleQuizChoicePreview } from '@/components/StyleQuizChoicePreview';
 import { StyleQuizFooter } from '@/components/StyleQuizFooter';
@@ -74,9 +76,7 @@ export default function StyleQuizScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.light.text} />
-        </View>
+        <LoadingState text="Carregando questionário..." />
       </SafeAreaView>
     );
   }
@@ -84,10 +84,7 @@ export default function StyleQuizScreen() {
   if (identification.status === 'loading') {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.brand.primary} />
-          <Text style={styles.statusText}>Identificando seu estilo...</Text>
-        </View>
+        <LoadingState text="Identificando seu estilo..." />
       </SafeAreaView>
     );
   }
@@ -164,23 +161,28 @@ export default function StyleQuizScreen() {
             {'Agora...\nVamos descobrir\nmais sobre seu estilo'}
           </Text>
 
-          <Text style={scaledStyles.question} allowFontScaling={false}>
-            {currentQuestion.question}
-          </Text>
+          <Animated.View
+            key={currentQuestion.id}
+            entering={FadeInDown.duration(260).reduceMotion(ReduceMotion.System)}
+          >
+            <Text style={scaledStyles.question} allowFontScaling={false}>
+              {currentQuestion.question}
+            </Text>
 
-          <View style={scaledStyles.grid} accessibilityRole="radiogroup">
-            {currentQuestion.options.map((option, index) => (
-              <StyleQuizOptionCard
-                key={option.id}
-                option={option}
-                index={index}
-                isSelected={
-                  visibleAnswer?.type === 'option' && visibleAnswer.optionId === option.id
-                }
-                onSelect={() => setPendingAnswer({ type: 'option', optionId: option.id })}
-              />
-            ))}
-          </View>
+            <View style={scaledStyles.grid} accessibilityRole="radiogroup">
+              {currentQuestion.options.map((option, index) => (
+                <StyleQuizOptionCard
+                  key={option.id}
+                  option={option}
+                  index={index}
+                  isSelected={
+                    visibleAnswer?.type === 'option' && visibleAnswer.optionId === option.id
+                  }
+                  onSelect={() => setPendingAnswer({ type: 'option', optionId: option.id })}
+                />
+              ))}
+            </View>
+          </Animated.View>
         </ScrollView>
 
         <StyleQuizFooter answer={visibleAnswer} onAnswer={setPendingAnswer} />

@@ -19,6 +19,17 @@ import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
 import { useStorefrontNotice } from '@/hooks/UseStorefrontNotice';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
+import { useWardrobeProductIds } from '@/hooks/UseWardrobeProductIds';
+
+const IGNORED_FILTER_LABELS: Record<string, string> = {
+  colorimetry: 'colorimetria',
+  matchesProfile: 'Combinam com você',
+};
+
+function profileNotice(ignored: string[]): string {
+  const names = ignored.map((id) => IGNORED_FILTER_LABELS[id] ?? id).join(' e ');
+  return `Não aplicamos o filtro de ${names}: complete seu perfil (estilos e cores) e entre na sua conta para usá-lo.`;
+}
 
 export default function StorefrontScreen() {
   const insets = useSafeAreaInsets();
@@ -39,10 +50,19 @@ export default function StorefrontScreen() {
     clearSearch,
     catalogParams,
   } = useStorefrontFilters();
-  const { status, products, retry, loadNextPage, isFetchingNextPage, refresh, refreshing } =
-    useStorefrontCatalog(catalogParams);
+  const {
+    status,
+    products,
+    ignoredFilters,
+    retry,
+    loadNextPage,
+    isFetchingNextPage,
+    refresh,
+    refreshing,
+  } = useStorefrontCatalog(catalogParams);
 
   const { message: noticeMessage } = useStorefrontNotice();
+  const inClosetProductIds = useWardrobeProductIds();
 
   const renderFiltersSpotlight = useCallback(
     () => (
@@ -124,6 +144,9 @@ export default function StorefrontScreen() {
         </View>
 
         {noticeMessage && <StorefrontNotice message={noticeMessage} />}
+        {!isLoading && ignoredFilters.length > 0 && (
+          <StorefrontNotice message={profileNotice(ignoredFilters)} />
+        )}
 
         <View style={styles.body}>
           {isLoading && <LoadingState text="Carregando produtos..." />}
@@ -136,14 +159,15 @@ export default function StorefrontScreen() {
           )}
           {!isLoading && status === 'empty' && (
             <EmptyState
-              icon={<Feather name="shopping-bag" size={32} color={Colors.iconMuted} />}
+              icon={<Feather name="shopping-bag" size={34} color={Colors.brand.primary} />}
               title="Nenhum produto encontrado"
-              subtitle="Tente ajustar os filtros ou volte mais tarde."
+              subtitle="Tente ajustar os filtros ou a busca para encontrar outras peças."
             />
           )}
           {!isLoading && status === 'success' && (
             <StorefrontProductGrid
               products={products}
+              inClosetProductIds={inClosetProductIds}
               onProductPress={handleStoreFrontPress}
               contentBottomInset={insets.bottom + BottomTabInset + Spacing.three}
               onEndReached={loadNextPage}

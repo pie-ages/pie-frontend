@@ -1,4 +1,5 @@
-import { Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 
 import { AuthButton } from '@/components/AuthButton';
 import { ThemedText } from '@/components/ThemedText';
@@ -26,28 +27,35 @@ export function ColorimetryConsentModal({
       onRequestClose={onClose}
       onDismiss={onDismiss}
     >
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={() => {}} accessibilityViewIsModal>
-          <ThemedText type="smallBold">Antes da foto</ThemedText>
+      <View style={styles.backdrop}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        {visible && (
+          <Animated.View
+            entering={FadeInDown.duration(260).reduceMotion(ReduceMotion.System)}
+            style={styles.sheet}
+            accessibilityViewIsModal
+          >
+            <ThemedText type="smallBold">Antes da foto</ThemedText>
 
-          <ThemedText themeColor="textSecondary">
-            Sua foto é enviada para uma IA (AWS) só para identificar as cores que combinam com você.
-            Ela não é salva: guardamos apenas o resultado da colorimetria.
-          </ThemedText>
+            <ThemedText themeColor="textSecondary">
+              Sua foto é enviada para uma IA (AWS) só para identificar as cores que combinam com
+              você. Ela não é salva: guardamos apenas o resultado da colorimetria.
+            </ThemedText>
 
-          <View style={styles.actions}>
-            <AuthButton
-              title="Concordo e tirar foto"
-              onPress={onAccept}
-              accessibilityRole="button"
-              accessibilityLabel="Concordar com o uso da foto e abrir a câmera"
-            />
-            <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button">
-              <Text style={styles.dismiss}>Agora não</Text>
-            </Pressable>
-          </View>
-        </Pressable>
-      </Pressable>
+            <View style={styles.actions}>
+              <AuthButton
+                title="Concordo e tirar foto"
+                onPress={onAccept}
+                accessibilityRole="button"
+                accessibilityLabel="Concordar com o uso da foto e abrir a câmera"
+              />
+              <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button">
+                <Text style={styles.dismiss}>Agora não</Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        )}
+      </View>
     </Modal>
   );
 }

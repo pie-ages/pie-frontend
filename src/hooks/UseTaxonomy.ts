@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { fetchCompanies } from '@/services/companies';
 import { fetchTaxonomy } from '@/services/taxonomy';
-import type { FilterGroup } from '@/types/Filter';
+import { GENDER_OPTIONS, PROFILE_OPTIONS, type FilterGroup } from '@/types/Filter';
 
 type TaxonomyState = {
   filterGroups: FilterGroup[];
@@ -41,6 +41,8 @@ export function useTaxonomy(): TaxonomyState {
               label: 'Cores',
               options: taxonomy.colors.map((t) => ({ id: t.id, label: t.name })),
             },
+            { id: 'generos', label: 'Gênero', options: GENDER_OPTIONS },
+            { id: 'perfil', label: 'Para você', options: PROFILE_OPTIONS },
             {
               id: 'lojas',
               label: 'Lojas',

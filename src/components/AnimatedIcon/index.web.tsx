@@ -2,13 +2,12 @@ import { Image } from 'expo-image';
 import * as SplashScreen from 'expo-splash-screen';
 import { useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, { Keyframe, Easing } from 'react-native-reanimated';
+import Animated, { Keyframe, Easing, ReduceMotion } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import classes from './styles.module.css';
 const DURATION = 300;
-const SPLASH_DURATION = 600;
-const HOLD_DURATION = 3000;
+const SPLASH_DURATION = 500;
 
 const MIN_SPLASH_IMAGE_SIZE = 150;
 const MAX_SPLASH_IMAGE_SIZE = 280;
@@ -17,11 +16,12 @@ function getSplashImageSize(windowWidth: number) {
   return Math.min(Math.max(windowWidth * 0.55, MIN_SPLASH_IMAGE_SIZE), MAX_SPLASH_IMAGE_SIZE);
 }
 
-export function AnimatedSplashOverlay() {
-  const [animate, setAnimate] = useState(false);
+export function AnimatedSplashOverlay({ ready }: { ready: boolean }) {
   const [visible, setVisible] = useState(true);
+  const [laidOut, setLaidOut] = useState(false);
   const { width } = useWindowDimensions();
   const imageSize = getSplashImageSize(width);
+  const animate = ready && laidOut;
 
   if (!visible) return null;
 
@@ -30,17 +30,15 @@ export function AnimatedSplashOverlay() {
       transform: [{ scale: 1 }],
       opacity: 1,
     },
-    20: {
+    30: {
+      transform: [{ scale: 1.03 }],
       opacity: 1,
-    },
-    70: {
-      opacity: 0,
-      easing: Easing.elastic(0.7),
+      easing: Easing.out(Easing.quad),
     },
     100: {
       opacity: 0,
-      transform: [{ scale: 1 }],
-      easing: Easing.elastic(0.7),
+      transform: [{ scale: 0.96 }],
+      easing: Easing.out(Easing.cubic),
     },
   });
 
@@ -53,12 +51,15 @@ export function AnimatedSplashOverlay() {
 
   return animate ? (
     <Animated.View
-      entering={splashKeyframe.duration(SPLASH_DURATION).withCallback((finished) => {
-        'worklet';
-        if (finished) {
-          scheduleOnRN(setVisible, false);
-        }
-      })}
+      entering={splashKeyframe
+        .duration(SPLASH_DURATION)
+        .reduceMotion(ReduceMotion.System)
+        .withCallback((finished) => {
+          'worklet';
+          if (finished) {
+            scheduleOnRN(setVisible, false);
+          }
+        })}
       style={styles.splashOverlay}
     >
       {image}
@@ -66,9 +67,7 @@ export function AnimatedSplashOverlay() {
   ) : (
     <View
       onLayout={() => {
-        SplashScreen.hideAsync().finally(() => {
-          setTimeout(() => setAnimate(true), HOLD_DURATION);
-        });
+        SplashScreen.hideAsync().finally(() => setLaidOut(true));
       }}
       style={styles.splashOverlay}
     >

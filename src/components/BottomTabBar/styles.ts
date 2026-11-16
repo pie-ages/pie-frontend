@@ -29,13 +29,24 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.half,
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.four,
     borderRadius: 999,
   },
+  buttonInner: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.half,
+  },
   buttonActive: {
     backgroundColor: 'rgba(224, 225, 230, 0.55)',
+  },
+  activePill: {
+    position: 'absolute',
+    left: 0,
+    borderRadius: 999,
+    backgroundColor: 'rgba(224, 225, 230, 0.65)',
   },
   pressed: {
     opacity: 0.8,

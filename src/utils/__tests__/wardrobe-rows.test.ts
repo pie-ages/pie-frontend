@@ -3,6 +3,8 @@ import { describe, expect, it } from '@jest/globals';
 import type { WardrobePiece } from '@/types/Look';
 import {
   createWardrobeStore,
+  formatWardrobeCategory,
+  groupWardrobePieces,
   wardrobeReducer,
   type WardrobeRowPage,
   type WardrobeState,
@@ -39,7 +41,7 @@ describe('wardrobeReducer — itemRemoved', () => {
     const next = wardrobeReducer(state, { type: 'itemRemoved', itemId: 'a' });
 
     expect(next.rows['Calça'].items.map((item) => item.id)).toEqual(['b']);
-    expect(next.rowIds).toEqual(['Calça', 'Blusa']);
+    expect(next.rowIds).toEqual(['Blusa', 'Calça']);
     expect(next.status).toBe('success');
   });
 
@@ -82,5 +84,32 @@ describe('createWardrobeStore — removeItem', () => {
 
     expect(store.getState().rows['Calça'].items.map((item) => item.id)).toEqual(['b']);
     expect(notifications).toBe(1);
+  });
+});
+
+describe('formatWardrobeCategory & groupWardrobePieces', () => {
+  it('capitalizes first letter, singularizes plurals and restores canonical accents', () => {
+    expect(formatWardrobeCategory('camiseta')).toBe('Camiseta');
+    expect(formatWardrobeCategory('Camisetas')).toBe('Camiseta');
+    expect(formatWardrobeCategory('calca')).toBe('Calça');
+    expect(formatWardrobeCategory('Calças')).toBe('Calça');
+    expect(formatWardrobeCategory('tenis')).toBe('Tênis');
+    expect(formatWardrobeCategory('Tênis')).toBe('Tênis');
+    expect(formatWardrobeCategory('casacos')).toBe('Casaco');
+  });
+
+  it('merges duplicate category variations and orders rows by body position', () => {
+    const rows = groupWardrobePieces([
+      piece('1', 'tenis'),
+      piece('2', 'calca'),
+      piece('3', 'camiseta'),
+      piece('4', 'Camisetas'),
+      piece('5', 'Calças'),
+      piece('6', 'casaco'),
+    ]);
+
+    expect(rows.map((r) => r.title)).toEqual(['Casaco', 'Camiseta', 'Calça', 'Tênis']);
+    expect(rows.find((r) => r.title === 'Camiseta')?.items.map((i) => i.id)).toEqual(['3', '4']);
+    expect(rows.find((r) => r.title === 'Calça')?.items.map((i) => i.id)).toEqual(['2', '5']);
   });
 });

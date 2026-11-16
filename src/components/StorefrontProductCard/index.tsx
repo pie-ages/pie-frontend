@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
 import { StoreLogo } from '@/components/StoreLogo';
+import { InClosetBadge } from '@/components/InClosetBadge';
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/schemas/productSchema';
@@ -17,9 +18,14 @@ export { CARD_WIDTH };
 type StorefrontProductCardProps = {
   product: CatalogItem;
   onPress: () => void;
+  isInCloset?: boolean;
 };
 
-export function StorefrontProductCard({ product, onPress }: StorefrontProductCardProps) {
+export function StorefrontProductCard({
+  product,
+  onPress,
+  isInCloset = false,
+}: StorefrontProductCardProps) {
   const { toggle, isInWishlist } = useWishlist();
   const wishlisted = isInWishlist(product.id);
 
@@ -44,6 +50,7 @@ export function StorefrontProductCard({ product, onPress }: StorefrontProductCar
             style={styles.storeLogo}
           />
         ) : null}
+        {isInCloset && <InClosetBadge style={styles.inClosetBadge} />}
 
         <Pressable
           onPress={() => toggle(product)}

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, FlatList, ActivityIndicator, Pressable } from 'react-native';
 
 import { ClothingCard } from '@/components/ClothingCard';
+import { Colors } from '@/constants/Theme';
 import type { WardrobePiece } from '@/types/Look';
 import type { WardrobeRow } from '@/utils/wardrobe-rows';
 
@@ -18,7 +19,10 @@ export function CategoryRow({ data, onEndReached, onRetry, onRemoveItem }: Categ
   const footer =
     data.status === 'loadingMore' ? (
       <View style={styles.footer}>
-        <ActivityIndicator color="#000" accessibilityLabel={`Carregando mais ${data.title}`} />
+        <ActivityIndicator
+          color={Colors.brand.primary}
+          accessibilityLabel={`Carregando mais ${data.title}`}
+        />
       </View>
     ) : data.status === 'error' ? (
       <View style={styles.footer}>

@@ -4,7 +4,6 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Animated,
   Platform,
   Pressable,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
@@ -37,7 +37,6 @@ export default function LooksScreen() {
   const [viewMode, setViewMode] = useState<LooksViewMode>(
     params.viewMode === 'grid' ? 'grid' : 'focus',
   );
-  const [contentOpacity] = useState(() => new Animated.Value(1));
   const {
     status,
     looks,
@@ -68,15 +67,6 @@ export default function LooksScreen() {
     }
   }, [activeIndex, hasNext, loadMore, looks.length, pageError, viewMode]);
 
-  useEffect(() => {
-    contentOpacity.setValue(0);
-    Animated.timing(contentOpacity, {
-      toValue: 1,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-  }, [viewMode, contentOpacity]);
-
   const focusBottomPadding = insets.bottom + BottomTabInset + Spacing.two;
 
   const handleChangeViewMode = (mode: LooksViewMode) => {
@@ -100,8 +90,7 @@ export default function LooksScreen() {
         fileName: asset.fileName,
       });
       updateLookPhoto(lookId, result.photoUrl);
-    } catch {
-    }
+    } catch {}
   };
 
   const handleLookPress = (id: string) => {
@@ -145,13 +134,19 @@ export default function LooksScreen() {
           )}
           {status === 'empty' && (
             <EmptyState
-              icon={<Ionicons name="sparkles-outline" size={32} color={Colors.icon} />}
+              icon={<Ionicons name="sparkles-outline" size={34} color={Colors.brand.primary} />}
               title="Você ainda não tem looks"
-              subtitle="Monte seu primeiro look para vê-lo aqui."
+              subtitle="Monte seu primeiro look combinando as peças do seu closet."
+              actionLabel="Criar look"
+              onAction={() => router.push('/CreateLook')}
             />
           )}
           {status === 'success' && (
-            <Animated.View style={[styles.modeContainer, { opacity: contentOpacity }]}>
+            <Animated.View
+              key={viewMode}
+              entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}
+              style={styles.modeContainer}
+            >
               {viewMode === 'focus' && (
                 <View style={[styles.focusContent, { paddingBottom: focusBottomPadding }]}>
                   <View

@@ -1,11 +1,12 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { TabTriggerSlotProps } from 'expo-router/ui';
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { createContext, forwardRef, useContext, useEffect, useRef, useState } from 'react';
 import {
   Platform,
   Pressable,
   View,
+  type LayoutChangeEvent,
   type LayoutRectangle,
   type PressableInstance,
   type ViewProps,
@@ -16,6 +17,7 @@ import Animated, {
   ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -33,37 +35,123 @@ type TabBarButtonProps = TabTriggerSlotProps & {
   iconSet?: IconSet;
 };
 
+type ActivePillContextValue = {
+  reportActiveSlot: (label: string, layout: LayoutRectangle) => void;
+  hasAnimatedPill: boolean;
+};
+
+const ActivePillContext = createContext<ActivePillContextValue>({
+  reportActiveSlot: () => {},
+  hasAnimatedPill: false,
+});
+
 export const TabBarButton = forwardRef<PressableInstance, TabBarButtonProps>(function TabBarButton(
-  { label, icon, iconSet = 'feather', isFocused, ...props },
+  { label, icon, iconSet = 'feather', isFocused, onLayout, ...props },
   ref,
 ) {
+  const { reportActiveSlot, hasAnimatedPill } = useContext(ActivePillContext);
+  const layoutRef = useRef<LayoutRectangle | null>(null);
+  const scale = useSharedValue(isFocused ? 1 : 0.94);
+
+  useEffect(() => {
+    scale.value = withSpring(isFocused ? 1 : 0.94, {
+      damping: 18,
+      stiffness: 220,
+      reduceMotion: ReduceMotion.System,
+    });
+    if (isFocused && layoutRef.current) {
+      reportActiveSlot(label, layoutRef.current);
+    }
+  }, [isFocused, label, reportActiveSlot, scale]);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    layoutRef.current = event.nativeEvent.layout;
+    if (isFocused) {
+      reportActiveSlot(label, event.nativeEvent.layout);
+    }
+    onLayout?.(event);
+  };
+
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   const color = isFocused ? Colors.brand.primary : Colors.icon;
 
   return (
     <Pressable
       ref={ref}
       {...props}
+      onLayout={handleLayout}
       style={({ pressed }) => [
         styles.button,
-        isFocused && styles.buttonActive,
+        isFocused && !hasAnimatedPill && styles.buttonActive,
         pressed && styles.pressed,
       ]}
     >
-      {iconSet === 'ionicons' && <Ionicons name={icon as never} size={26} color={color} />}
-      {iconSet === 'material-community' && (
-        <MaterialCommunityIcons name={icon as never} size={26} color={color} />
-      )}
-      {iconSet === 'feather' && <Feather name={icon as never} size={26} color={color} />}
+      <Animated.View style={[styles.buttonInner, iconAnimatedStyle]}>
+        {iconSet === 'ionicons' && <Ionicons name={icon as never} size={26} color={color} />}
+        {iconSet === 'material-community' && (
+          <MaterialCommunityIcons name={icon as never} size={26} color={color} />
+        )}
+        {iconSet === 'feather' && <Feather name={icon as never} size={26} color={color} />}
 
-      <ThemedText type="small" style={[styles.label, { color }]}>
-        {label}
-      </ThemedText>
+        <ThemedText type="small" style={[styles.label, { color }]}>
+          {label}
+        </ThemedText>
+      </Animated.View>
     </Pressable>
   );
 });
 
+const PILL_BORDER_OFFSET = 1;
+
 export function BottomTabBar(props: ViewProps) {
   const insets = useSafeAreaInsets();
+  const [activeLayout, setActiveLayout] = useState<LayoutRectangle | null>(null);
+  const hasPlaced = useRef(false);
+  const translateX = useSharedValue(0);
+  const pillWidth = useSharedValue(0);
+
+  const reportActiveSlot = (label: string, layout: LayoutRectangle) => {
+    setActiveLayout((prev) => {
+      if (
+        prev &&
+        Math.abs(prev.x - layout.x) < 0.5 &&
+        Math.abs(prev.width - layout.width) < 0.5 &&
+        Math.abs(prev.height - layout.height) < 0.5
+      ) {
+        return prev;
+      }
+      return layout;
+    });
+  };
+
+  useEffect(() => {
+    if (!activeLayout) return;
+    const targetX = activeLayout.x - PILL_BORDER_OFFSET;
+    if (hasPlaced.current) {
+      translateX.value = withTiming(targetX, {
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        reduceMotion: ReduceMotion.System,
+      });
+      pillWidth.value = withTiming(activeLayout.width, {
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        reduceMotion: ReduceMotion.System,
+      });
+    } else {
+      translateX.value = targetX;
+      pillWidth.value = activeLayout.width;
+      hasPlaced.current = true;
+    }
+  }, [activeLayout, pillWidth, translateX]);
+
+  const pillAnimatedStyle = useAnimatedStyle(() => ({
+    width: pillWidth.value,
+    transform: [{ translateX: translateX.value }],
+  }));
 
   const webStyle =
     Platform.OS === 'web'
@@ -74,16 +162,38 @@ export function BottomTabBar(props: ViewProps) {
         } as object)
       : undefined;
 
+  const pillNode = activeLayout ? (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.activePill,
+        {
+          top: activeLayout.y - PILL_BORDER_OFFSET,
+          height: activeLayout.height,
+        },
+        pillAnimatedStyle,
+      ]}
+    />
+  ) : null;
+
   return (
-    <View {...props} style={[styles.wrapper, { bottom: insets.bottom + Spacing.one }]}>
-      {Platform.OS === 'web' ? (
-        <View style={[styles.container, webStyle]}>{props.children}</View>
-      ) : (
-        <BlurView intensity={45} tint="light" style={styles.container}>
-          {props.children}
-        </BlurView>
-      )}
-    </View>
+    <ActivePillContext.Provider
+      value={{ reportActiveSlot, hasAnimatedPill: Boolean(activeLayout) }}
+    >
+      <View {...props} style={[styles.wrapper, { bottom: insets.bottom + Spacing.one }]}>
+        {Platform.OS === 'web' ? (
+          <View style={[styles.container, webStyle]}>
+            {pillNode}
+            {props.children}
+          </View>
+        ) : (
+          <BlurView intensity={45} tint="light" style={styles.container}>
+            {pillNode}
+            {props.children}
+          </BlurView>
+        )}
+      </View>
+    </ActivePillContext.Provider>
   );
 }
 

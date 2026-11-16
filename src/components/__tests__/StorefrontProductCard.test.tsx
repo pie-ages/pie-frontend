@@ -22,6 +22,9 @@ const product: CatalogItem = {
   purchaseUrl: null,
   companyName: 'Loja Aurora',
   companyPhotoUrl: 'https://cdn/logo.png',
+  imageUrl: null,
+  purchaseUrl: 'https://loja.com.br/blusa',
+  companyName: 'Loja',
   status: 'PUBLISHED',
   styles: [],
   sizes: [],
@@ -32,6 +35,12 @@ function renderCard(item: CatalogItem) {
   return render(
     <WishlistProvider>
       <StorefrontProductCard product={item} onPress={jest.fn()} />
+} as CatalogItem;
+
+async function renderCard(isInCloset?: boolean) {
+  await render(
+    <WishlistProvider>
+      <StorefrontProductCard product={product} onPress={() => {}} isInCloset={isInCloset} />
     </WishlistProvider>,
   );
 }
@@ -64,5 +73,28 @@ describe('StorefrontProductCard', () => {
     await renderCard({ ...product, companyName: null, companyPhotoUrl: null });
 
     expect(screen.queryByLabelText(/Logo da loja/)).toBeNull();
+describe('StorefrontProductCard — closet indicator', () => {
+  it('shows the indicator for a product that is in the closet', async () => {
+    await renderCard(true);
+
+    expect(screen.getByText('No closet')).toBeTruthy();
+  });
+
+  it('does not show the indicator for a product that is not in the closet', async () => {
+    await renderCard(false);
+
+    expect(screen.queryByText('No closet')).toBeNull();
+  });
+
+  it('does not show the indicator by default', async () => {
+    await renderCard();
+
+    expect(screen.queryByText('No closet')).toBeNull();
+  });
+
+  it('keeps showing the product data when it is in the closet', async () => {
+    await renderCard(true);
+
+    expect(screen.getByText('Blusa Floral')).toBeTruthy();
   });
 });

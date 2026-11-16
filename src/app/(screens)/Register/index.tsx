@@ -1,8 +1,18 @@
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { Controller } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AccountSexField } from '@/components/AccountSexField';
 import { AuthButton } from '@/components/AuthButton';
 import { AuthInput } from '@/components/AuthInput';
 import { AuthPasswordInput } from '@/components/AuthPasswordInput';
@@ -10,6 +20,8 @@ import { Colors } from '@/constants/Theme';
 import { useRegisterForm } from '@/hooks/UseRegisterForm';
 
 export default function RegisterScreen() {
+  const router = useRouter();
+
   const {
     control,
     errors,
@@ -20,6 +32,8 @@ export default function RegisterScreen() {
     togglePasswordVisibility,
     toggleConfirmPasswordVisibility,
     handleRegister,
+    sexChoice,
+    setSexChoice,
   } = useRegisterForm();
 
   return (
@@ -57,6 +71,8 @@ export default function RegisterScreen() {
                   />
                 )}
               />
+
+              <AccountSexField value={sexChoice} onChange={setSexChoice} disabled={isLoading} />
 
               <Controller
                 name="email"
@@ -119,6 +135,16 @@ export default function RegisterScreen() {
                 onPress={() => void handleRegister()}
                 isLoading={isLoading}
               />
+
+              <Pressable
+                style={styles.loginLink}
+                onPress={() => router.back()}
+                disabled={isLoading}
+              >
+                <Text style={styles.loginLinkText}>
+                  Já possui uma conta? <Text style={styles.loginLinkAction}>Fazer login</Text>
+                </Text>
+              </Pressable>
             </View>
           </View>
         </ScrollView>
@@ -174,5 +200,21 @@ const styles = StyleSheet.create({
 
   actions: {
     marginTop: 32,
+    gap: 16,
+    alignItems: 'center',
+  },
+
+  loginLink: {
+    paddingVertical: 4,
+  },
+
+  loginLinkText: {
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
+
+  loginLinkAction: {
+    color: Colors.brand.primary,
+    fontWeight: '600',
   },
 });

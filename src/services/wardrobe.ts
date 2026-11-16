@@ -10,7 +10,11 @@ import {
 import { apiDeleteAuth, apiGetAuth, apiUploadAuth, parseResponse } from '@/services/client';
 import type { WardrobePiece } from '@/types/Look';
 import { buildWardrobeItemFromProduct } from '@/utils/wardrobe-product';
-import { groupWardrobePieces, type WardrobeFetch } from '@/utils/wardrobe-rows';
+import {
+  formatWardrobeCategory,
+  groupWardrobePieces,
+  type WardrobeFetch,
+} from '@/utils/wardrobe-rows';
 
 export type { WardrobeImageAnalysis, WardrobeItemDTO };
 
@@ -30,9 +34,8 @@ export type WardrobeImageAsset = {
 };
 
 function toPiece(item: WardrobeItemDTO): WardrobePiece {
-  const category = item.category?.trim() || 'Outros';
-  const name =
-    item.name?.trim() || [item.category, item.color].filter(Boolean).join(' · ') || 'Peça';
+  const category = formatWardrobeCategory(item.category);
+  const name = item.name?.trim() || [category, item.color].filter(Boolean).join(' · ') || 'Peça';
   return {
     id: item.id,
     name,
