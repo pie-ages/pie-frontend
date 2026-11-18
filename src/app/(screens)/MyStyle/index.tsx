@@ -12,15 +12,15 @@ import {
 import Animated, { FadeInDown, FadeInUp, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors, FontFamilies, Spacing } from '../../../constants/Theme';
-import { availableStyles, mockUserIdentifiedStyles } from '../../../mocks/styleMocks';
+import { PERSONAL_STYLE_IMAGES } from '@/constants/PersonalStyleImages';
+import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
+import { useUserStyle } from '@/contexts/UserStyleContext';
+import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 
 export default function MyStyleScreen() {
-  const primaryStyleId = mockUserIdentifiedStyles[0];
-  const primaryStyleData = availableStyles.find((s) => s.id === primaryStyleId);
-
-  const secondaryStyle1 = availableStyles.find((s) => s.id === mockUserIdentifiedStyles[1]);
-  const secondaryStyle2 = availableStyles.find((s) => s.id === mockUserIdentifiedStyles[2]);
+  const { identifiedStyle } = useUserStyle();
+  const styleLabel = identifiedStyle ? IDENTIFIED_STYLE_INFO[identifiedStyle].label : null;
+  const background = identifiedStyle ? PERSONAL_STYLE_IMAGES[identifiedStyle] : undefined;
 
   useEffect(() => {
     StatusBar.setBarStyle('light-content');
@@ -30,7 +30,7 @@ export default function MyStyleScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={{ uri: primaryStyleData?.bgImageUrl }}
+        source={{ uri: background ?? PERSONAL_STYLE_IMAGES.CLASSICO }}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
@@ -44,16 +44,12 @@ export default function MyStyleScreen() {
             style={styles.textArea}
           >
             <Text style={styles.baseText}>
-              Seu estilo é <Text style={styles.highlightText}>{primaryStyleData?.label}</Text>
-              {'\n'}por essência, com toques{'\n'}
-              {secondaryStyle1 && (
-                <Text style={styles.highlightText}>{secondaryStyle1.label}s</Text>
-              )}
-              {secondaryStyle2 && (
+              {styleLabel ? (
                 <>
-                  {' '}
-                  e <Text style={styles.highlightText}>{secondaryStyle2.label}s</Text>
+                  Seu estilo é <Text style={styles.highlightText}>{styleLabel}</Text>
                 </>
+              ) : (
+                'Personalize seus estilos'
               )}
             </Text>
           </Animated.View>

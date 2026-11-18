@@ -6,7 +6,7 @@ import { useEditProfile } from '@/hooks/UseEditProfile';
 import { ApiError } from '@/services/client';
 import { fetchCurrentUser, updateCurrentUser } from '@/services/user';
 
-jest.mock('expo-router', () => ({ router: { back: jest.fn() } }));
+jest.mock('expo-router', () => ({ router: { back: jest.fn(), dismissTo: jest.fn() } }));
 jest.mock('@/services/user');
 
 const mockFetchCurrentUser = jest.mocked(fetchCurrentUser);
@@ -49,7 +49,10 @@ describe('useEditProfile', () => {
       name: 'Marcos Raach',
       photoUrl: 'https://cdn.pie.com/marcos.jpg',
     });
-    expect(router.back).toHaveBeenCalled();
+    expect(router.dismissTo).toHaveBeenCalledWith({
+      pathname: '/(screens)/Profile',
+      params: { updatedSection: 'user' },
+    });
   });
 
   it('não salva com o nome em branco', async () => {
@@ -66,10 +69,12 @@ describe('useEditProfile', () => {
     mockUpdateCurrentUser.mockRejectedValue(new ApiError('Nome inválido', 400, 'Nome inválido'));
     const { result } = await renderLoadedHook();
 
+    await act(async () => result.current.setName('Nome inválido'));
     await act(async () => result.current.save());
 
     expect(result.current.error).toBe('Nome inválido');
     expect(router.back).not.toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
   it('preenche o sexo recebido da API', async () => {
@@ -119,10 +124,9 @@ describe('useEditProfile', () => {
 
     await act(async () => result.current.save());
 
-    expect(mockUpdateCurrentUser).toHaveBeenCalledWith('user-1', {
-      name: 'Marcos',
-      photoUrl: 'https://cdn.pie.com/marcos.jpg',
-    });
+    expect(mockUpdateCurrentUser).not.toHaveBeenCalled();
+    expect(router.back).toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
   it('mantém a escolha e permanece na tela quando o salvamento falha', async () => {

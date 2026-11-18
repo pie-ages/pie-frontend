@@ -68,7 +68,7 @@ describe('StorefrontProductCard', () => {
     expect(screen.getByText('LA')).toBeTruthy();
     expect(screen.queryByTestId('store-logo-image')).toBeNull();
     expect(screen.getByText('Blusa Floral')).toBeTruthy();
-    expect(screen.getByText('No closet')).toBeTruthy();
+    expect(screen.getByLabelText('Esta peça já está no seu closet')).toBeTruthy();
   });
 
   it('hides the store badge when the product has no store', async () => {
@@ -82,19 +82,19 @@ describe('StorefrontProductCard — closet indicator', () => {
   it('shows the indicator for a product that is in the closet', async () => {
     await renderCard(product, true);
 
-    expect(screen.getByText('No closet')).toBeTruthy();
+    expect(screen.getByLabelText('Esta peça já está no seu closet')).toBeTruthy();
   });
 
   it('does not show the indicator for a product that is not in the closet', async () => {
     await renderCard(product, false);
 
-    expect(screen.queryByText('No closet')).toBeNull();
+    expect(screen.queryByLabelText('Esta peça já está no seu closet')).toBeNull();
   });
 
   it('does not show the indicator by default', async () => {
     await renderCard();
 
-    expect(screen.queryByText('No closet')).toBeNull();
+    expect(screen.queryByLabelText('Esta peça já está no seu closet')).toBeNull();
   });
 
   it('keeps showing the product data when it is in the closet', async () => {

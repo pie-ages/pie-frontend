@@ -1,6 +1,10 @@
-import { ColorimetryColorRow } from '@/components/ColorimetryColorRow';
+import { StyleSheet, View } from 'react-native';
+
+import { ColorSwatch } from '@/components/ColorSwatch';
 import { ProfileSectionCard, type ProfileSectionAction } from '@/components/ProfileSectionCard';
 import { ProfileSectionStatus } from '@/components/ProfileSectionStatus';
+import { ThemedText } from '@/components/ThemedText';
+import { Spacing } from '@/constants/Theme';
 import { ProfileStatus } from '@/types/Profile';
 
 type ProfileColorSectionProps = {
@@ -26,13 +30,18 @@ export function ProfileColorSection({
 }: ProfileColorSectionProps) {
   if (status === ProfileStatus.Success && colors.length > 0) {
     return (
-      <ColorimetryColorRow
-        compact
-        title={title}
-        colors={colors}
-        caption={caption}
-        action={action}
-      />
+      <ProfileSectionCard title={title} action={action}>
+        <View style={styles.swatches}>
+          {colors.map((color, index) => (
+            <ColorSwatch key={`${color}-${index}`} color={color} size={40} outlined />
+          ))}
+        </View>
+        {caption && (
+          <ThemedText type="small" themeColor="textSecondary" style={styles.caption}>
+            {caption}
+          </ThemedText>
+        )}
+      </ProfileSectionCard>
     );
   }
 
@@ -49,3 +58,14 @@ export function ProfileColorSection({
     </ProfileSectionCard>
   );
 }
+
+const styles = StyleSheet.create({
+  swatches: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two + Spacing.one,
+  },
+  caption: {
+    lineHeight: 20,
+  },
+});

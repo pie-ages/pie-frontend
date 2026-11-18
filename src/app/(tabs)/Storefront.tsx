@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ColorimetrySuccessModal } from '@/components/ColorimetrySuccessModal';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -16,6 +17,7 @@ import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useOnboardingTarget } from '@/hooks/UseOnboardingTarget';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
+import { useStorefrontFavoriteColors } from '@/hooks/UseStorefrontFavoriteColors';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
 import { useStorefrontNotice } from '@/hooks/UseStorefrontNotice';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
@@ -36,6 +38,7 @@ export default function StorefrontScreen() {
   const { height: windowHeight } = useWindowDimensions();
   const [isSheetVisible, setSheetVisible] = useState(false);
   const { filterGroups } = useTaxonomy();
+  const favoriteColors = useStorefrontFavoriteColors();
   const {
     searchInput,
     setSearchInput,
@@ -179,9 +182,11 @@ export default function StorefrontScreen() {
         </View>
       </View>
 
+      <ColorimetrySuccessModal />
       <StorefrontFilterSheet
         visible={isSheetVisible}
         groups={filterGroups}
+        favoriteColors={favoriteColors}
         pendingFiltersByGroup={pendingFiltersByGroup}
         onTogglePending={togglePendingFilter}
         onApply={handleApplySheet}

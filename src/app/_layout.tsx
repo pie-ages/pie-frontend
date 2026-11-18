@@ -99,7 +99,7 @@ function RootNavigator({ onReady }: { onReady: () => void }) {
         <Stack.Screen name="(screens)/StyleSelection/index" options={{ animation: 'fade' }} />
         <Stack.Screen
           name="(screens)/ColorimetryResult/index"
-          options={{ animation: 'slide_from_right' }}
+          options={{ presentation: 'card', animation: 'slide_from_right' }}
         />
         <Stack.Screen
           name="(screens)/CreateLook/index"

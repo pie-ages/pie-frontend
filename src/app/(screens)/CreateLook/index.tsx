@@ -21,6 +21,7 @@ import { AuthButton } from '@/components/AuthButton';
 import { LookPieceCard } from '@/components/LookPieceCard';
 import { LOOK_PIECE_ASPECT_RATIO } from '@/components/LookPiecesStack/styles';
 import { SaveLookSheet } from '@/components/SaveLookSheet';
+import { SuccessModal } from '@/components/SuccessModal';
 import { WardrobePickerModal } from '@/components/WardrobePickerModal';
 import { Colors, Spacing } from '@/constants/Theme';
 import { useLookForm } from '@/hooks/UseLookForm';
@@ -402,23 +403,13 @@ export default function CreateLookScreen() {
         </View>
       </Modal>
 
-      <Modal visible={saved} transparent animationType="fade" onRequestClose={goBack}>
-        <View style={styles.successBackdrop}>
-          {saved && (
-            <Animated.View
-              entering={ZoomIn.duration(240).reduceMotion(ReduceMotion.System)}
-              style={styles.successCard}
-            >
-              <View style={styles.successCircle}>
-                <Feather name="check" size={32} color={Colors.white} />
-              </View>
-              <Text style={styles.successTitle}>Look salvo!</Text>
-              <Text style={styles.successMessage}>Seu look foi criado com sucesso.</Text>
-              <AuthButton title="Ver meus looks" onPress={goBack} />
-            </Animated.View>
-          )}
-        </View>
-      </Modal>
+      <SuccessModal
+        visible={saved}
+        title="Look salvo!"
+        message="Seu look foi criado com sucesso."
+        buttonTitle="Ver meus looks"
+        onContinue={goBack}
+      />
     </View>
   );
 }
@@ -618,40 +609,5 @@ const styles = StyleSheet.create({
   suggestionCell: {
     width: '40%',
     alignSelf: 'center',
-  },
-  successBackdrop: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: Spacing.four,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
-  },
-  successCard: {
-    width: '100%',
-    maxWidth: 360,
-    alignItems: 'center',
-    gap: Spacing.two,
-    padding: Spacing.four,
-    borderRadius: 24,
-    backgroundColor: Colors.white,
-  },
-  successCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.brand.primary,
-  },
-  successTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
-  successMessage: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: Colors.light.textSecondary,
-    paddingBottom: Spacing.one,
   },
 });

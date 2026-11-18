@@ -9,6 +9,7 @@ import { styles } from './styles';
 type ColorimetryConsentModalProps = {
   visible: boolean;
   onAccept: () => void;
+  onSkip: () => void;
   onClose: () => void;
   onDismiss?: () => void;
 };
@@ -16,6 +17,7 @@ type ColorimetryConsentModalProps = {
 export function ColorimetryConsentModal({
   visible,
   onAccept,
+  onSkip,
   onClose,
   onDismiss,
 }: ColorimetryConsentModalProps) {
@@ -49,7 +51,7 @@ export function ColorimetryConsentModal({
                 accessibilityRole="button"
                 accessibilityLabel="Concordar com o uso da foto e abrir a câmera"
               />
-              <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button">
+              <Pressable onPress={onSkip} hitSlop={8} accessibilityRole="button">
                 <Text style={styles.dismiss}>Agora não</Text>
               </Pressable>
             </View>

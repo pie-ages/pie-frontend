@@ -194,14 +194,13 @@ describe('favoriteStylesSchema', () => {
   });
 
   it('ignores unknown styles instead of rejecting the response', () => {
-    expect(favoriteStylesSchema.parse({ styles: ['DRAMATICO'] }).styles).toEqual([]);
+    expect(favoriteStylesSchema.parse({ styles: ['PUNK'] }).styles).toEqual([]);
   });
 
   it('keeps the known styles when the list also has unknown ones', () => {
-    expect(favoriteStylesSchema.parse({ styles: ['CASUAL', 'DRAMATICO', 'BOHO'] }).styles).toEqual([
-      'CASUAL',
-      'BOHO',
-    ]);
+    expect(
+      favoriteStylesSchema.parse({ styles: ['CASUAL', 'DRAMATICO', 'PUNK', 'BOHO'] }).styles,
+    ).toEqual(['CASUAL', 'DRAMATICO', 'BOHO']);
   });
 });
 

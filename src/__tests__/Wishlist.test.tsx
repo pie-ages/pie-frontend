@@ -62,7 +62,7 @@ describe('Wishlist — closet indicator', () => {
 
     await render(<WishlistScreen />);
 
-    expect(screen.getAllByText('No closet')).toHaveLength(1);
+    expect(screen.getAllByLabelText('Esta peça já está no seu closet')).toHaveLength(1);
     expect(screen.getByText('Blusa Floral')).toBeTruthy();
     expect(screen.getByText('Calça Jeans')).toBeTruthy();
   });
@@ -72,17 +72,17 @@ describe('Wishlist — closet indicator', () => {
 
     await render(<WishlistScreen />);
 
-    expect(screen.queryByText('No closet')).toBeNull();
+    expect(screen.queryByLabelText('Esta peça já está no seu closet')).toBeNull();
   });
 
   it('removes the indicator once the piece leaves the closet', async () => {
     mockUseWardrobeProductIds.mockReturnValue(new Set(['prod-1']));
     const { rerender } = await render(<WishlistScreen />);
-    expect(screen.getAllByText('No closet')).toHaveLength(1);
+    expect(screen.getAllByLabelText('Esta peça já está no seu closet')).toHaveLength(1);
 
     mockUseWardrobeProductIds.mockReturnValue(new Set());
     await rerender(<WishlistScreen />);
 
-    expect(screen.queryByText('No closet')).toBeNull();
+    expect(screen.queryByLabelText('Esta peça já está no seu closet')).toBeNull();
   });
 });

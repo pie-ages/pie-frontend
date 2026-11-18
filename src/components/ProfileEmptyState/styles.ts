@@ -7,8 +7,6 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: Colors.light.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
   },
 });

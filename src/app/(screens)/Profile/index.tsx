@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useRef } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,6 +14,7 @@ import { useCurrentUser } from '@/hooks/UseCurrentUser';
 import { useFavoriteStyles } from '@/hooks/UseFavoriteStyles';
 import { useProfilePreferences } from '@/hooks/UseProfilePreferences';
 import { useSessionExpiredRedirect } from '@/hooks/UseSessionExpiredRedirect';
+import type { ProfileUpdatedSection } from '@/types/Profile';
 
 export default function ProfileScreen() {
   const { signOut } = useAuth();
@@ -23,20 +24,18 @@ export default function ProfileScreen() {
   const favoriteStyles = useFavoriteStyles(true);
 
   const { retry: reloadUser } = currentUser;
-  const { retry: reloadPreferences } = preferences;
+  const { refresh: reloadPreferences } = preferences;
   const { retry: reloadStyles } = favoriteStyles;
-  const hasFocusedBefore = useRef(false);
+  const { updatedSection } = useLocalSearchParams<{ updatedSection?: ProfileUpdatedSection }>();
 
-  useFocusEffect(
-    useCallback(() => {
-      if (hasFocusedBefore.current) {
-        reloadUser();
-        reloadPreferences();
-        reloadStyles();
-      }
-      hasFocusedBefore.current = true;
-    }, [reloadUser, reloadPreferences, reloadStyles]),
-  );
+  useEffect(() => {
+    if (!updatedSection) return;
+
+    if (updatedSection === 'user') reloadUser();
+    if (updatedSection === 'colors') reloadPreferences();
+    if (updatedSection === 'styles') reloadStyles();
+    router.setParams({ updatedSection: undefined });
+  }, [updatedSection, reloadUser, reloadPreferences, reloadStyles]);
 
   useSessionExpiredRedirect(
     currentUser.sessionExpired || preferences.sessionExpired || favoriteStyles.sessionExpired,
@@ -83,7 +82,7 @@ export default function ProfileScreen() {
             title: 'Refazer',
             label: 'Refazer colorimetria',
             icon: 'refresh-cw',
-            onPress: () => router.push('/(screens)/ColorimetryResult'),
+            onPress: () => router.replace('/(screens)/ColorimetryResult'),
           }}
           errorTitle="Não foi possível carregar sua colorimetria"
           emptyTitle="Você ainda não fez sua colorimetria."
@@ -124,7 +123,7 @@ export default function ProfileScreen() {
           { paddingBottom: Math.max(insets.bottom + Spacing.two, Spacing.four) },
         ]}
       >
-        <ProductActionButton title="Sair" onPress={signOut} />
+        <ProductActionButton title="Sair" variant="outline" onPress={signOut} />
       </View>
     </SafeAreaView>
   );
@@ -133,12 +132,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#FAF7F5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
   },
   headerButton: {
@@ -164,13 +163,12 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.four,
-    paddingBottom: Spacing.four,
-    gap: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.three,
+    gap: Spacing.three,
   },
   footer: {
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.two,
-    backgroundColor: Colors.white,
   },
 });

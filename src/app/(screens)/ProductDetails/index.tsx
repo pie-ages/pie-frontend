@@ -101,6 +101,18 @@ function ProductDetails({ id }: { id?: string }) {
 
   const canOpenStore = product.available && isHttpUrl(product.purchaseUrl);
   const storeName = product.companyName ?? 'parceira';
+  const galleryImages = [
+    ...new Set(
+      [...product.images]
+        .sort(
+          (a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.displayOrder - b.displayOrder,
+        )
+        .map((image) => image.url.trim())
+        .filter(Boolean),
+    ),
+  ];
+  const images =
+    galleryImages.length > 0 ? galleryImages : product.imageUrl ? [product.imageUrl] : [];
 
   const formattedPrice = product.price.toLocaleString('pt-BR', {
     style: 'currency',
@@ -122,7 +134,7 @@ function ProductDetails({ id }: { id?: string }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.imageWrapper}>
-          <ProductImageCarousel images={product.imageUrl ? [product.imageUrl] : []} />
+          <ProductImageCarousel key={product.id} images={images} />
         </View>
 
         <View style={styles.sectionsWrapper}>

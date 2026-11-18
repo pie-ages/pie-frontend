@@ -27,17 +27,18 @@ export function useProfilePreferences(enabled: boolean) {
         else setStatus(ProfileStatus.Error);
       });
 
-    return () => {
-      controller.abort();
-      setStatus(ProfileStatus.Loading);
-      setSessionExpired(false);
-    };
+    return () => controller.abort();
   }, [attempt, enabled]);
+
+  const refresh = useCallback(() => {
+    setSessionExpired(false);
+    setAttempt((value) => value + 1);
+  }, []);
 
   const retry = useCallback(() => {
     setStatus(ProfileStatus.Loading);
-    setAttempt((value) => value + 1);
-  }, []);
+    refresh();
+  }, [refresh]);
 
   return {
     highlightColors: preferences?.highlightColors ?? [],
@@ -46,5 +47,6 @@ export function useProfilePreferences(enabled: boolean) {
     status,
     sessionExpired,
     retry,
+    refresh,
   };
 }

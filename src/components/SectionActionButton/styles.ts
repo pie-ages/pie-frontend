@@ -1,23 +1,24 @@
 import { StyleSheet } from 'react-native';
 
-import { Colors } from '@/constants/Theme';
+import { Colors, Spacing } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: Spacing.three,
     paddingVertical: 6,
-    borderRadius: 8,
-    backgroundColor: Colors.brand.primary,
+    minHeight: 36,
+    borderRadius: 999,
+    backgroundColor: '#FCEDE7',
   },
   pressed: {
     opacity: 0.8,
   },
   text: {
-    color: Colors.white,
-    fontSize: 12,
+    color: Colors.brand.primary,
+    fontSize: 13,
     fontWeight: '600',
   },
 });
