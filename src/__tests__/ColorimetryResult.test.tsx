@@ -1,4 +1,5 @@
 import { expect, it, jest } from '@jest/globals';
+import * as ImagePicker from 'expo-image-picker';
 import { Stack } from 'expo-router';
 
 /* eslint-disable import/order -- Load colorimetry components before the router helpers install their animation mock. */
@@ -11,7 +12,7 @@ import { Tabs, TabList, TabSlot, TabTrigger } from 'expo-router/ui';
 
 jest.mock('expo-image-picker', () => ({
   CameraType: { front: 'front' },
-  requestCameraPermissionsAsync: async () => ({ granted: true }),
+  requestCameraPermissionsAsync: jest.fn(async () => ({ granted: true })),
   launchCameraAsync: async () => ({
     canceled: false,
     assets: [{ uri: 'file:///selfie.jpg' }],
@@ -141,5 +142,35 @@ it.each([
     expect(app.getPathname()).toBe('/Storefront');
     expect(screen.queryByText('Colorimetria atualizada!')).toBeNull();
     expect(testRouter.canGoBack()).toBe(false);
+  },
+);
+
+it.each([false, true])(
+  'can continue without a photo after camera denial: %s',
+  async (denyCamera) => {
+    const app = await renderRouter(
+      {
+        _layout: () => <Stack />,
+        '(screens)/ColorimetryResult/index': ColorimetryResultScreen,
+        '(tabs)/_layout': CatalogTabs,
+        '(tabs)/Looks': () => null,
+        '(tabs)/Storefront': () => null,
+      },
+      { initialUrl: '/ColorimetryResult' },
+    );
+    if (denyCamera) {
+      jest.mocked(ImagePicker.requestCameraPermissionsAsync).mockResolvedValueOnce({
+        granted: false,
+      } as Awaited<ReturnType<typeof ImagePicker.requestCameraPermissionsAsync>>);
+      await fireEvent.press(
+        screen.getByRole('button', { name: 'Tirar foto para iniciar a colorimetria' }),
+      );
+      await fireEvent.press(screen.getByRole('button', { name: 'Aceitar' }));
+      expect(
+        await screen.findByText('Permita o acesso à câmera para tirar sua foto.'),
+      ).toBeTruthy();
+    }
+    await fireEvent.press(screen.getByRole('button', { name: 'Continuar sem foto' }));
+    expect(app.getPathname()).toBe('/Storefront');
   },
 );

@@ -16,6 +16,7 @@ import { PERSONAL_STYLE_IMAGES } from '@/constants/PersonalStyleImages';
 import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
 import { useEditFavoriteStyles } from '@/hooks/UseEditFavoriteStyles';
 import { useSessionExpiredRedirect } from '@/hooks/UseSessionExpiredRedirect';
+import type { PersonalStyle } from '@/types/IdentifiedStyle';
 
 const FadeImage = ({ uri, isActive }: { uri: string; isActive: boolean }) => {
   const [fadeAnim] = useState(() => new Animated.Value(isActive ? 1 : 0));
@@ -65,7 +66,7 @@ export default function StyleSelectionScreen() {
     sessionExpired,
     save,
   } = useEditFavoriteStyles(() => router.push('/(screens)/ColorimetryResult'));
-  const [previewStyle, setPreviewStyle] = useState<string | null>(null);
+  const [previewStyle, setPreviewStyle] = useState<PersonalStyle | null>(null);
   const activeBgStyleId =
     previewStyle && selectedIds.has(previewStyle)
       ? previewStyle

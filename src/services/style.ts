@@ -13,7 +13,12 @@ import {
   isSessionExpiredError,
   parseResponse,
 } from '@/services/client';
-import type { IdentifiedStyle } from '@/types/IdentifiedStyle';
+import type {
+  IdentifiedStyle,
+  PersonalStyle,
+  QuizStyle,
+  StyleQuizResult,
+} from '@/types/IdentifiedStyle';
 import type { StyleQuizSubmission } from '@/types/StyleQuiz';
 
 const ERROR_MESSAGE = 'Não foi possível identificar seu estilo. Tente novamente.';
@@ -28,7 +33,7 @@ function toStyleError(error: unknown): unknown {
   return new Error(error.serverMessage ?? ERROR_MESSAGE);
 }
 
-function readStyles(data: unknown): IdentifiedStyle[] {
+function readStyles(data: unknown): QuizStyle[] {
   return parseResponse(styleIdentificationSchema, data, INVALID_STYLE_MESSAGE).styles;
 }
 
@@ -39,7 +44,7 @@ export async function fetchStyleQuestions(): Promise<StyleQuizQuestion[]> {
 
 export async function submitStyleQuizAndIdentify(
   answers: StyleQuizSubmission[],
-): Promise<IdentifiedStyle> {
+): Promise<StyleQuizResult> {
   let data: unknown;
   try {
     await apiPostAuth('/api/users/me/style/answers', { answers });
@@ -48,14 +53,15 @@ export async function submitStyleQuizAndIdentify(
     throw toStyleError(error);
   }
 
-  const [style] = readStyles(data);
+  const result = parseResponse(styleIdentificationSchema, data, INVALID_STYLE_MESSAGE);
+  const [style] = result.styles;
   if (!style) {
     throw new Error('Não há respostas ou preferências suficientes para identificar seu estilo.');
   }
-  return style;
+  return { essence: style, touches: result.touches };
 }
 
-export async function getIdentifiedStyle(): Promise<IdentifiedStyle | null> {
+export async function getIdentifiedStyle(): Promise<QuizStyle | null> {
   let data: unknown;
   try {
     data = await apiGetAuth<unknown>('/api/users/me/style/identified');
@@ -77,7 +83,7 @@ export async function getFavoriteStyles(signal?: AbortSignal): Promise<Identifie
   return parseResponse(favoriteStylesSchema, data, INVALID_STYLE_MESSAGE).styles;
 }
 
-export async function updateFavoriteStyles(styles: IdentifiedStyle[]): Promise<IdentifiedStyle[]> {
+export async function updateFavoriteStyles(styles: PersonalStyle[]): Promise<IdentifiedStyle[]> {
   let data: unknown;
   try {
     data = await apiPutAuth<unknown>('/api/users/me/style', { styles });

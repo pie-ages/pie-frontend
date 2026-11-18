@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
-import { IDENTIFIED_STYLES, type IdentifiedStyle } from '@/types/IdentifiedStyle';
+import { IDENTIFIED_STYLES, QUIZ_STYLES } from '@/types/IdentifiedStyle';
+
+const identifiedStyleSchema = z.enum(QUIZ_STYLES);
 
 export const styleQuizOptionSchema = z.object({
   id: z.string(),
   label: z.string(),
   imageUrl: z.string(),
-  style: z.string(),
+  style: identifiedStyleSchema,
 });
 
 export const styleQuizQuestionSchema = z.object({
@@ -23,14 +25,24 @@ export const styleQuizResponseSchema = z.object({
 export type StyleQuizOption = z.infer<typeof styleQuizOptionSchema>;
 export type StyleQuizQuestion = z.infer<typeof styleQuizQuestionSchema>;
 
-export const styleIdentificationSchema = z.object({
-  styles: z.array(z.enum(IDENTIFIED_STYLES)).max(1),
-});
-
-function isIdentifiedStyle(style: string): style is IdentifiedStyle {
-  return (IDENTIFIED_STYLES as readonly string[]).includes(style);
-}
+export const styleIdentificationSchema = z
+  .object({
+    styles: z.array(identifiedStyleSchema).max(1),
+    touches: z.array(identifiedStyleSchema).max(2),
+  })
+  .refine(
+    ({ styles, touches }) =>
+      new Set(touches).size === touches.length &&
+      (styles.length > 0 || touches.length === 0) &&
+      !touches.some((style) => styles.includes(style)),
+    'Essência e toques devem ser distintos e não podem existir toques sem essência.',
+  );
 
 export const favoriteStylesSchema = z.object({
-  styles: z.array(z.string()).transform((styles) => styles.filter(isIdentifiedStyle)),
+  styles: z
+    .array(z.enum(IDENTIFIED_STYLES))
+    .refine(
+      (styles) => new Set(styles).size === styles.length,
+      'Estilos favoritos não podem se repetir.',
+    ),
 });

@@ -10,9 +10,25 @@ export const PERSONAL_STYLES = [
   'BOHO',
 ] as const;
 
+export const QUIZ_STYLES = [
+  'CASUAL',
+  'ELEGANTE',
+  'ESPORTIVO',
+  'ROMANTICO',
+  'MINIMALISTA',
+  'BOHO',
+] as const;
+export type PersonalStyle = (typeof PERSONAL_STYLES)[number];
+export type QuizStyle = (typeof QUIZ_STYLES)[number];
+export type StyleQuizResult = { essence: QuizStyle; touches: QuizStyle[] };
+
 export const IDENTIFIED_STYLES = [...PERSONAL_STYLES, 'ELEGANTE', 'ESPORTIVO'] as const;
 
 export type IdentifiedStyle = (typeof IDENTIFIED_STYLES)[number];
+
+export function isPersonalStyle(style: string): style is PersonalStyle {
+  return (PERSONAL_STYLES as readonly string[]).includes(style);
+}
 
 export const IDENTIFIED_STYLE_INFO: Record<
   IdentifiedStyle,
