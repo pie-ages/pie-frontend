@@ -10,14 +10,6 @@ import * as products from '@/services/products';
 import * as wardrobe from '@/services/wardrobe';
 
 jest.mock('@/global.css', () => ({}));
-jest.mock('@/contexts/AuthContext', () => ({
-  useAuth: () => ({ userId: 'user-1', isAuthenticated: true }),
-}));
-jest.mock('@/services/wishlist', () => ({
-  fetchWishlist: async () => [],
-  addWishlistItem: jest.fn(),
-  removeWishlistItem: jest.fn(),
-}));
 const mockDismissTo = jest.fn();
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ productId: 'prod-1' }),

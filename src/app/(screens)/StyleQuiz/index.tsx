@@ -31,7 +31,7 @@ export default function StyleQuizScreen() {
   const { s } = useLayoutScale();
   const scaledStyles = useMemo(() => createScaledStyles(s), [s]);
   const { questions, isLoading, error: quizError } = useStyleQuiz();
-  const { setIdentifiedStyle, setIdentifiedTouches } = useUserStyle();
+  const { setIdentifiedStyle } = useUserStyle();
   const { completeStyleQuiz, signOut } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, StyleQuizAnswer>>({});
@@ -53,8 +53,7 @@ export default function StyleQuizScreen() {
       if (!run.started) return;
       dispatchIdentification({ type: 'start' });
       const identifiedStyle = await run.promise;
-      setIdentifiedStyle(identifiedStyle.essence);
-      setIdentifiedTouches(identifiedStyle.touches);
+      setIdentifiedStyle(identifiedStyle);
       completeStyleQuiz();
       dispatchIdentification({ type: 'success' });
       router.replace('/MyStyle');

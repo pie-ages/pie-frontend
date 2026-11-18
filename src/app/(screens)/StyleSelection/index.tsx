@@ -81,7 +81,7 @@ export default function StyleSelectionScreen() {
   return (
     <View style={styles.container}>
       {Object.entries(PERSONAL_STYLE_IMAGES).map(([id, uri]) => (
-        <FadeImage key={id} uri={uri} isActive={id === (activeBgStyleId ?? 'CASUAL')} />
+        <FadeImage key={id} uri={uri} isActive={id === (activeBgStyleId ?? 'CLASSICO')} />
       ))}
 
       <View style={styles.overlay} />

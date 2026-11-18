@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { BrandColors } from '@/constants/Theme';
@@ -13,8 +13,6 @@ type ProductHeaderProps = {
   onClose: () => void;
   isWishlisted?: boolean;
   onToggleWishlist?: () => void;
-  isWishlistPending?: boolean;
-  isWishlistDisabled?: boolean;
 };
 
 export function ProductHeader({
@@ -22,8 +20,6 @@ export function ProductHeader({
   onClose,
   isWishlisted = false,
   onToggleWishlist,
-  isWishlistPending = false,
-  isWishlistDisabled = false,
 }: ProductHeaderProps) {
   const theme = useTheme();
 
@@ -44,25 +40,17 @@ export function ProductHeader({
 
       <Pressable
         onPress={onToggleWishlist}
-        disabled={isWishlistDisabled || isWishlistPending || !onToggleWishlist}
-        accessibilityRole="button"
-        accessibilityLabel={`${isWishlisted ? 'Remover' : 'Adicionar'} ${title} ${isWishlisted ? 'da' : 'à'} Wishlist`}
-        accessibilityState={{ busy: isWishlistPending }}
         style={[
           styles.iconButton,
           { backgroundColor: isWishlisted ? BrandColors.primary : theme.backgroundElement },
         ]}
         hitSlop={8}
       >
-        {isWishlistPending ? (
-          <ActivityIndicator size="small" color={isWishlisted ? '#FFFFFF' : BrandColors.primary} />
-        ) : (
-          <MaterialCommunityIcons
-            name="heart"
-            size={22}
-            color={isWishlisted ? '#FFFFFF' : theme.text}
-          />
-        )}
+        <MaterialCommunityIcons
+          name="heart"
+          size={22}
+          color={isWishlisted ? '#FFFFFF' : theme.text}
+        />
       </Pressable>
     </View>
   );

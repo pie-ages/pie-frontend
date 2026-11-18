@@ -18,11 +18,9 @@ import { useUserStyle } from '@/contexts/UserStyleContext';
 import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 
 export default function MyStyleScreen() {
-  const { identifiedStyle, identifiedTouches } = useUserStyle();
+  const { identifiedStyle } = useUserStyle();
   const styleLabel = identifiedStyle ? IDENTIFIED_STYLE_INFO[identifiedStyle].label : null;
   const background = identifiedStyle ? PERSONAL_STYLE_IMAGES[identifiedStyle] : undefined;
-
-  const touchLabels = identifiedTouches.map((style) => IDENTIFIED_STYLE_INFO[style].label);
 
   useEffect(() => {
     StatusBar.setBarStyle('light-content');
@@ -32,7 +30,7 @@ export default function MyStyleScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={background ? { uri: background } : undefined}
+        source={{ uri: background ?? PERSONAL_STYLE_IMAGES.CLASSICO }}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
@@ -49,15 +47,6 @@ export default function MyStyleScreen() {
               {styleLabel ? (
                 <>
                   Seu estilo é <Text style={styles.highlightText}>{styleLabel}</Text>
-                  {' por essência'}
-                  {touchLabels.length > 0 ? (
-                    <>
-                      {', com toques de '}
-                      <Text style={styles.highlightText}>{touchLabels.join(' e ')}</Text>
-                    </>
-                  ) : (
-                    '.'
-                  )}
                 </>
               ) : (
                 'Personalize seus estilos'

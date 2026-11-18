@@ -8,58 +8,40 @@ import Animated, { FadeIn, FadeOut, LinearTransition, ReduceMotion } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
-import { ErrorState } from '@/components/ErrorState';
 import { InClosetBadge } from '@/components/InClosetBadge';
-import { LoadingState } from '@/components/LoadingState';
-import { WishlistFeedback } from '@/components/WishlistFeedback';
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useWardrobeProductIds } from '@/hooks/UseWardrobeProductIds';
-import type { WishlistProduct } from '@/schemas/wishlistSchema';
+import type { CatalogItem } from '@/schemas/productSchema';
 import { formatColor } from '@/utils/format-color';
 import { formatPrice } from '@/utils/format-price';
 
 export default function WishlistScreen() {
   const router = useRouter();
-  const { items, remove, isLoading, error, retry, isPending } = useWishlist();
+  const { items, remove } = useWishlist();
   const inClosetProductIds = useWardrobeProductIds();
 
   function handleClose() {
     if (router.canGoBack()) router.back();
-    else router.replace('/Storefront');
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Pressable
-          onPress={handleClose}
-          style={styles.closeButton}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Fechar Wishlist"
-        >
+        <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8}>
           <Feather name="x" size={24} color={BrandColors.primary} />
         </Pressable>
         <Text style={styles.title}>Wishlist</Text>
         <View style={styles.headerSpacer} />
       </View>
 
-      {isLoading ? (
-        <LoadingState text="Carregando Wishlist..." />
-      ) : error && items.length === 0 ? (
-        <ErrorState
-          title="Não foi possível carregar sua Wishlist"
-          subtitle={error}
-          onRetry={retry}
-        />
-      ) : items.length === 0 ? (
+      {items.length === 0 ? (
         <EmptyState
           icon={<MaterialCommunityIcons name="heart" size={36} color={BrandColors.primary} />}
           title="Sua lista de desejos está vazia"
           subtitle="Toque no ícone de coração nas peças da Vitrine para salvar seus itens favoritos aqui!"
           actionLabel="Explorar Vitrine"
-          onAction={() => router.dismissTo('/Storefront')}
+          onAction={handleClose}
         />
       ) : (
         <FlatList
@@ -69,13 +51,11 @@ export default function WishlistScreen() {
           contentContainerStyle={styles.gridContent}
           columnWrapperStyle={styles.columnWrapper}
           showsVerticalScrollIndicator={false}
-          ListHeaderComponent={<WishlistFeedback />}
           renderItem={({ item }) =>
             item ? (
               <WishlistCard
                 product={item}
                 onRemove={() => remove(item.id)}
-                isRemoving={isPending(item.id)}
                 isInCloset={inClosetProductIds.has(item.id)}
               />
             ) : (
@@ -89,13 +69,12 @@ export default function WishlistScreen() {
 }
 
 type WishlistCardProps = {
-  product: WishlistProduct;
+  product: CatalogItem;
   onRemove: () => void;
   isInCloset: boolean;
-  isRemoving: boolean;
 };
 
-function WishlistCard({ product, onRemove, isInCloset, isRemoving }: WishlistCardProps) {
+function WishlistCard({ product, onRemove, isInCloset }: WishlistCardProps) {
   async function handleViewInStore() {
     if (!product.purchaseUrl) return;
     await WebBrowser.openBrowserAsync(product.purchaseUrl);
@@ -117,16 +96,12 @@ function WishlistCard({ product, onRemove, isInCloset, isRemoving }: WishlistCar
           </View>
         )}
 
-        {!product.available && <View style={styles.unavailableOverlay} />}
+        {product.status !== 'PUBLISHED' && <View style={styles.unavailableOverlay} />}
 
         {isInCloset && <InClosetBadge style={styles.inClosetBadge} />}
 
         <Pressable
           onPress={onRemove}
-          disabled={isRemoving}
-          accessibilityRole="button"
-          accessibilityLabel={`Remover ${product.name} da Wishlist`}
-          accessibilityState={{ busy: isRemoving }}
           style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
           hitSlop={4}
         >
@@ -141,7 +116,7 @@ function WishlistCard({ product, onRemove, isInCloset, isRemoving }: WishlistCar
         {product.color ? <Text style={styles.cardColor}>{formatColor(product.color)}</Text> : null}
         <Text style={styles.cardPrice}>{formatPrice(product.price)}</Text>
 
-        {product.available && product.purchaseUrl ? (
+        {product.status === 'PUBLISHED' ? (
           <Pressable
             onPress={handleViewInStore}
             style={({ pressed }) => [styles.storeButton, pressed && styles.storeButtonPressed]}

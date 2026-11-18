@@ -143,40 +143,11 @@ describe('response schemas', () => {
     expect(result).toEqual({ category: 'vestido', style: '', color: '' });
   });
 
-  it('requires an explicit essence list and touches list with dev styles', () => {
-    expect(styleIdentificationSchema.safeParse({ styles: [], touches: [] }).success).toBe(true);
-    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO'], touches: [] }).success).toBe(
-      true,
-    );
-    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO'] }).success).toBe(false);
-    expect(
-      styleIdentificationSchema.safeParse({ styles: ['BOHO', 'CASUAL'], touches: [] }).success,
-    ).toBe(false);
-    expect(styleIdentificationSchema.safeParse({ styles: ['PUNK'], touches: [] }).success).toBe(
-      false,
-    );
-    expect(
-      styleIdentificationSchema.parse({ styles: ['ELEGANTE'], touches: ['ROMANTICO', 'BOHO'] }),
-    ).toEqual({ styles: ['ELEGANTE'], touches: ['ROMANTICO', 'BOHO'] });
-    expect(
-      styleIdentificationSchema.safeParse({
-        styles: ['ELEGANTE'],
-        touches: ['CASUAL', 'BOHO', 'ESPORTIVO'],
-      }).success,
-    ).toBe(false);
-    expect(
-      styleIdentificationSchema.safeParse({
-        styles: ['ELEGANTE'],
-        touches: ['ELEGANTE', 'ROMANTICO'],
-      }).success,
-    ).toBe(false);
-    expect(
-      styleIdentificationSchema.safeParse({ styles: ['ELEGANTE'], touches: ['BOHO', 'BOHO'] })
-        .success,
-    ).toBe(false);
-    expect(styleIdentificationSchema.safeParse({ styles: [], touches: ['BOHO'] }).success).toBe(
-      false,
-    );
+  it('accepts at most one known identified style', () => {
+    expect(styleIdentificationSchema.safeParse({ styles: [] }).success).toBe(true);
+    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO'] }).success).toBe(true);
+    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO', 'CASUAL'] }).success).toBe(false);
+    expect(styleIdentificationSchema.safeParse({ styles: ['PUNK'] }).success).toBe(false);
   });
 });
 
@@ -222,15 +193,14 @@ describe('favoriteStylesSchema', () => {
     ]);
   });
 
-  it('rejects an unknown favorite style', () => {
-    expect(favoriteStylesSchema.safeParse({ styles: ['PUNK'] }).success).toBe(false);
+  it('ignores unknown styles instead of rejecting the response', () => {
+    expect(favoriteStylesSchema.parse({ styles: ['PUNK'] }).styles).toEqual([]);
   });
 
-  it('rejects mixed lists rather than silently keeping only valid favorites', () => {
-    expect(favoriteStylesSchema.safeParse({ styles: ['CASUAL', 'REFINADO', 'BOHO'] }).success).toBe(
-      false,
-    );
-    expect(favoriteStylesSchema.safeParse({ styles: ['BOHO', 'BOHO'] }).success).toBe(false);
+  it('keeps the known styles when the list also has unknown ones', () => {
+    expect(
+      favoriteStylesSchema.parse({ styles: ['CASUAL', 'DRAMATICO', 'PUNK', 'BOHO'] }).styles,
+    ).toEqual(['CASUAL', 'DRAMATICO', 'BOHO']);
   });
 });
 

@@ -14,7 +14,6 @@ import { StorefrontFilterSheet } from '@/components/StorefrontFilterSheet';
 import { StorefrontNotice } from '@/components/StorefrontNotice';
 import { StorefrontProductGrid } from '@/components/StorefrontProductGrid';
 import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
-import { WishlistFeedback } from '@/components/WishlistFeedback';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useOnboardingTarget } from '@/hooks/UseOnboardingTarget';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
@@ -148,7 +147,6 @@ export default function StorefrontScreen() {
         </View>
 
         {noticeMessage && <StorefrontNotice message={noticeMessage} />}
-        <WishlistFeedback />
         {!isLoading && ignoredFilters.length > 0 && (
           <StorefrontNotice message={profileNotice(ignoredFilters)} />
         )}

@@ -8,8 +8,6 @@ type UserStyleContextValue = {
   setStyles: (styles: Style[]) => void;
   identifiedStyle: IdentifiedStyle | null;
   setIdentifiedStyle: (style: IdentifiedStyle | null) => void;
-  identifiedTouches: IdentifiedStyle[];
-  setIdentifiedTouches: (styles: IdentifiedStyle[]) => void;
 };
 
 const UserStyleContext = createContext<UserStyleContextValue | null>(null);
@@ -18,19 +16,8 @@ export function UserStyleProvider({ children }: { children: ReactNode }) {
   const [styles, setStyles] = useState<Style[]>([]);
   const [identifiedStyle, setIdentifiedStyle] = useState<IdentifiedStyle | null>(null);
 
-  const [identifiedTouches, setIdentifiedTouches] = useState<IdentifiedStyle[]>([]);
-
   return (
-    <UserStyleContext.Provider
-      value={{
-        styles,
-        setStyles,
-        identifiedStyle,
-        setIdentifiedStyle,
-        identifiedTouches,
-        setIdentifiedTouches,
-      }}
-    >
+    <UserStyleContext.Provider value={{ styles, setStyles, identifiedStyle, setIdentifiedStyle }}>
       {children}
     </UserStyleContext.Provider>
   );

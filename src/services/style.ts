@@ -13,7 +13,7 @@ import {
   isSessionExpiredError,
   parseResponse,
 } from '@/services/client';
-import type { IdentifiedStyle, StyleQuizResult } from '@/types/IdentifiedStyle';
+import type { IdentifiedStyle } from '@/types/IdentifiedStyle';
 import type { StyleQuizSubmission } from '@/types/StyleQuiz';
 
 const ERROR_MESSAGE = 'Não foi possível identificar seu estilo. Tente novamente.';
@@ -39,7 +39,7 @@ export async function fetchStyleQuestions(): Promise<StyleQuizQuestion[]> {
 
 export async function submitStyleQuizAndIdentify(
   answers: StyleQuizSubmission[],
-): Promise<StyleQuizResult> {
+): Promise<IdentifiedStyle> {
   let data: unknown;
   try {
     await apiPostAuth('/api/users/me/style/answers', { answers });
@@ -48,12 +48,11 @@ export async function submitStyleQuizAndIdentify(
     throw toStyleError(error);
   }
 
-  const result = parseResponse(styleIdentificationSchema, data, INVALID_STYLE_MESSAGE);
-  const [style] = result.styles;
+  const [style] = readStyles(data);
   if (!style) {
     throw new Error('Não há respostas ou preferências suficientes para identificar seu estilo.');
   }
-  return { essence: style, touches: result.touches };
+  return style;
 }
 
 export async function getIdentifiedStyle(): Promise<IdentifiedStyle | null> {
