@@ -1,11 +1,16 @@
-export const IDENTIFIED_STYLES = [
+export const PERSONAL_STYLES = [
+  'CLASSICO',
   'CASUAL',
-  'ELEGANTE',
-  'ESPORTIVO',
+  'CRIATIVO',
   'ROMANTICO',
+  'REFINADO',
+  'SENSUAL',
+  'DRAMATICO',
   'MINIMALISTA',
   'BOHO',
 ] as const;
+
+export const IDENTIFIED_STYLES = [...PERSONAL_STYLES, 'ELEGANTE', 'ESPORTIVO'] as const;
 
 export type IdentifiedStyle = (typeof IDENTIFIED_STYLES)[number];
 
@@ -13,6 +18,36 @@ export const IDENTIFIED_STYLE_INFO: Record<
   IdentifiedStyle,
   { label: string; description: string; background: string; highlight: string }
 > = {
+  CLASSICO: {
+    label: 'Clássico',
+    description: 'Peças atemporais, cortes alinhados e combinações elegantes.',
+    background: '#E4DED3',
+    highlight: '#526B41',
+  },
+  CRIATIVO: {
+    label: 'Criativo',
+    description: 'Combinações originais, cores marcantes e muita personalidade.',
+    background: '#FFD98E',
+    highlight: '#6B410B',
+  },
+  REFINADO: {
+    label: 'Refinado',
+    description: 'Acabamentos sofisticados, tecidos nobres e visual impecável.',
+    background: '#D9C9A8',
+    highlight: '#57482D',
+  },
+  SENSUAL: {
+    label: 'Sensual',
+    description: 'Silhuetas valorizadas, confiança e detalhes envolventes.',
+    background: '#F4D7DE',
+    highlight: '#6E263D',
+  },
+  DRAMATICO: {
+    label: 'Dramático',
+    description: 'Contrastes fortes, formas marcantes e presença.',
+    background: '#E5DCE5',
+    highlight: '#3A2E39',
+  },
   CASUAL: {
     label: 'Casual',
     description: 'Conforto, praticidade e peças fáceis de combinar.',
