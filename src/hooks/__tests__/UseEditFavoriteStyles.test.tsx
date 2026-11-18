@@ -33,16 +33,12 @@ describe('useEditFavoriteStyles', () => {
 
     expect([...result.current.selectedIds]).toEqual(['ELEGANTE']);
     expect(result.current.styleOptions.map(({ label }) => label)).toEqual([
-      'Clássico',
       'Casual',
-      'Criativo',
+      'Elegante',
+      'Esportivo',
       'Romântico',
-      'Refinado',
-      'Sensual',
-      'Dramático',
       'Minimalista',
       'Boho',
-      'Elegante',
     ]);
   });
 
@@ -70,16 +66,16 @@ describe('useEditFavoriteStyles', () => {
 
   it('persiste as escolhas do cadastro antes de abrir a próxima etapa', async () => {
     mockGetFavoriteStyles.mockResolvedValue(['ROMANTICO']);
-    mockUpdateFavoriteStyles.mockResolvedValue(['CLASSICO', 'CRIATIVO', 'ROMANTICO']);
+    mockUpdateFavoriteStyles.mockResolvedValue(['CASUAL', 'ESPORTIVO', 'ROMANTICO']);
     const onContinue = jest.fn();
     const { result } = await renderLoadedHook(onContinue);
 
-    expect(result.current.styleOptions).toHaveLength(9);
-    await act(async () => result.current.toggle('CLASSICO'));
-    await act(async () => result.current.toggle('CRIATIVO'));
+    expect(result.current.styleOptions).toHaveLength(6);
+    await act(async () => result.current.toggle('CASUAL'));
+    await act(async () => result.current.toggle('ESPORTIVO'));
     await act(async () => result.current.save());
 
-    expect(mockUpdateFavoriteStyles).toHaveBeenCalledWith(['CLASSICO', 'CRIATIVO', 'ROMANTICO']);
+    expect(mockUpdateFavoriteStyles).toHaveBeenCalledWith(['CASUAL', 'ESPORTIVO', 'ROMANTICO']);
     expect(onContinue).toHaveBeenCalledTimes(1);
     expect(router.dismissTo).not.toHaveBeenCalled();
   });

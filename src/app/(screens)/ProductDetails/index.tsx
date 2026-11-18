@@ -10,6 +10,7 @@ import { ProductHeader } from '@/components/ProductHeader';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
+import { WishlistFeedback } from '@/components/WishlistFeedback';
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAddToWardrobe } from '@/hooks/UseAddToWardrobe';
@@ -44,7 +45,7 @@ function ProductDetails({ id }: { id?: string }) {
   const router = useRouter();
   const theme = useTheme();
   const { product, isLoading, error } = useProductDetails(id);
-  const { toggle, isInWishlist } = useWishlist();
+  const { toggle, isInWishlist, isPending, canChange } = useWishlist();
   const wardrobe = useAddToWardrobe(product);
   const [storeError, setStoreError] = useState<string | null>(null);
 
@@ -125,8 +126,11 @@ function ProductDetails({ id }: { id?: string }) {
         title={product.name}
         onClose={handleClose}
         isWishlisted={isInWishlist(product.id)}
+        isWishlistPending={isPending(product.id)}
+        isWishlistDisabled={!canChange}
         onToggleWishlist={() => toggle(toWishlistItem(product))}
       />
+      <WishlistFeedback />
 
       <ScrollView
         style={styles.scrollView}

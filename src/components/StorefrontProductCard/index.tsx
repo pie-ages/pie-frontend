@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
-import { Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { InClosetBadge } from '@/components/InClosetBadge';
 import { StoreLogo } from '@/components/StoreLogo';
@@ -26,8 +26,9 @@ export function StorefrontProductCard({
   onPress,
   isInCloset = false,
 }: StorefrontProductCardProps) {
-  const { toggle, isInWishlist } = useWishlist();
+  const { toggle, isInWishlist, isPending, canChange } = useWishlist();
   const wishlisted = isInWishlist(product.id);
+  const pending = isPending(product.id);
 
   return (
     <Pressable
@@ -54,6 +55,10 @@ export function StorefrontProductCard({
 
         <Pressable
           onPress={() => toggle(product)}
+          disabled={!canChange || pending}
+          accessibilityRole="button"
+          accessibilityLabel={`${wishlisted ? 'Remover' : 'Adicionar'} ${product.name} ${wishlisted ? 'da' : 'à'} Wishlist`}
+          accessibilityState={{ disabled: !canChange || pending, busy: pending }}
           style={({ pressed }) => [
             styles.wishlistButton,
             wishlisted && styles.wishlistButtonActive,
@@ -61,11 +66,18 @@ export function StorefrontProductCard({
           ]}
           hitSlop={4}
         >
-          <MaterialCommunityIcons
-            name="heart"
-            size={18}
-            color={wishlisted ? Colors.white : Colors.icon}
-          />
+          {pending ? (
+            <ActivityIndicator
+              size="small"
+              color={wishlisted ? Colors.white : Colors.brand.primary}
+            />
+          ) : (
+            <MaterialCommunityIcons
+              name="heart"
+              size={18}
+              color={wishlisted ? Colors.white : Colors.icon}
+            />
+          )}
         </Pressable>
       </View>
 
