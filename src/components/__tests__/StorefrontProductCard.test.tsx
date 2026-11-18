@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from '@jest/globals';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { StorefrontProductCard } from '@/components/StorefrontProductCard';
 import { WishlistProvider } from '@/contexts/WishlistContext';
@@ -22,25 +22,16 @@ const product: CatalogItem = {
   purchaseUrl: null,
   companyName: 'Loja Aurora',
   companyPhotoUrl: 'https://cdn/logo.png',
-  imageUrl: null,
-  purchaseUrl: 'https://loja.com.br/blusa',
-  companyName: 'Loja',
   status: 'PUBLISHED',
   styles: [],
   sizes: [],
   materials: [],
 };
 
-function renderCard(item: CatalogItem) {
-  return render(
-    <WishlistProvider>
-      <StorefrontProductCard product={item} onPress={jest.fn()} />
-} as CatalogItem;
-
-async function renderCard(isInCloset?: boolean) {
+async function renderCard(item: CatalogItem = product, isInCloset?: boolean) {
   await render(
     <WishlistProvider>
-      <StorefrontProductCard product={product} onPress={() => {}} isInCloset={isInCloset} />
+      <StorefrontProductCard product={item} onPress={jest.fn()} isInCloset={isInCloset} />
     </WishlistProvider>,
   );
 }
@@ -69,19 +60,33 @@ describe('StorefrontProductCard', () => {
     expect(screen.getByTestId('store-logo-image')).toBeTruthy();
   });
 
+  it('keeps product information and the closet indicator when the logo fails to load', async () => {
+    await renderCard(product, true);
+
+    await fireEvent(screen.getByTestId('store-logo-image'), 'error', { error: 'failed' });
+
+    expect(screen.getByText('LA')).toBeTruthy();
+    expect(screen.queryByTestId('store-logo-image')).toBeNull();
+    expect(screen.getByText('Blusa Floral')).toBeTruthy();
+    expect(screen.getByText('No closet')).toBeTruthy();
+  });
+
   it('hides the store badge when the product has no store', async () => {
     await renderCard({ ...product, companyName: null, companyPhotoUrl: null });
 
     expect(screen.queryByLabelText(/Logo da loja/)).toBeNull();
+  });
+});
+
 describe('StorefrontProductCard — closet indicator', () => {
   it('shows the indicator for a product that is in the closet', async () => {
-    await renderCard(true);
+    await renderCard(product, true);
 
     expect(screen.getByText('No closet')).toBeTruthy();
   });
 
   it('does not show the indicator for a product that is not in the closet', async () => {
-    await renderCard(false);
+    await renderCard(product, false);
 
     expect(screen.queryByText('No closet')).toBeNull();
   });
@@ -93,7 +98,7 @@ describe('StorefrontProductCard — closet indicator', () => {
   });
 
   it('keeps showing the product data when it is in the closet', async () => {
-    await renderCard(true);
+    await renderCard(product, true);
 
     expect(screen.getByText('Blusa Floral')).toBeTruthy();
   });

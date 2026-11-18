@@ -3,8 +3,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
-import { StoreLogo } from '@/components/StoreLogo';
 import { InClosetBadge } from '@/components/InClosetBadge';
+import { StoreLogo } from '@/components/StoreLogo';
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/schemas/productSchema';

@@ -43,4 +43,20 @@ describe('StoreLogo', () => {
     expect(screen.getByText('A')).toBeTruthy();
     expect(screen.queryByTestId('store-logo-image')).toBeNull();
   });
+
+  it('loads a new logo after the previous url failed', async () => {
+    const view = await render(
+      <StoreLogo companyName="Loja Aurora" logoUrl="https://cdn/broken.png" />,
+    );
+    await fireEvent(screen.getByTestId('store-logo-image'), 'error', { error: 'failed' });
+
+    await view.rerender(
+      <StoreLogo companyName="Loja Aurora" logoUrl="https://cdn/replacement.png" />,
+    );
+
+    expect(screen.getByTestId('store-logo-image').props.source).toEqual({
+      uri: 'https://cdn/replacement.png',
+    });
+    expect(screen.queryByText('LA')).toBeNull();
+  });
 });
