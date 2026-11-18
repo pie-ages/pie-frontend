@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
 import { InClosetBadge } from '@/components/InClosetBadge';
+import { StoreLogo } from '@/components/StoreLogo';
 import { Colors } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/schemas/productSchema';
@@ -42,6 +43,13 @@ export function StorefrontProductCard({
           </View>
         )}
 
+        {product.companyName || product.companyPhotoUrl ? (
+          <StoreLogo
+            companyName={product.companyName}
+            logoUrl={product.companyPhotoUrl}
+            style={styles.storeLogo}
+          />
+        ) : null}
         {isInCloset && <InClosetBadge style={styles.inClosetBadge} />}
 
         <Pressable
