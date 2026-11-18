@@ -135,7 +135,9 @@ export default function LooksScreen() {
               },
             ]}
           />
-          <LooksViewModeToggle value={viewMode} onChange={handleChangeViewMode} />
+          {looks.length > 0 && (
+            <LooksViewModeToggle value={viewMode} onChange={handleChangeViewMode} />
+          )}
         </View>
 
         <View style={styles.body}>

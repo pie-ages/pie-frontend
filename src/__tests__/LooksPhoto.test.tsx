@@ -76,6 +76,19 @@ beforeEach(() => {
   });
 });
 
+it('shows the view selector only after at least one look exists', async () => {
+  mockLooks = [];
+  const { rerender } = await render(<LooksScreen />);
+
+  expect(screen.getByText('Você ainda não tem looks')).toBeTruthy();
+  expect(screen.queryByText('Seletor Grid/Foco')).toBeNull();
+
+  mockLooks = [{ id: 'look-1', name: 'Look de verão', imageUrl: null, items: [] }];
+  await rerender(<LooksScreen />);
+
+  expect(screen.getByText('Seletor Grid/Foco')).toBeTruthy();
+});
+
 async function addPhoto() {
   await render(<LooksScreen />);
   await fireEvent.press(
