@@ -118,7 +118,7 @@ export default function ColorimetryResultScreen() {
   }
 
   function goToStorefront(showConfirmation = false) {
-    if (Platform.OS !== 'web') router.dismissAll();
+    if (Platform.OS !== 'web' && router.canGoBack()) router.dismissAll();
     router.replace({
       pathname: '/Storefront',
       params: showConfirmation ? { colorimetryUpdated: 'true' } : undefined,
@@ -144,8 +144,9 @@ export default function ColorimetryResultScreen() {
   }
 
   function handleSkip() {
+    const waitForDismiss = Platform.OS === 'ios' && isConsentVisible;
     setIsConsentVisible(false);
-    if (Platform.OS === 'ios') {
+    if (waitForDismiss) {
       consentActionRef.current = 'skip';
     } else {
       goToStorefront();
@@ -225,6 +226,14 @@ export default function ColorimetryResultScreen() {
               accessibilityRole="button"
               accessibilityLabel="Tirar foto para iniciar a colorimetria"
             />
+            <AuthButton
+              title="Continuar sem foto"
+              variant="secondary"
+              onPress={handleSkip}
+              disabled={isCapturing}
+              accessibilityRole="button"
+              accessibilityLabel="Continuar sem foto"
+            />
           </View>
         </ScrollView>
         <ColorimetryConsentModal
@@ -263,6 +272,9 @@ export default function ColorimetryResultScreen() {
         </Pressable>
         <Pressable onPress={handleRedoColorimetry} hitSlop={8} accessibilityRole="button">
           <Text style={styles.redoLink}>Tirar outra foto</Text>
+        </Pressable>
+        <Pressable onPress={handleSkip} hitSlop={8} accessibilityRole="button">
+          <Text style={styles.redoLink}>Continuar sem foto</Text>
         </Pressable>
       </SafeAreaView>
     );

@@ -6,6 +6,14 @@ import { WishlistProvider } from '@/contexts/WishlistContext';
 import type { CatalogItem } from '@/schemas/productSchema';
 
 jest.mock('@/global.css', () => ({}));
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuth: () => ({ userId: 'user-1', isAuthenticated: true }),
+}));
+jest.mock('@/services/wishlist', () => ({
+  fetchWishlist: async () => [],
+  addWishlistItem: jest.fn(),
+  removeWishlistItem: jest.fn(),
+}));
 jest.mock('expo-image', () => {
   const { createElement } = jest.requireActual<typeof import('react')>('react');
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
