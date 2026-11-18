@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ColorimetrySuccessModal } from '@/components/ColorimetrySuccessModal';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -181,6 +182,7 @@ export default function StorefrontScreen() {
         </View>
       </View>
 
+      <ColorimetrySuccessModal />
       <StorefrontFilterSheet
         visible={isSheetVisible}
         groups={filterGroups}

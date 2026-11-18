@@ -32,7 +32,7 @@ export default function ColorimetryResultScreen() {
   const [hasConsented, setHasConsented] = useState(false);
   const [isConsentVisible, setIsConsentVisible] = useState(false);
   const capturingRef = useRef(false);
-  const openCameraOnDismissRef = useRef(false);
+  const consentActionRef = useRef<'camera' | 'skip' | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function ColorimetryResultScreen() {
     setActiveSlot(null);
   }
 
-  async function handleEnter() {
+  async function handleFinish() {
     if (isSaving) return;
     if (selectedFavoriteColors.length > MAX_COLORS) {
       setFavoriteError(
@@ -114,7 +114,15 @@ export default function ColorimetryResultScreen() {
       const success = await saveFavoriteColors(selectedFavoriteColors);
       if (!success) return;
     }
-    router.replace('/Storefront');
+    if (mountedRef.current) goToStorefront(true);
+  }
+
+  function goToStorefront(showConfirmation = false) {
+    if (Platform.OS !== 'web') router.dismissAll();
+    router.replace({
+      pathname: '/Storefront',
+      params: showConfirmation ? { colorimetryUpdated: 'true' } : undefined,
+    });
   }
 
   function handleTakePhoto() {
@@ -129,16 +137,26 @@ export default function ColorimetryResultScreen() {
     setHasConsented(true);
     setIsConsentVisible(false);
     if (Platform.OS === 'ios') {
-      openCameraOnDismissRef.current = true;
+      consentActionRef.current = 'camera';
     } else {
       void openCamera();
     }
   }
 
+  function handleSkip() {
+    setIsConsentVisible(false);
+    if (Platform.OS === 'ios') {
+      consentActionRef.current = 'skip';
+    } else {
+      goToStorefront();
+    }
+  }
+
   function handleConsentDismiss() {
-    if (!openCameraOnDismissRef.current) return;
-    openCameraOnDismissRef.current = false;
-    void openCamera();
+    const action = consentActionRef.current;
+    consentActionRef.current = null;
+    if (action === 'camera') void openCamera();
+    if (action === 'skip') goToStorefront();
   }
 
   async function openCamera() {
@@ -212,6 +230,7 @@ export default function ColorimetryResultScreen() {
         <ColorimetryConsentModal
           visible={isConsentVisible}
           onAccept={handleAcceptConsent}
+          onSkip={handleSkip}
           onClose={() => setIsConsentVisible(false)}
           onDismiss={handleConsentDismiss}
         />
@@ -303,7 +322,7 @@ export default function ColorimetryResultScreen() {
         )}
 
         <View style={styles.footer}>
-          <AuthButton title="Continuar" onPress={handleEnter} isLoading={isSaving} />
+          <AuthButton title="Concluir" onPress={handleFinish} isLoading={isSaving} />
 
           <Pressable
             onPress={handleRedoColorimetry}

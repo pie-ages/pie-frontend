@@ -83,7 +83,7 @@ export default function ProfileScreen() {
             title: 'Refazer',
             label: 'Refazer colorimetria',
             icon: 'refresh-cw',
-            onPress: () => router.push('/(screens)/ColorimetryResult'),
+            onPress: () => router.replace('/(screens)/ColorimetryResult'),
           }}
           errorTitle="Não foi possível carregar sua colorimetria"
           emptyTitle="Você ainda não fez sua colorimetria."
