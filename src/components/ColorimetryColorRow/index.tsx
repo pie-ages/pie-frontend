@@ -2,11 +2,10 @@ import { Feather } from '@expo/vector-icons';
 import { Pressable, View } from 'react-native';
 
 import { ColorSwatch } from '@/components/ColorSwatch';
-import { SectionActionButton, type SectionAction } from '@/components/SectionActionButton';
 import { ThemedText } from '@/components/ThemedText';
 import { Colors } from '@/constants/Theme';
 
-import { COMPACT_SWATCH_SIZE, styles } from './styles';
+import { styles } from './styles';
 
 type ColorimetryColorRowProps = {
   title: string;
@@ -14,10 +13,8 @@ type ColorimetryColorRowProps = {
   colors: (string | null)[];
   emptyColor?: string;
   disabled?: boolean;
-  compact?: boolean;
   onSlotPress?: (index: number) => void;
   onSlotRemove?: (index: number) => void;
-  action?: SectionAction;
 };
 
 export function ColorimetryColorRow({
@@ -26,10 +23,8 @@ export function ColorimetryColorRow({
   colors,
   emptyColor = '#999999',
   disabled = false,
-  compact = false,
   onSlotPress,
   onSlotRemove,
-  action,
 }: ColorimetryColorRowProps) {
   return (
     <View style={styles.card}>
@@ -37,11 +32,9 @@ export function ColorimetryColorRow({
         <ThemedText type="smallBold" style={styles.title}>
           {title}
         </ThemedText>
-
-        {action && <SectionActionButton {...action} />}
       </View>
 
-      <View style={[styles.row, onSlotPress && styles.editableRow, compact && styles.rowCompact]}>
+      <View style={[styles.row, onSlotPress && styles.editableRow]}>
         {colors.map((color, index) => {
           if (color === null && onSlotPress) {
             return (
@@ -60,14 +53,9 @@ export function ColorimetryColorRow({
           }
 
           return (
-            <View
-              key={`${color}-${index}`}
-              style={[styles.colorSlot, compact && styles.colorSlotCompact]}
-            >
+            <View key={`${color}-${index}`} style={styles.colorSlot}>
               <ColorSwatch
                 color={color ?? emptyColor}
-                size={compact ? COMPACT_SWATCH_SIZE : undefined}
-                outlined={compact}
                 selected={!!onSlotPress && color !== null}
                 onPress={onSlotPress && !disabled ? () => onSlotPress(index) : undefined}
               />
@@ -90,11 +78,7 @@ export function ColorimetryColorRow({
       </View>
 
       {caption && (
-        <ThemedText
-          type="small"
-          themeColor="textSecondary"
-          style={[styles.caption, compact && styles.captionCompact]}
-        >
+        <ThemedText type="small" themeColor="textSecondary" style={styles.caption}>
           {caption}
         </ThemedText>
       )}

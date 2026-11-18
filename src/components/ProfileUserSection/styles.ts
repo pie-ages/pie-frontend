@@ -7,16 +7,18 @@ export const styles = StyleSheet.create({
   card: {
     minHeight: PROFILE_AVATAR_SIZE + Spacing.three * 2 + 2,
     justifyContent: 'center',
+    backgroundColor: '#FFF3EE',
+    borderColor: '#EEDCD3',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
-    paddingHorizontal: Spacing.four,
   },
   info: {
     flex: 1,
-    gap: Spacing.one,
+    minWidth: 0,
+    gap: Spacing.half,
   },
   name: {
     fontSize: 20,
@@ -31,7 +33,7 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: Colors.brand.tertiary,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
   },

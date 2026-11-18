@@ -123,7 +123,7 @@ export default function ProfileScreen() {
           { paddingBottom: Math.max(insets.bottom + Spacing.two, Spacing.four) },
         ]}
       >
-        <ProductActionButton title="Sair" onPress={signOut} />
+        <ProductActionButton title="Sair" variant="outline" onPress={signOut} />
       </View>
     </SafeAreaView>
   );
@@ -132,12 +132,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#FAF7F5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
   },
   headerButton: {
@@ -163,13 +163,12 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.four,
-    paddingBottom: Spacing.four,
-    gap: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.three,
+    gap: Spacing.three,
   },
   footer: {
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.two,
-    backgroundColor: Colors.white,
   },
 });
