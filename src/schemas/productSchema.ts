@@ -16,6 +16,7 @@ export const catalogItemSchema = z.object({
   imageUrl: z.string().nullable(),
   purchaseUrl: z.string().nullable(),
   companyName: z.string().nullable(),
+  companyPhotoUrl: z.string().nullish(),
   status: z.string(),
   styles: z.array(z.string()),
   sizes: z.array(z.string()),
