@@ -1,14 +1,16 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LoadingState } from '@/components/LoadingState';
 import { ProductActionButton } from '@/components/ProductActionButton';
 import { ProductHeader } from '@/components/ProductHeader';
 import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { ProductSizeSelector } from '@/components/ProductSizeSelector';
 import { ThemedText } from '@/components/ThemedText';
+import { WishlistFeedback } from '@/components/WishlistFeedback';
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAddToWardrobe } from '@/hooks/UseAddToWardrobe';
@@ -43,7 +45,7 @@ function ProductDetails({ id }: { id?: string }) {
   const router = useRouter();
   const theme = useTheme();
   const { product, isLoading, error } = useProductDetails(id);
-  const { toggle, isInWishlist } = useWishlist();
+  const { toggle, isInWishlist, isPending, canChange } = useWishlist();
   const wardrobe = useAddToWardrobe(product);
   const [storeError, setStoreError] = useState<string | null>(null);
 
@@ -79,9 +81,8 @@ function ProductDetails({ id }: { id?: string }) {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.text} />
-        </View>
+        <ProductHeader title="" onClose={handleClose} />
+        <LoadingState text="Carregando produto..." />
       </SafeAreaView>
     );
   }
@@ -101,6 +102,18 @@ function ProductDetails({ id }: { id?: string }) {
 
   const canOpenStore = product.available && isHttpUrl(product.purchaseUrl);
   const storeName = product.companyName ?? 'parceira';
+  const galleryImages = [
+    ...new Set(
+      [...product.images]
+        .sort(
+          (a, b) => Number(b.isPrimary) - Number(a.isPrimary) || a.displayOrder - b.displayOrder,
+        )
+        .map((image) => image.url.trim())
+        .filter(Boolean),
+    ),
+  ];
+  const images =
+    galleryImages.length > 0 ? galleryImages : product.imageUrl ? [product.imageUrl] : [];
 
   const formattedPrice = product.price.toLocaleString('pt-BR', {
     style: 'currency',
@@ -113,8 +126,11 @@ function ProductDetails({ id }: { id?: string }) {
         title={product.name}
         onClose={handleClose}
         isWishlisted={isInWishlist(product.id)}
+        isWishlistPending={isPending(product.id)}
+        isWishlistDisabled={!canChange}
         onToggleWishlist={() => toggle(toWishlistItem(product))}
       />
+      <WishlistFeedback />
 
       <ScrollView
         style={styles.scrollView}
@@ -122,7 +138,7 @@ function ProductDetails({ id }: { id?: string }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.imageWrapper}>
-          <ProductImageCarousel images={product.imageUrl ? [product.imageUrl] : []} />
+          <ProductImageCarousel key={product.id} images={images} />
         </View>
 
         <View style={styles.sectionsWrapper}>

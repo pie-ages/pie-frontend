@@ -9,10 +9,14 @@ import {
   StatusBar,
   Animated,
 } from 'react-native';
+import Reanimated, { FadeInDown, FadeInUp, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PERSONAL_STYLE_IMAGES } from '@/constants/PersonalStyleImages';
 import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
-import { availableStyles, mockUserIdentifiedStyles, StyleType } from '@/mocks/styleMocks';
+import { useEditFavoriteStyles } from '@/hooks/UseEditFavoriteStyles';
+import { useSessionExpiredRedirect } from '@/hooks/UseSessionExpiredRedirect';
+import type { PersonalStyle } from '@/types/IdentifiedStyle';
 
 const FadeImage = ({ uri, isActive }: { uri: string; isActive: boolean }) => {
   const [fadeAnim] = useState(() => new Animated.Value(isActive ? 1 : 0));
@@ -40,7 +44,7 @@ const FadeImage = ({ uri, isActive }: { uri: string; isActive: boolean }) => {
         { position: 'absolute', width: '100%', height: '100%' },
         {
           opacity: fadeAnim,
-          transform: [{ scale: scaleAnim as any }],
+          transform: [{ scale: scaleAnim }],
         },
       ]}
       resizeMode="cover"
@@ -49,63 +53,69 @@ const FadeImage = ({ uri, isActive }: { uri: string; isActive: boolean }) => {
 };
 
 export default function StyleSelectionScreen() {
-  const [selectedStyleIds, setSelectedStyleIds] = useState<StyleType[]>(mockUserIdentifiedStyles);
+  const {
+    styleOptions,
+    selectedIds,
+    toggle,
+    isLoading,
+    isSaving,
+    canSave,
+    hasLoadError,
+    retryLoad,
+    error,
+    sessionExpired,
+    save,
+  } = useEditFavoriteStyles(() => router.push('/(screens)/ColorimetryResult'));
+  const [previewStyle, setPreviewStyle] = useState<PersonalStyle | null>(null);
+  const activeBgStyleId =
+    previewStyle && selectedIds.has(previewStyle)
+      ? previewStyle
+      : selectedIds.values().next().value;
 
-  const [activeBgStyleId, setActiveBgStyleId] = useState<StyleType>(
-    mockUserIdentifiedStyles[0] || 'classic',
-  );
+  useSessionExpiredRedirect(sessionExpired);
 
   useEffect(() => {
     StatusBar.setBarStyle('light-content');
     return () => StatusBar.setBarStyle('dark-content');
   }, []);
 
-  const handleToggleStyle = (styleId: StyleType) => {
-    setSelectedStyleIds((prev) => {
-      const isAlreadySelected = prev.includes(styleId);
-
-      if (isAlreadySelected) {
-        if (prev.length === 1) return prev;
-
-        const updatedList = prev.filter((id) => id !== styleId);
-
-        if (activeBgStyleId === styleId && updatedList.length > 0) {
-          setActiveBgStyleId(updatedList[updatedList.length - 1]);
-        }
-
-        return updatedList;
-      } else {
-        setActiveBgStyleId(styleId);
-        return [...prev, styleId];
-      }
-    });
-  };
-
   return (
     <View style={styles.container}>
-      {availableStyles.map((style) => (
-        <FadeImage key={style.id} uri={style.bgImageUrl} isActive={style.id === activeBgStyleId} />
+      {Object.entries(PERSONAL_STYLE_IMAGES).map(([id, uri]) => (
+        <FadeImage key={id} uri={uri} isActive={id === (activeBgStyleId ?? 'CLASSICO')} />
       ))}
 
       <View style={styles.overlay} />
 
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.headerArea}>
+        <Reanimated.View
+          entering={FadeInDown.duration(380).reduceMotion(ReduceMotion.System)}
+          style={styles.headerArea}
+        >
           <Text style={styles.headerTitle}>Caso você queira personalizar seu estilo</Text>
           <Text style={styles.headerSubtitle}>
             Escolha um estilo para começar. {'\n'}Você pode ajustar os detalhes depois.
           </Text>
-        </View>
+        </Reanimated.View>
 
-        <View style={styles.gridContainer}>
-          {availableStyles.map((style) => {
-            const isSelected = selectedStyleIds.includes(style.id);
+        <Reanimated.View
+          entering={FadeInDown.duration(420).delay(100).reduceMotion(ReduceMotion.System)}
+          style={styles.gridContainer}
+        >
+          {styleOptions.map((style) => {
+            const isSelected = selectedIds.has(style.id);
 
             return (
               <TouchableOpacity
                 key={style.id}
                 activeOpacity={0.8}
-                onPress={() => handleToggleStyle(style.id)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                disabled={isLoading || isSaving}
+                onPress={() => {
+                  toggle(style.id);
+                  setPreviewStyle(style.id);
+                }}
                 style={[
                   styles.styleButton,
                   isSelected ? styles.styleButtonActive : styles.styleButtonInactive,
@@ -122,19 +132,29 @@ export default function StyleSelectionScreen() {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </Reanimated.View>
 
-        <View style={styles.footer}>
+        <Reanimated.View
+          entering={FadeInUp.duration(380).delay(180).reduceMotion(ReduceMotion.System)}
+          style={styles.footer}
+        >
+          {error && (
+            <Text accessibilityRole="alert" style={styles.headerSubtitle}>
+              {error}
+            </Text>
+          )}
           <TouchableOpacity
             style={styles.continueButton}
             activeOpacity={0.8}
-            onPress={() => {
-              router.push('/(screens)/ColorimetryResult');
-            }}
+            accessibilityRole="button"
+            disabled={!canSave && !hasLoadError}
+            onPress={hasLoadError ? retryLoad : save}
           >
-            <Text style={styles.continueButtonText}>Continuar</Text>
+            <Text style={styles.continueButtonText}>
+              {hasLoadError ? 'Tentar novamente' : isSaving ? 'Salvando...' : 'Continuar'}
+            </Text>
           </TouchableOpacity>
-        </View>
+        </Reanimated.View>
       </SafeAreaView>
     </View>
   );

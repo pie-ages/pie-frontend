@@ -1,18 +1,14 @@
 import { StyleSheet } from 'react-native';
 
+import { LOOK_EMPTY_CARD_ASPECT_RATIO } from '@/components/LookPiecesStack/styles';
 import { Colors } from '@/constants/Theme';
 
 export const styles = StyleSheet.create({
   face: {
     width: '100%',
-    backfaceVisibility: 'hidden',
   },
   back: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    aspectRatio: LOOK_EMPTY_CARD_ASPECT_RATIO,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: Colors.light.backgroundElement,

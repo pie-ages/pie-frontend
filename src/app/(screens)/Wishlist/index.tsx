@@ -4,34 +4,63 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { InClosetBadge } from '@/components/InClosetBadge';
+import { LoadingState } from '@/components/LoadingState';
+import { WishlistFeedback } from '@/components/WishlistFeedback';
 import { BrandColors, Colors, Spacing } from '@/constants/Theme';
 import { useWishlist } from '@/contexts/WishlistContext';
-import type { CatalogItem } from '@/schemas/productSchema';
+import { useWardrobeProductIds } from '@/hooks/UseWardrobeProductIds';
+import type { WishlistProduct } from '@/schemas/wishlistSchema';
 import { formatColor } from '@/utils/format-color';
 import { formatPrice } from '@/utils/format-price';
 
 export default function WishlistScreen() {
   const router = useRouter();
-  const { items, remove } = useWishlist();
+  const { items, remove, isLoading, error, retry, isPending } = useWishlist();
+  const inClosetProductIds = useWardrobeProductIds();
 
   function handleClose() {
     if (router.canGoBack()) router.back();
+    else router.replace('/Storefront');
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Pressable onPress={handleClose} style={styles.closeButton} hitSlop={8}>
+        <Pressable
+          onPress={handleClose}
+          style={styles.closeButton}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Fechar Wishlist"
+        >
           <Feather name="x" size={24} color={BrandColors.primary} />
         </Pressable>
         <Text style={styles.title}>Wishlist</Text>
         <View style={styles.headerSpacer} />
       </View>
 
-      {items.length === 0 ? (
-        <EmptyState onExplore={handleClose} />
+      {isLoading ? (
+        <LoadingState text="Carregando Wishlist..." />
+      ) : error && items.length === 0 ? (
+        <ErrorState
+          title="Não foi possível carregar sua Wishlist"
+          subtitle={error}
+          onRetry={retry}
+        />
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={<MaterialCommunityIcons name="heart" size={36} color={BrandColors.primary} />}
+          title="Sua lista de desejos está vazia"
+          subtitle="Toque no ícone de coração nas peças da Vitrine para salvar seus itens favoritos aqui!"
+          actionLabel="Explorar Vitrine"
+          onAction={() => router.dismissTo('/Storefront')}
+        />
       ) : (
         <FlatList
           data={items.length % 2 !== 0 ? [...items, null] : items}
@@ -40,9 +69,15 @@ export default function WishlistScreen() {
           contentContainerStyle={styles.gridContent}
           columnWrapperStyle={styles.columnWrapper}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={<WishlistFeedback />}
           renderItem={({ item }) =>
             item ? (
-              <WishlistCard product={item} onRemove={() => remove(item.id)} />
+              <WishlistCard
+                product={item}
+                onRemove={() => remove(item.id)}
+                isRemoving={isPending(item.id)}
+                isInCloset={inClosetProductIds.has(item.id)}
+              />
             ) : (
               <View style={styles.cardPlaceholder} />
             )
@@ -53,34 +88,26 @@ export default function WishlistScreen() {
   );
 }
 
-function EmptyState({ onExplore }: { onExplore: () => void }) {
-  return (
-    <View style={styles.emptyContainer}>
-      <View style={styles.emptyIconCircle}>
-        <MaterialCommunityIcons name="heart" size={40} color={BrandColors.primary} />
-      </View>
-      <Text style={styles.emptyTitle}>Sua lista de desejos está vazia</Text>
-      <Text style={styles.emptySubtitle}>
-        Toque no ícone de prancheta nas peças da Vitrine para salvar seus itens favoritos aqui!
-      </Text>
-      <Pressable
-        onPress={onExplore}
-        style={({ pressed }) => [styles.exploreButton, pressed && styles.exploreButtonPressed]}
-      >
-        <Text style={styles.exploreButtonText}>Explorar Vitrine</Text>
-      </Pressable>
-    </View>
-  );
-}
+type WishlistCardProps = {
+  product: WishlistProduct;
+  onRemove: () => void;
+  isInCloset: boolean;
+  isRemoving: boolean;
+};
 
-function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: () => void }) {
+function WishlistCard({ product, onRemove, isInCloset, isRemoving }: WishlistCardProps) {
   async function handleViewInStore() {
     if (!product.purchaseUrl) return;
     await WebBrowser.openBrowserAsync(product.purchaseUrl);
   }
 
   return (
-    <View style={styles.card}>
+    <Animated.View
+      entering={FadeIn.duration(220).reduceMotion(ReduceMotion.System)}
+      exiting={FadeOut.duration(180).reduceMotion(ReduceMotion.System)}
+      layout={LinearTransition.duration(220).reduceMotion(ReduceMotion.System)}
+      style={styles.card}
+    >
       <View style={styles.cardImageContainer}>
         {product.imageUrl ? (
           <Image source={{ uri: product.imageUrl }} style={styles.cardImage} contentFit="cover" />
@@ -90,10 +117,16 @@ function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: (
           </View>
         )}
 
-        {product.status !== 'PUBLISHED' && <View style={styles.unavailableOverlay} />}
+        {!product.available && <View style={styles.unavailableOverlay} />}
+
+        {isInCloset && <InClosetBadge style={styles.inClosetBadge} />}
 
         <Pressable
           onPress={onRemove}
+          disabled={isRemoving}
+          accessibilityRole="button"
+          accessibilityLabel={`Remover ${product.name} da Wishlist`}
+          accessibilityState={{ busy: isRemoving }}
           style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
           hitSlop={4}
         >
@@ -108,7 +141,7 @@ function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: (
         {product.color ? <Text style={styles.cardColor}>{formatColor(product.color)}</Text> : null}
         <Text style={styles.cardPrice}>{formatPrice(product.price)}</Text>
 
-        {product.status === 'PUBLISHED' ? (
+        {product.available && product.purchaseUrl ? (
           <Pressable
             onPress={handleViewInStore}
             style={({ pressed }) => [styles.storeButton, pressed && styles.storeButtonPressed]}
@@ -119,7 +152,7 @@ function WishlistCard({ product, onRemove }: { product: CatalogItem; onRemove: (
           <Text style={styles.unavailableLabel}>Indisponível</Text>
         )}
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -194,6 +227,11 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
+  inClosetBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+  },
   removeButton: {
     position: 'absolute',
     top: 8,
@@ -252,50 +290,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.light.textSecondary,
     textAlign: 'center',
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.five,
-    gap: Spacing.two,
-  },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: BrandColors.tertiary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.one,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: BrandColors.primary,
-    textAlign: 'center',
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  exploreButton: {
-    marginTop: Spacing.two,
-    width: '100%',
-    height: 52,
-    borderRadius: 1000,
-    backgroundColor: BrandColors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  exploreButtonPressed: {
-    opacity: 0.85,
-  },
-  exploreButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.white,
   },
 });

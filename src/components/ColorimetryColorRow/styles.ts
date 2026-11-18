@@ -2,8 +2,6 @@ import { StyleSheet } from 'react-native';
 
 import { Colors, Spacing } from '@/constants/Theme';
 
-export const COMPACT_SWATCH_SIZE = 40;
-
 export const styles = StyleSheet.create({
   card: {
     backgroundColor: '#F8F8F8',
@@ -32,10 +30,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     marginBottom: Spacing.two,
   },
-  rowCompact: {
-    justifyContent: 'space-evenly',
-    marginBottom: 0,
-  },
   caption: {
     color: '#000000',
     fontSize: 14,
@@ -60,10 +54,6 @@ export const styles = StyleSheet.create({
     width: 48,
     height: 48,
   },
-  colorSlotCompact: {
-    width: COMPACT_SWATCH_SIZE,
-    height: COMPACT_SWATCH_SIZE,
-  },
   removeButton: {
     position: 'absolute',
     top: 0,
@@ -76,8 +66,5 @@ export const styles = StyleSheet.create({
     borderColor: '#661414',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  captionCompact: {
-    textAlign: 'center',
   },
 });

@@ -1,7 +1,8 @@
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, ReduceMotion, ZoomIn } from 'react-native-reanimated';
 
 import { useLayoutScale } from '@/hooks/UseLayoutScale';
 import type { StyleQuizOption } from '@/schemas/styleSchema';
@@ -49,8 +50,13 @@ export function StyleQuizChoicePreview({
       statusBarTranslucent
       onRequestClose={onBack}
     >
-      <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
-      <View style={styles.dim} />
+      <BlurView
+        intensity={45}
+        tint="light"
+        blurMethod="dimezisBlurViewSdk31Plus"
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={[styles.dim, Platform.OS === 'android' && styles.dimAndroid]} />
 
       <Pressable
         style={StyleSheet.absoluteFill}
@@ -60,7 +66,11 @@ export function StyleQuizChoicePreview({
       />
 
       {shownAnswer ? (
-        <View style={styles.content} pointerEvents="box-none">
+        <Animated.View
+          entering={ZoomIn.duration(220).reduceMotion(ReduceMotion.System)}
+          style={styles.content}
+          pointerEvents="box-none"
+        >
           {selectedOption ? (
             <View style={styles.card}>
               <View style={styles.imageContainer}>
@@ -84,7 +94,7 @@ export function StyleQuizChoicePreview({
           ) : null}
 
           {shownAnswer.type !== 'option' ? (
-            <>
+            <View style={styles.multiSelectionCard}>
               <Text style={styles.title} allowFontScaling={false}>
                 {TITLES[shownAnswer.type]}
               </Text>
@@ -109,10 +119,13 @@ export function StyleQuizChoicePreview({
                   </View>
                 ))}
               </View>
-            </>
+            </View>
           ) : null}
 
-          <View style={styles.actions}>
+          <Animated.View
+            entering={FadeIn.delay(60).duration(180).reduceMotion(ReduceMotion.System)}
+            style={styles.actions}
+          >
             <Pressable
               onPress={onBack}
               accessibilityRole="button"
@@ -136,8 +149,8 @@ export function StyleQuizChoicePreview({
                 Confirmar
               </Text>
             </Pressable>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       ) : null}
     </Modal>
   );

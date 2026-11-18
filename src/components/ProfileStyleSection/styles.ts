@@ -7,7 +7,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.two,
-    paddingHorizontal: Spacing.four,
   },
   pill: {
     backgroundColor: Colors.brand.tertiary,
@@ -22,6 +21,6 @@ export const styles = StyleSheet.create({
   },
   caption: {
     color: Colors.light.textSecondary,
-    paddingHorizontal: Spacing.four,
+    lineHeight: 20,
   },
 });

@@ -18,9 +18,10 @@ export function SectionActionButton({ title, label, icon, onPress }: SectionActi
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
+      hitSlop={4}
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}
     >
-      <Feather name={icon as never} size={12} color={Colors.white} />
+      <Feather name={icon as never} size={14} color={Colors.brand.primary} />
       <Text style={styles.text}>{title}</Text>
     </Pressable>
   );

@@ -37,6 +37,7 @@ export function ProfileUserSection({ status, user, onRetry, onEdit }: ProfileUse
               onPress={onEdit}
               accessibilityRole="button"
               accessibilityLabel="Editar perfil"
+              hitSlop={4}
               style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
             >
               <Feather name="edit-2" size={18} color={Colors.brand.primary} />
@@ -56,7 +57,7 @@ export function ProfileUserSection({ status, user, onRetry, onEdit }: ProfileUse
           onRetry={onRetry}
         />
       ) : (
-        <ActivityIndicator color={Colors.brand.accent} />
+        <ActivityIndicator color={Colors.brand.primary} />
       )}
     </ProfileSectionCard>
   );

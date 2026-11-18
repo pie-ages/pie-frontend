@@ -15,9 +15,6 @@ export const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#E5E7EB',
     width: '100%',
-    position: 'absolute',
-    top: 30,
-    zIndex: -1,
   },
   listContent: {
     paddingLeft: 16,

@@ -125,6 +125,69 @@ describe('useLookForm', () => {
     expect(result.current.error).toMatch(/Não há peças disponíveis/);
   });
 
+  it('filters selected pieces and categories before limiting suggestions', async () => {
+    jest
+      .mocked(fetchLookSuggestion)
+      .mockResolvedValue([
+        calca,
+        makePiece('outra-calca', 'calca'),
+        makePiece('short', 'Short'),
+        makePiece('saia', 'Saia'),
+        makePiece('bermuda', 'Bermuda'),
+        makePiece('macacao', 'Macacão'),
+        camisa,
+        casaco,
+      ]);
+    const { result } = await renderHook(() => useLookForm());
+    await act(async () => result.current.choosePieceCount(3));
+    await act(async () => result.current.assignPiece(0, calca));
+    await act(async () => {
+      await result.current.requestSuggestion();
+    });
+    expect(result.current.suggestion).toEqual([camisa, casaco]);
+    await act(async () => result.current.acceptSuggestion());
+    expect(result.current.slots).toEqual([casaco, camisa, calca]);
+  });
+
+  it.each([
+    {
+      selected: makePiece('vestido', 'Vestido'),
+      candidates: [camisa, calca, makePiece('outro-vestido', 'Vestidos'), casaco, tenis],
+      expected: [casaco, tenis],
+    },
+    {
+      selected: camisa,
+      candidates: [makePiece('blusa', 'Blusa'), makePiece('vestido', 'Vestido'), calca, casaco],
+      expected: [calca, casaco],
+    },
+  ])(
+    'complements $selected.category without conflicting garment roles',
+    async ({ selected, candidates, expected }) => {
+      jest.mocked(fetchLookSuggestion).mockResolvedValue(candidates);
+      const { result } = await renderHook(() => useLookForm());
+      await act(async () => result.current.choosePieceCount(3));
+      await act(async () => result.current.assignPiece(0, selected));
+      await act(async () => {
+        await result.current.requestSuggestion();
+      });
+      expect(result.current.suggestion).toEqual(expected);
+    },
+  );
+
+  it('checks the current composition again when accepting an older suggestion', async () => {
+    jest.mocked(fetchLookSuggestion).mockResolvedValue([camisa, casaco]);
+    const { result } = await renderHook(() => useLookForm());
+    const manual = makePiece('camisa-manual', 'Camisa');
+    await act(async () => result.current.choosePieceCount(3));
+    await act(async () => result.current.assignPiece(0, tenis));
+    await act(async () => {
+      await result.current.requestSuggestion();
+    });
+    await act(async () => result.current.assignPiece(1, manual));
+    await act(async () => result.current.acceptSuggestion());
+    expect(result.current.slots).toEqual([casaco, manual, tenis]);
+  });
+
   describe('saveLook', () => {
     const makeProduct = (id: string, category: string): WardrobePiece => ({
       id,

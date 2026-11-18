@@ -1,5 +1,53 @@
 import type { WardrobePiece } from '../types/Look';
 
+import { lookPieceRank } from './look-order';
+
+const ACCENT_MARKS = /[\u0300-\u036f]/g;
+const KEEP_PLURAL = new Set(['tenis', 'outros', 'oculos']);
+
+const CANONICAL_TITLES: Record<string, string> = {
+  calca: 'Calça',
+  calcado: 'Calçado',
+  sandalia: 'Sandália',
+  tenis: 'Tênis',
+  macacao: 'Macacão',
+  oculos: 'Óculos',
+  outros: 'Outros',
+};
+
+function normalizeCategoryKey(raw: string): string {
+  const ascii = raw.trim().normalize('NFD').replace(ACCENT_MARKS, '').toLowerCase();
+  if (!ascii || ascii === 'outro') return 'outros';
+  if (ascii === 'macacoes') return 'macacao';
+  if (ascii === 'moletons') return 'moletom';
+  if (!KEEP_PLURAL.has(ascii) && ascii.length > 3 && ascii.endsWith('s')) {
+    return ascii.slice(0, -1);
+  }
+  return ascii;
+}
+
+export function formatWardrobeCategory(category: string | null | undefined): string {
+  const trimmed = category?.trim() ?? '';
+  if (!trimmed) return 'Outros';
+
+  const key = normalizeCategoryKey(trimmed);
+  if (CANONICAL_TITLES[key]) return CANONICAL_TITLES[key];
+
+  const singular =
+    !KEEP_PLURAL.has(key) && trimmed.length > 3 && /[sS]$/.test(trimmed)
+      ? trimmed.slice(0, -1)
+      : trimmed;
+
+  return singular.charAt(0).toUpperCase() + singular.slice(1).toLowerCase();
+}
+
+export function sortWardrobeRows<T extends { title: string }>(rows: T[]): T[] {
+  return rows
+    .map((row, index) => ({ row, index }))
+    .sort((a, b) => lookPieceRank(a.row.title) - lookPieceRank(b.row.title) || a.index - b.index)
+    .map(({ row }) => row);
+}
+
 export type WardrobeRowPage = {
   id: string;
   title: string;
@@ -10,14 +58,16 @@ export type WardrobeRowPage = {
 export function groupWardrobePieces(pieces: WardrobePiece[]): WardrobeRowPage[] {
   const rows = new Map<string, WardrobeRowPage>();
   for (const piece of pieces) {
-    let row = rows.get(piece.category);
+    const category = formatWardrobeCategory(piece.category);
+    const normalizedPiece = piece.category === category ? piece : { ...piece, category };
+    let row = rows.get(category);
     if (!row) {
-      row = { id: piece.category, title: piece.category, items: [], hasNext: false };
-      rows.set(piece.category, row);
+      row = { id: category, title: category, items: [], hasNext: false };
+      rows.set(category, row);
     }
-    row.items.push(piece);
+    row.items.push(normalizedPiece);
   }
-  return [...rows.values()];
+  return sortWardrobeRows([...rows.values()]);
 }
 
 export type WardrobeFetch = (params: {
@@ -78,16 +128,33 @@ export function wardrobeReducer(state: WardrobeState, action: WardrobeAction): W
     case 'load':
       return INITIAL_WARDROBE_STATE;
     case 'loaded': {
-      const rows = action.rows.filter((row) => row.items.length > 0);
+      const merged = new Map<string, WardrobeRow>();
+      for (const rawRow of action.rows) {
+        if (rawRow.items.length === 0) continue;
+        const category = formatWardrobeCategory(rawRow.title || rawRow.id);
+        const normalizedItems = rawRow.items.map((item) =>
+          item.category === category ? item : { ...item, category },
+        );
+        const existing = merged.get(category);
+        if (existing) {
+          existing.items = appendUniquePieces(existing.items, normalizedItems);
+          existing.hasNext = existing.hasNext || rawRow.hasNext;
+        } else {
+          merged.set(category, {
+            id: category,
+            title: category,
+            items: appendUniquePieces([], normalizedItems),
+            hasNext: rawRow.hasNext,
+            page: 0,
+            status: 'idle',
+          });
+        }
+      }
+      const rows = sortWardrobeRows([...merged.values()]);
       return {
         status: rows.length === 0 ? 'empty' : 'success',
         rowIds: rows.map((row) => row.id),
-        rows: Object.fromEntries(
-          rows.map((row) => [
-            row.id,
-            { ...row, items: appendUniquePieces([], row.items), page: 0, status: 'idle' },
-          ]),
-        ),
+        rows: Object.fromEntries(rows.map((row) => [row.id, row])),
       };
     }
     case 'loadFailed':

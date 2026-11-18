@@ -1,8 +1,9 @@
-import type { RegisterFormData } from '@/schemas/authSchema';
+import type { AccountSex } from '@/schemas/accountSexSchema';
+import type { CreateUserPayload } from '@/schemas/authSchema';
 import { currentUserSchema, type CurrentUser } from '@/schemas/userSchema';
 import { apiGetAuth, apiPost, apiPutAuth, parseResponse } from '@/services/client';
 
-export type RegisterUserPayload = Omit<RegisterFormData, 'confirmPassword'>;
+export type RegisterUserPayload = CreateUserPayload;
 
 export async function fetchCurrentUser(signal?: AbortSignal): Promise<CurrentUser> {
   return parseResponse(currentUserSchema, await apiGetAuth('/api/users/me', signal));
@@ -15,6 +16,7 @@ export async function registerUser(payload: RegisterUserPayload): Promise<Curren
 export type UpdateUserPayload = {
   name: string;
   photoUrl: string | null;
+  sex?: AccountSex;
 };
 
 export async function updateCurrentUser(

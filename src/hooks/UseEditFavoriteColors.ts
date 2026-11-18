@@ -11,6 +11,7 @@ const SAVE_ERROR = 'Não foi possível salvar suas cores favoritas. Tente novame
 
 export function useEditFavoriteColors() {
   const [slots, setSlots] = useState<(string | null)[]>(Array(MAX_FAVORITE_COLORS).fill(null));
+  const [initialColors, setInitialColors] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -22,6 +23,7 @@ export function useEditFavoriteColors() {
     fetchPreferences(controller.signal)
       .then(({ favoriteColors }) => {
         if (controller.signal.aborted) return;
+        setInitialColors(favoriteColors.map((color) => color.toUpperCase()));
         setSlots(
           Array.from(
             { length: Math.max(MAX_FAVORITE_COLORS, favoriteColors.length) },
@@ -67,10 +69,17 @@ export function useEditFavoriteColors() {
   }, []);
 
   const colors = slots.filter((slot): slot is string => slot !== null);
-  const canSave = !isLoading && !isSaving;
+  const canSave = initialColors !== null && !isLoading && !isSaving;
 
   const save = useCallback(async () => {
-    if (!canSave) return;
+    if (!canSave || !initialColors) return;
+    if (
+      colors.length === initialColors.length &&
+      colors.every((color, index) => color.toUpperCase() === initialColors[index])
+    ) {
+      router.back();
+      return;
+    }
     if (colors.length > MAX_FAVORITE_COLORS) {
       setError(
         `Você pode escolher no máximo ${MAX_FAVORITE_COLORS} cores favoritas. Remova as cores excedentes para salvar.`,
@@ -82,14 +91,14 @@ export function useEditFavoriteColors() {
     setError(null);
     try {
       await updateFavoriteColors(colors);
-      router.back();
+      router.dismissTo({ pathname: '/(screens)/Profile', params: { updatedSection: 'colors' } });
     } catch (saveError) {
       if (isSessionExpiredError(saveError)) setSessionExpired(true);
       else setError(SAVE_ERROR);
     } finally {
       setIsSaving(false);
     }
-  }, [canSave, colors]);
+  }, [canSave, colors, initialColors]);
 
   return { slots, isLoading, isSaving, error, sessionExpired, selectColor, removeColor, save };
 }

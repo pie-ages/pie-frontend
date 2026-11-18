@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 
 import { LookImage } from '@/components/LookImage';
 import { LookPiecesStack } from '@/components/LookPiecesStack';
@@ -14,35 +15,24 @@ type LookFlipCardProps = {
   interactive: boolean;
   onSelect: () => void;
   onAddPhoto?: (lookId: string) => void;
+  isUploadingPhoto?: boolean;
 };
 
-export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFlipCardProps) {
+export function LookFlipCard({
+  look,
+  interactive,
+  onSelect,
+  onAddPhoto,
+  isUploadingPhoto,
+}: LookFlipCardProps) {
   const hasPhoto = Boolean(look.imageUrl);
   const [flipped, setFlipped] = useState(false);
   const [wasInteractive, setWasInteractive] = useState(interactive);
-  const [rotation] = useState(() => new Animated.Value(0));
 
   if (wasInteractive !== interactive) {
     setWasInteractive(interactive);
     if (!interactive) setFlipped(false);
   }
-
-  useEffect(() => {
-    Animated.timing(rotation, {
-      toValue: flipped ? 1 : 0,
-      duration: 350,
-      useNativeDriver: true,
-    }).start();
-  }, [flipped, rotation]);
-
-  const frontRotateY = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
-  const backRotateY = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['180deg', '360deg'],
-  });
 
   function handleFrontPress() {
     if (!interactive) {
@@ -58,11 +48,12 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
       ? `${look.name}: ver foto usando o look`
       : `${look.name}: adicionar foto usando o look`;
 
-  return (
-    <View>
+  if (!flipped) {
+    return (
       <Animated.View
-        pointerEvents={flipped ? 'none' : 'auto'}
-        style={[styles.face, { transform: [{ perspective: 1000 }, { rotateY: frontRotateY }] }]}
+        key="pieces"
+        entering={FadeIn.duration(180).reduceMotion(ReduceMotion.System)}
+        style={styles.face}
       >
         <Pressable
           onPress={handleFrontPress}
@@ -77,52 +68,50 @@ export function LookFlipCard({ look, interactive, onSelect, onAddPhoto }: LookFl
           </View>
         ) : null}
       </Animated.View>
+    );
+  }
 
-      <Animated.View
-        pointerEvents={flipped ? 'auto' : 'none'}
-        style={[
-          styles.face,
-          styles.back,
-          { transform: [{ perspective: 1000 }, { rotateY: backRotateY }] },
-        ]}
-      >
-        {hasPhoto ? (
-          <Pressable
-            onPress={() => setFlipped(false)}
-            accessibilityRole="button"
-            accessibilityLabel={`${look.name}: voltar para as peças`}
-            style={styles.backFill}
-          >
-            <LookImage
-              uri={look.imageUrl}
-              style={styles.backImage}
-              accessibilityLabel={look.name}
-            />
-          </Pressable>
-        ) : (
-          <View style={styles.addPhoto}>
-            <Feather name="camera" size={28} color={Colors.light.textSecondary} />
-            <Text style={styles.addPhotoText}>Você ainda não tem uma foto usando este look</Text>
-            <Pressable
-              onPress={() => onAddPhoto?.(look.id)}
-              accessibilityRole="button"
-              accessibilityLabel="Adicionar foto usando o look"
-              style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}
-            >
-              <Feather name="plus" size={16} color={Colors.white} />
-              <Text style={styles.addButtonText}>Adicionar foto</Text>
-            </Pressable>
-          </View>
-        )}
+  return (
+    <Animated.View
+      key="photo"
+      entering={FadeIn.duration(180).reduceMotion(ReduceMotion.System)}
+      style={[styles.face, styles.back]}
+    >
+      {hasPhoto ? (
         <Pressable
           onPress={() => setFlipped(false)}
           accessibilityRole="button"
-          accessibilityLabel="Voltar para as peças"
-          style={styles.badge}
+          accessibilityLabel={`${look.name}: voltar para as peças`}
+          style={styles.backFill}
         >
-          <Feather name="layers" size={14} color={Colors.white} />
+          <LookImage uri={look.imageUrl} style={styles.backImage} accessibilityLabel={look.name} />
         </Pressable>
-      </Animated.View>
-    </View>
+      ) : (
+        <View style={styles.addPhoto}>
+          <Feather name="camera" size={28} color={Colors.light.textSecondary} />
+          <Text style={styles.addPhotoText}>Você ainda não tem uma foto usando este look</Text>
+          <Pressable
+            onPress={() => onAddPhoto?.(look.id)}
+            disabled={isUploadingPhoto}
+            accessibilityRole="button"
+            accessibilityLabel="Adicionar foto usando o look"
+            style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}
+          >
+            <Feather name="plus" size={16} color={Colors.white} />
+            <Text style={styles.addButtonText}>
+              {isUploadingPhoto ? 'Enviando foto...' : 'Adicionar foto'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      <Pressable
+        onPress={() => setFlipped(false)}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar para as peças"
+        style={styles.badge}
+      >
+        <Feather name="layers" size={14} color={Colors.white} />
+      </Pressable>
+    </Animated.View>
   );
 }

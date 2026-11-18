@@ -9,17 +9,20 @@ import {
   Platform,
   StatusBar,
 } from 'react-native';
+import Animated, { FadeInDown, FadeInUp, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { QUIZ_STYLE_IMAGES } from '@/constants/PersonalStyleImages';
 import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
-import { availableStyles, mockUserIdentifiedStyles } from '@/mocks/styleMocks';
+import { useUserStyle } from '@/contexts/UserStyleContext';
+import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 
 export default function MyStyleScreen() {
-  const primaryStyleId = mockUserIdentifiedStyles[0];
-  const primaryStyleData = availableStyles.find((s) => s.id === primaryStyleId);
+  const { identifiedStyle, identifiedTouches } = useUserStyle();
+  const styleLabel = identifiedStyle ? IDENTIFIED_STYLE_INFO[identifiedStyle].label : null;
+  const background = identifiedStyle ? QUIZ_STYLE_IMAGES[identifiedStyle] : undefined;
 
-  const secondaryStyle1 = availableStyles.find((s) => s.id === mockUserIdentifiedStyles[1]);
-  const secondaryStyle2 = availableStyles.find((s) => s.id === mockUserIdentifiedStyles[2]);
+  const touchLabels = identifiedTouches.map((style) => IDENTIFIED_STYLE_INFO[style].label);
 
   useEffect(() => {
     StatusBar.setBarStyle('light-content');
@@ -29,7 +32,7 @@ export default function MyStyleScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={{ uri: primaryStyleData?.bgImageUrl }}
+        source={background ? { uri: background } : undefined}
         style={styles.backgroundImage}
         resizeMode="cover"
       >
@@ -38,25 +41,36 @@ export default function MyStyleScreen() {
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.spacer} />
 
-          <View style={styles.textArea}>
+          <Animated.View
+            entering={FadeInDown.duration(500).delay(100).reduceMotion(ReduceMotion.System)}
+            style={styles.textArea}
+          >
             <Text style={styles.baseText}>
-              Seu estilo é <Text style={styles.highlightText}>{primaryStyleData?.label}</Text>
-              {'\n'}por essência, com toques{'\n'}
-              {secondaryStyle1 && (
-                <Text style={styles.highlightText}>{secondaryStyle1.label}s</Text>
-              )}
-              {secondaryStyle2 && (
+              {styleLabel ? (
                 <>
-                  {' '}
-                  e <Text style={styles.highlightText}>{secondaryStyle2.label}s</Text>
+                  Seu estilo é <Text style={styles.highlightText}>{styleLabel}</Text>
+                  {' por essência'}
+                  {touchLabels.length > 0 ? (
+                    <>
+                      {', com toques de '}
+                      <Text style={styles.highlightText}>{touchLabels.join(' e ')}</Text>
+                    </>
+                  ) : (
+                    '.'
+                  )}
                 </>
+              ) : (
+                'Personalize seus estilos'
               )}
             </Text>
-          </View>
+          </Animated.View>
 
           <View style={styles.spacer} />
 
-          <View style={styles.footer}>
+          <Animated.View
+            entering={FadeInUp.duration(450).delay(280).reduceMotion(ReduceMotion.System)}
+            style={styles.footer}
+          >
             <TouchableOpacity
               style={styles.continueButton}
               activeOpacity={0.8}
@@ -66,7 +80,7 @@ export default function MyStyleScreen() {
             >
               <Text style={styles.continueButtonText}>Continuar</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </SafeAreaView>
       </ImageBackground>
     </View>

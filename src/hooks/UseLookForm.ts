@@ -11,6 +11,7 @@ import {
 } from '@/services/looks';
 import { buildLookItemRefs, MAX_LOOK_PIECES, type WardrobePiece } from '@/types/Look';
 import { sortLookPieces } from '@/utils/look-order';
+import { compatibleLookSuggestions } from '@/utils/look-suggestions';
 
 export function useLookForm() {
   const [suggestion, setSuggestion] = useState<WardrobePiece[] | null>(null);
@@ -78,7 +79,11 @@ export function useLookForm() {
     setOperation('suggest');
     try {
       const result = await fetchLookSuggestion();
-      const suggestions = result.slice(0, size);
+      const suggestions = compatibleLookSuggestions(
+        result,
+        slots.filter((slot): slot is WardrobePiece => slot !== null),
+        size,
+      );
       if (suggestions.length === 0) {
         setError('Não há peças disponíveis para sugerir. Adicione peças ao seu closet.');
         return;
@@ -95,8 +100,11 @@ export function useLookForm() {
   function acceptSuggestion() {
     if (!suggestion) return;
     const next = [...slots];
-    const selectedIds = new Set(next.flatMap((item) => (item ? [item.id] : [])));
-    const suggestions = suggestion.filter((item) => !selectedIds.has(item.id));
+    const suggestions = compatibleLookSuggestions(
+      suggestion,
+      next.filter((item): item is WardrobePiece => item !== null),
+      next.filter((item) => item === null).length,
+    );
     let suggestionIndex = 0;
     for (let index = 0; index < next.length && suggestionIndex < suggestions.length; index += 1) {
       if (next[index] === null) {

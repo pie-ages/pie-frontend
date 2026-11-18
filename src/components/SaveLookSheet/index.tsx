@@ -13,6 +13,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Animated, {
+  Easing,
+  ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors } from '@/constants/Theme';
@@ -48,6 +55,7 @@ export function SaveLookSheet({
   const [pageHeights, setPageHeights] = useState<[number, number]>([0, 0]);
   const [wasVisible, setWasVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const slideAnim = useSharedValue(visible ? 0 : 40);
   const isLastPage = page >= 1;
 
   const setPageHeight = (index: 0 | 1, height: number) =>
@@ -91,16 +99,29 @@ export function SaveLookSheet({
   }
 
   useEffect(() => {
-    if (visible) scrollRef.current?.scrollTo({ x: 0, animated: false });
-  }, [visible]);
+    if (visible) {
+      scrollRef.current?.scrollTo({ x: 0, animated: false });
+      slideAnim.value = 36;
+      slideAnim.value = withTiming(0, {
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        reduceMotion: ReduceMotion.System,
+      });
+    }
+  }, [slideAnim, visible]);
+
+  const sheetAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: slideAnim.value }],
+  }));
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
-        <View
+        <Animated.View
           testID="save-look-sheet"
           style={[
             styles.sheet,
+            sheetAnimatedStyle,
             {
               marginBottom: Platform.OS === 'android' ? 0 : keyboardHeight,
               paddingBottom: keyboardHeight > 0 ? 16 : insets.bottom + 16,
@@ -241,7 +262,7 @@ export function SaveLookSheet({
               <View key={index} style={[styles.dot, index === page && styles.dotActive]} />
             ))}
           </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );

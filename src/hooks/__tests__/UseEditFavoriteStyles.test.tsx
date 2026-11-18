@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { useEditFavoriteStyles } from '@/hooks/UseEditFavoriteStyles';
 import { getFavoriteStyles, updateFavoriteStyles } from '@/services/style';
 
-jest.mock('expo-router', () => ({ router: { back: jest.fn() } }));
+jest.mock('expo-router', () => ({ router: { back: jest.fn(), dismissTo: jest.fn() } }));
 jest.mock('@/services/style', () => ({
   StyleSessionError: class StyleSessionError extends Error {},
   getFavoriteStyles: jest.fn(),
@@ -15,8 +15,8 @@ jest.mock('@/services/style', () => ({
 const mockGetFavoriteStyles = jest.mocked(getFavoriteStyles);
 const mockUpdateFavoriteStyles = jest.mocked(updateFavoriteStyles);
 
-async function renderLoadedHook() {
-  const hook = await renderHook(() => useEditFavoriteStyles());
+async function renderLoadedHook(onContinue?: () => void) {
+  const hook = await renderHook(() => useEditFavoriteStyles(onContinue));
   await waitFor(() => expect(hook.result.current.isLoading).toBe(false));
   return hook;
 }
@@ -24,31 +24,69 @@ async function renderLoadedHook() {
 describe('useEditFavoriteStyles', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetFavoriteStyles.mockResolvedValue(['ELEGANTE']);
-    mockUpdateFavoriteStyles.mockResolvedValue(['ELEGANTE', 'CASUAL']);
+    mockGetFavoriteStyles.mockResolvedValue(['CASUAL']);
+    mockUpdateFavoriteStyles.mockResolvedValue(['CLASSICO', 'CASUAL']);
   });
 
   it('carrega os estilos favoritos como selecionados', async () => {
     const { result } = await renderLoadedHook();
 
-    expect([...result.current.selectedIds]).toEqual(['ELEGANTE']);
-    expect(result.current.styleOptions).toHaveLength(6);
+    expect([...result.current.selectedIds]).toEqual(['CASUAL']);
+    expect(result.current.styleOptions.map(({ label }) => label)).toEqual([
+      'Clássico',
+      'Casual',
+      'Criativo',
+      'Romântico',
+      'Refinado',
+      'Sensual',
+      'Dramático',
+      'Minimalista',
+      'Boho',
+    ]);
   });
 
   it('salva os estilos selecionados na ordem do catálogo e volta para o perfil', async () => {
     const { result } = await renderLoadedHook();
 
-    await act(async () => result.current.toggle('CASUAL'));
+    await act(async () => result.current.toggle('CLASSICO'));
     await act(async () => result.current.save());
 
-    expect(mockUpdateFavoriteStyles).toHaveBeenCalledWith(['CASUAL', 'ELEGANTE']);
+    expect(mockUpdateFavoriteStyles).toHaveBeenCalledWith(['CLASSICO', 'CASUAL']);
+    expect(router.dismissTo).toHaveBeenCalledWith({
+      pathname: '/(screens)/Profile',
+      params: { updatedSection: 'styles' },
+    });
+  });
+
+  it('volta sem gravar quando os estilos continuam iguais', async () => {
+    const { result } = await renderLoadedHook();
+    await act(async () => result.current.save());
+
+    expect(mockUpdateFavoriteStyles).not.toHaveBeenCalled();
     expect(router.back).toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
+  });
+
+  it('persiste as escolhas do cadastro antes de abrir a próxima etapa', async () => {
+    mockGetFavoriteStyles.mockResolvedValue(['ROMANTICO']);
+    mockUpdateFavoriteStyles.mockResolvedValue(['CLASSICO', 'CRIATIVO', 'ROMANTICO']);
+    const onContinue = jest.fn();
+    const { result } = await renderLoadedHook(onContinue);
+
+    expect(result.current.styleOptions).toHaveLength(9);
+    await act(async () => result.current.toggle('CLASSICO'));
+    await act(async () => result.current.toggle('CRIATIVO'));
+    await act(async () => result.current.save());
+
+    expect(mockUpdateFavoriteStyles).toHaveBeenCalledWith(['CLASSICO', 'CRIATIVO', 'ROMANTICO']);
+    expect(onContinue).toHaveBeenCalledTimes(1);
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
   it('não permite salvar sem nenhum estilo', async () => {
     const { result } = await renderLoadedHook();
 
-    await act(async () => result.current.toggle('ELEGANTE'));
+    await act(async () => result.current.toggle('CASUAL'));
 
     expect(result.current.canSave).toBe(false);
     await act(async () => result.current.save());
@@ -59,9 +97,22 @@ describe('useEditFavoriteStyles', () => {
     mockUpdateFavoriteStyles.mockRejectedValue(new Error('falhou'));
     const { result } = await renderLoadedHook();
 
+    await act(async () => result.current.toggle('BOHO'));
     await act(async () => result.current.save());
 
     expect(result.current.error).toBe('Não foi possível salvar seus estilos. Tente novamente.');
     expect(router.back).not.toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
+  });
+  it('mantém só os nove botões mesmo quando o quiz devolve seus próprios estilos', async () => {
+    mockGetFavoriteStyles.mockResolvedValue(['ELEGANTE', 'ESPORTIVO']);
+    mockUpdateFavoriteStyles.mockResolvedValue(['REFINADO']);
+    const { result } = await renderLoadedHook();
+    expect(result.current.styleOptions).toHaveLength(9);
+    expect([...result.current.selectedIds]).toEqual([]);
+    expect(result.current.canSave).toBe(false);
+    await act(async () => result.current.toggle('REFINADO'));
+    await act(async () => result.current.save());
+    expect(mockUpdateFavoriteStyles).toHaveBeenCalledWith(['REFINADO']);
   });
 });

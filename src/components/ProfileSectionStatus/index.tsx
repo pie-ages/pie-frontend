@@ -1,8 +1,8 @@
-import { View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import { ErrorState } from '@/components/ErrorState';
-import { LoadingState } from '@/components/LoadingState';
 import { ProfileEmptyState } from '@/components/ProfileEmptyState';
+import { Colors } from '@/constants/Theme';
 import { ProfileStatus } from '@/types/Profile';
 
 import { styles } from './styles';
@@ -26,7 +26,7 @@ export function ProfileSectionStatus({
 
   return (
     <View style={styles.container}>
-      {status === ProfileStatus.Loading && <LoadingState />}
+      {status === ProfileStatus.Loading && <ActivityIndicator color={Colors.brand.primary} />}
       {status === ProfileStatus.Error && (
         <ErrorState
           title={errorTitle}

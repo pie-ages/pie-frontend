@@ -1,8 +1,15 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { loginResponseSchema, registerSchema } from '@/schemas/authSchema';
+import {
+  loginResponseSchema,
+  forgotPasswordSchema,
+  recoveryCodeSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from '@/schemas/authSchema';
 import { colorimetryPreferencesSchema } from '@/schemas/colorimetrySchema';
 import { lookFormSchema } from '@/schemas/lookSchema';
+import { catalogItemSchema } from '@/schemas/productSchema';
 import { favoriteStylesSchema, styleIdentificationSchema } from '@/schemas/styleSchema';
 import { currentUserSchema } from '@/schemas/userSchema';
 import { addPieceSchema, wardrobeImageAnalysisSchema } from '@/schemas/wardrobeSchema';
@@ -57,6 +64,48 @@ describe('registerSchema', () => {
   });
 });
 
+describe('forgotPasswordSchema', () => {
+  it('trims the email', () => {
+    const result = forgotPasswordSchema.safeParse({ email: ' anna@pie.com.br ' });
+    expect(result.success && result.data.email).toBe('anna@pie.com.br');
+  });
+
+  it('rejects a malformed email', () => {
+    const result = forgotPasswordSchema.safeParse({ email: 'anna@' });
+    expect(result.error?.issues[0].message).toBe('Por favor, insira um e-mail válido.');
+  });
+});
+
+describe('recoveryCodeSchema', () => {
+  it('accepts a six-digit code, trimming spaces', () => {
+    const result = recoveryCodeSchema.safeParse({ code: ' 123456 ' });
+    expect(result.success && result.data.code).toBe('123456');
+  });
+
+  it.each(['', '12345', '1234567', '12a456'])('rejects %p', (code) => {
+    const result = recoveryCodeSchema.safeParse({ code });
+    expect(result.error?.issues[0].message).toBe('Informe o código de 6 dígitos.');
+  });
+});
+
+describe('resetPasswordSchema', () => {
+  const validReset = { password: '123456', confirmPassword: '123456' };
+
+  it('accepts matching passwords', () => {
+    expect(resetPasswordSchema.safeParse(validReset).success).toBe(true);
+  });
+
+  it('rejects passwords shorter than six characters', () => {
+    const result = resetPasswordSchema.safeParse({ password: '12345', confirmPassword: '12345' });
+    expect(result.error?.issues[0].message).toBe('A senha deve ter pelo menos 6 caracteres.');
+  });
+
+  it('flags confirmPassword when passwords differ', () => {
+    const result = resetPasswordSchema.safeParse({ ...validReset, confirmPassword: 'outra' });
+    expect(result.error?.issues[0].path).toEqual(['confirmPassword']);
+  });
+});
+
 describe('addPieceSchema', () => {
   const piece = { name: 'Vestido', category: 'vestido', style: '', color: '' };
 
@@ -94,11 +143,40 @@ describe('response schemas', () => {
     expect(result).toEqual({ category: 'vestido', style: '', color: '' });
   });
 
-  it('accepts at most one known identified style', () => {
-    expect(styleIdentificationSchema.safeParse({ styles: [] }).success).toBe(true);
-    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO'] }).success).toBe(true);
-    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO', 'CASUAL'] }).success).toBe(false);
-    expect(styleIdentificationSchema.safeParse({ styles: ['PUNK'] }).success).toBe(false);
+  it('requires an explicit essence list and touches list with dev styles', () => {
+    expect(styleIdentificationSchema.safeParse({ styles: [], touches: [] }).success).toBe(true);
+    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO'], touches: [] }).success).toBe(
+      true,
+    );
+    expect(styleIdentificationSchema.safeParse({ styles: ['BOHO'] }).success).toBe(false);
+    expect(
+      styleIdentificationSchema.safeParse({ styles: ['BOHO', 'CASUAL'], touches: [] }).success,
+    ).toBe(false);
+    expect(styleIdentificationSchema.safeParse({ styles: ['PUNK'], touches: [] }).success).toBe(
+      false,
+    );
+    expect(
+      styleIdentificationSchema.parse({ styles: ['ELEGANTE'], touches: ['ROMANTICO', 'BOHO'] }),
+    ).toEqual({ styles: ['ELEGANTE'], touches: ['ROMANTICO', 'BOHO'] });
+    expect(
+      styleIdentificationSchema.safeParse({
+        styles: ['ELEGANTE'],
+        touches: ['CASUAL', 'BOHO', 'ESPORTIVO'],
+      }).success,
+    ).toBe(false);
+    expect(
+      styleIdentificationSchema.safeParse({
+        styles: ['ELEGANTE'],
+        touches: ['ELEGANTE', 'ROMANTICO'],
+      }).success,
+    ).toBe(false);
+    expect(
+      styleIdentificationSchema.safeParse({ styles: ['ELEGANTE'], touches: ['BOHO', 'BOHO'] })
+        .success,
+    ).toBe(false);
+    expect(styleIdentificationSchema.safeParse({ styles: [], touches: ['BOHO'] }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -144,15 +222,15 @@ describe('favoriteStylesSchema', () => {
     ]);
   });
 
-  it('ignores unknown styles instead of rejecting the response', () => {
-    expect(favoriteStylesSchema.parse({ styles: ['DRAMATICO'] }).styles).toEqual([]);
+  it('rejects an unknown favorite style', () => {
+    expect(favoriteStylesSchema.safeParse({ styles: ['PUNK'] }).success).toBe(false);
   });
 
-  it('keeps the known styles when the list also has unknown ones', () => {
-    expect(favoriteStylesSchema.parse({ styles: ['CASUAL', 'DRAMATICO', 'BOHO'] }).styles).toEqual([
-      'CASUAL',
-      'BOHO',
-    ]);
+  it('rejects mixed lists rather than silently keeping only valid favorites', () => {
+    expect(favoriteStylesSchema.safeParse({ styles: ['CASUAL', 'PUNK', 'BOHO'] }).success).toBe(
+      false,
+    );
+    expect(favoriteStylesSchema.safeParse({ styles: ['BOHO', 'BOHO'] }).success).toBe(false);
   });
 });
 
@@ -173,5 +251,32 @@ describe('colorimetryPreferencesSchema', () => {
     };
     const result = colorimetryPreferencesSchema.safeParse({ ...colors, season });
     expect(result.success && result.data.season?.label).toBe('Outono Suave');
+  });
+});
+
+describe('catalogItemSchema', () => {
+  const item = {
+    id: 'prod-1',
+    name: 'Blusa Floral',
+    category: 'Blusas',
+    color: 'Azul',
+    price: 99.9,
+    imageUrl: null,
+    purchaseUrl: null,
+    companyName: 'Loja Aurora',
+    status: 'PUBLISHED',
+    styles: [],
+    sizes: [],
+    materials: [],
+  };
+
+  it('accepts items without the company logo field', () => {
+    expect(catalogItemSchema.safeParse(item).success).toBe(true);
+    expect(catalogItemSchema.safeParse({ ...item, companyPhotoUrl: null }).success).toBe(true);
+  });
+
+  it('keeps the company logo url when provided', () => {
+    const result = catalogItemSchema.parse({ ...item, companyPhotoUrl: 'https://cdn/logo.png' });
+    expect(result.companyPhotoUrl).toBe('https://cdn/logo.png');
   });
 });

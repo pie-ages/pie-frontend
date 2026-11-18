@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { useEditFavoriteColors } from '@/hooks/UseEditFavoriteColors';
 import { fetchPreferences, updateFavoriteColors } from '@/services/preferences';
 
-jest.mock('expo-router', () => ({ router: { back: jest.fn() } }));
+jest.mock('expo-router', () => ({ router: { back: jest.fn(), dismissTo: jest.fn() } }));
 jest.mock('@/services/preferences');
 
 const mockFetchPreferences = jest.mocked(fetchPreferences);
@@ -43,7 +43,19 @@ describe('useEditFavoriteColors', () => {
     await act(async () => result.current.save());
 
     expect(mockUpdateFavoriteColors).toHaveBeenCalledWith(['#0000FF', '#FFFF00']);
+    expect(router.dismissTo).toHaveBeenCalledWith({
+      pathname: '/(screens)/Profile',
+      params: { updatedSection: 'colors' },
+    });
+  });
+
+  it('volta sem gravar quando as cores continuam iguais', async () => {
+    const { result } = await renderLoadedHook();
+    await act(async () => result.current.save());
+
+    expect(mockUpdateFavoriteColors).not.toHaveBeenCalled();
     expect(router.back).toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
   it('rejeita cor repetida', async () => {
@@ -59,11 +71,13 @@ describe('useEditFavoriteColors', () => {
     mockUpdateFavoriteColors.mockRejectedValue(new Error('falhou'));
     const { result } = await renderLoadedHook();
 
+    await act(async () => result.current.removeColor(0));
     await act(async () => result.current.save());
 
     expect(result.current.error).toBe(
       'Não foi possível salvar suas cores favoritas. Tente novamente.',
     );
     expect(router.back).not.toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 });

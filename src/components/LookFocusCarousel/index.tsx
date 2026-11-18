@@ -10,11 +10,7 @@ import {
 } from 'react-native';
 
 import { LookFlipCard } from '@/components/LookFlipCard';
-import {
-  LOOK_EMPTY_CARD_ASPECT_RATIO,
-  LOOK_PIECE_ASPECT_RATIO,
-  LOOK_PIECE_GAP,
-} from '@/components/LookPiecesStack/styles';
+import { LOOK_EMPTY_CARD_ASPECT_RATIO } from '@/components/LookPiecesStack/styles';
 import { Spacing } from '@/constants/Theme';
 import type { Look } from '@/types/Look';
 
@@ -22,18 +18,11 @@ import { styles } from './styles';
 
 const CARD_WIDTH_RATIO = 0.67;
 const CARD_GAP = Spacing.four;
-const INACTIVE_OPACITY = 0.4;
+const INACTIVE_OPACITY = 0.45;
+const INACTIVE_SCALE = 0.92;
 
-function getMaxCardWidthForHeight(looks: Look[], maxHeight: number) {
-  const maxPieces = Math.max(0, ...looks.map((look) => look.items.length));
-  const emptyLimit = looks.some((look) => look.items.length === 0)
-    ? maxHeight * LOOK_EMPTY_CARD_ASPECT_RATIO
-    : Infinity;
-  const piecesLimit =
-    maxPieces > 0
-      ? ((maxHeight - (maxPieces - 1) * LOOK_PIECE_GAP) * LOOK_PIECE_ASPECT_RATIO) / maxPieces
-      : Infinity;
-  return Math.max(Math.min(emptyLimit, piecesLimit), 0);
+function getMaxCardWidthForHeight(maxHeight: number) {
+  return Math.max(maxHeight * LOOK_EMPTY_CARD_ASPECT_RATIO, 0);
 }
 
 type LookFocusCarouselProps = {
@@ -41,6 +30,7 @@ type LookFocusCarouselProps = {
   activeIndex: number;
   onChangeIndex: (index: number) => void;
   onAddPhoto?: (lookId: string) => void;
+  uploadingPhotoFor?: string | null;
   maxHeight: number;
 };
 
@@ -49,6 +39,7 @@ export function LookFocusCarousel({
   activeIndex,
   onChangeIndex,
   onAddPhoto,
+  uploadingPhotoFor,
   maxHeight,
 }: LookFocusCarouselProps) {
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -61,7 +52,7 @@ export function LookFocusCarousel({
 
   const cardWidth =
     maxHeight > 0
-      ? Math.min(carouselWidth * CARD_WIDTH_RATIO, getMaxCardWidthForHeight(looks, maxHeight))
+      ? Math.min(carouselWidth * CARD_WIDTH_RATIO, getMaxCardWidthForHeight(maxHeight))
       : 0;
   const itemPitch = cardWidth + CARD_GAP;
   const sideInset = Math.max((carouselWidth - cardWidth) / 2, 0);
@@ -155,9 +146,19 @@ export function LookFocusCarousel({
       >
         {cardWidth > 0 &&
           looks.map((look, index) => {
+            const inputRange = [
+              (index - 1) * itemPitch,
+              index * itemPitch,
+              (index + 1) * itemPitch,
+            ];
             const opacity = scrollX.interpolate({
-              inputRange: [(index - 1) * itemPitch, index * itemPitch, (index + 1) * itemPitch],
+              inputRange,
               outputRange: [INACTIVE_OPACITY, 1, INACTIVE_OPACITY],
+              extrapolate: 'clamp',
+            });
+            const scale = scrollX.interpolate({
+              inputRange,
+              outputRange: [INACTIVE_SCALE, 1, INACTIVE_SCALE],
               extrapolate: 'clamp',
             });
 
@@ -165,7 +166,7 @@ export function LookFocusCarousel({
               <Animated.View
                 key={look.id}
                 style={[
-                  { width: cardWidth, opacity },
+                  { width: cardWidth, opacity, transform: [{ scale }] },
                   index < looks.length - 1 && { marginRight: CARD_GAP },
                 ]}
               >
@@ -174,6 +175,7 @@ export function LookFocusCarousel({
                   interactive={index === activeIndex}
                   onSelect={() => onChangeIndex(index)}
                   onAddPhoto={onAddPhoto}
+                  isUploadingPhoto={uploadingPhotoFor === look.id}
                 />
               </Animated.View>
             );

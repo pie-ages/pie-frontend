@@ -12,6 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/AuthButton';
@@ -31,7 +32,7 @@ export default function ColorimetryResultScreen() {
   const [hasConsented, setHasConsented] = useState(false);
   const [isConsentVisible, setIsConsentVisible] = useState(false);
   const capturingRef = useRef(false);
-  const openCameraOnDismissRef = useRef(false);
+  const consentActionRef = useRef<'camera' | 'skip' | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -101,7 +102,7 @@ export default function ColorimetryResultScreen() {
     setActiveSlot(null);
   }
 
-  async function handleEnter() {
+  async function handleFinish() {
     if (isSaving) return;
     if (selectedFavoriteColors.length > MAX_COLORS) {
       setFavoriteError(
@@ -113,7 +114,15 @@ export default function ColorimetryResultScreen() {
       const success = await saveFavoriteColors(selectedFavoriteColors);
       if (!success) return;
     }
-    router.replace('/Storefront');
+    if (mountedRef.current) goToStorefront(true);
+  }
+
+  function goToStorefront(showConfirmation = false) {
+    if (Platform.OS !== 'web' && router.canGoBack()) router.dismissAll();
+    router.replace({
+      pathname: '/Storefront',
+      params: showConfirmation ? { colorimetryUpdated: 'true' } : undefined,
+    });
   }
 
   function handleTakePhoto() {
@@ -128,16 +137,27 @@ export default function ColorimetryResultScreen() {
     setHasConsented(true);
     setIsConsentVisible(false);
     if (Platform.OS === 'ios') {
-      openCameraOnDismissRef.current = true;
+      consentActionRef.current = 'camera';
     } else {
       void openCamera();
     }
   }
 
+  function handleSkip() {
+    const waitForDismiss = Platform.OS === 'ios' && isConsentVisible;
+    setIsConsentVisible(false);
+    if (waitForDismiss) {
+      consentActionRef.current = 'skip';
+    } else {
+      goToStorefront();
+    }
+  }
+
   function handleConsentDismiss() {
-    if (!openCameraOnDismissRef.current) return;
-    openCameraOnDismissRef.current = false;
-    void openCamera();
+    const action = consentActionRef.current;
+    consentActionRef.current = null;
+    if (action === 'camera') void openCamera();
+    if (action === 'skip') goToStorefront();
   }
 
   async function openCamera() {
@@ -206,11 +226,20 @@ export default function ColorimetryResultScreen() {
               accessibilityRole="button"
               accessibilityLabel="Tirar foto para iniciar a colorimetria"
             />
+            <AuthButton
+              title="Continuar sem foto"
+              variant="secondary"
+              onPress={handleSkip}
+              disabled={isCapturing}
+              accessibilityRole="button"
+              accessibilityLabel="Continuar sem foto"
+            />
           </View>
         </ScrollView>
         <ColorimetryConsentModal
           visible={isConsentVisible}
           onAccept={handleAcceptConsent}
+          onSkip={handleSkip}
           onClose={() => setIsConsentVisible(false)}
           onDismiss={handleConsentDismiss}
         />
@@ -244,6 +273,9 @@ export default function ColorimetryResultScreen() {
         <Pressable onPress={handleRedoColorimetry} hitSlop={8} accessibilityRole="button">
           <Text style={styles.redoLink}>Tirar outra foto</Text>
         </Pressable>
+        <Pressable onPress={handleSkip} hitSlop={8} accessibilityRole="button">
+          <Text style={styles.redoLink}>Continuar sem foto</Text>
+        </Pressable>
       </SafeAreaView>
     );
   }
@@ -261,7 +293,10 @@ export default function ColorimetryResultScreen() {
           </ThemedText>
         )}
 
-        <View style={styles.rows}>
+        <Animated.View
+          entering={FadeInDown.duration(380).delay(80).reduceMotion(ReduceMotion.System)}
+          style={styles.rows}
+        >
           <ColorimetryColorRow
             title="Suas cores de destaque"
             colors={preferences!.highlightColors}
@@ -284,7 +319,7 @@ export default function ColorimetryResultScreen() {
               setActiveSlot(index);
             }}
           />
-        </View>
+        </Animated.View>
 
         {favoriteError && (
           <ThemedText accessibilityRole="alert" style={styles.saveError} themeColor="textSecondary">
@@ -299,7 +334,7 @@ export default function ColorimetryResultScreen() {
         )}
 
         <View style={styles.footer}>
-          <AuthButton title="Continuar" onPress={handleEnter} isLoading={isSaving} />
+          <AuthButton title="Concluir" onPress={handleFinish} isLoading={isSaving} />
 
           <Pressable
             onPress={handleRedoColorimetry}
