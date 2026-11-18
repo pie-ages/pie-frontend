@@ -12,7 +12,7 @@ import {
 import Animated, { FadeInDown, FadeInUp, ReduceMotion } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { PERSONAL_STYLE_IMAGES } from '@/constants/PersonalStyleImages';
+import { QUIZ_STYLE_IMAGES } from '@/constants/PersonalStyleImages';
 import { Colors, FontFamilies, Spacing } from '@/constants/Theme';
 import { useUserStyle } from '@/contexts/UserStyleContext';
 import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
@@ -20,7 +20,7 @@ import { IDENTIFIED_STYLE_INFO } from '@/types/IdentifiedStyle';
 export default function MyStyleScreen() {
   const { identifiedStyle, identifiedTouches } = useUserStyle();
   const styleLabel = identifiedStyle ? IDENTIFIED_STYLE_INFO[identifiedStyle].label : null;
-  const background = identifiedStyle ? PERSONAL_STYLE_IMAGES[identifiedStyle] : undefined;
+  const background = identifiedStyle ? QUIZ_STYLE_IMAGES[identifiedStyle] : undefined;
 
   const touchLabels = identifiedTouches.map((style) => IDENTIFIED_STYLE_INFO[style].label);
 

@@ -227,7 +227,7 @@ describe('favoriteStylesSchema', () => {
   });
 
   it('rejects mixed lists rather than silently keeping only valid favorites', () => {
-    expect(favoriteStylesSchema.safeParse({ styles: ['CASUAL', 'REFINADO', 'BOHO'] }).success).toBe(
+    expect(favoriteStylesSchema.safeParse({ styles: ['CASUAL', 'PUNK', 'BOHO'] }).success).toBe(
       false,
     );
     expect(favoriteStylesSchema.safeParse({ styles: ['BOHO', 'BOHO'] }).success).toBe(false);

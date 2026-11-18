@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import { IDENTIFIED_STYLES } from '@/types/IdentifiedStyle';
+import { IDENTIFIED_STYLES, QUIZ_STYLES } from '@/types/IdentifiedStyle';
 
-const identifiedStyleSchema = z.enum(IDENTIFIED_STYLES);
+const identifiedStyleSchema = z.enum(QUIZ_STYLES);
 
 export const styleQuizOptionSchema = z.object({
   id: z.string(),
@@ -40,7 +40,7 @@ export const styleIdentificationSchema = z
 
 export const favoriteStylesSchema = z.object({
   styles: z
-    .array(identifiedStyleSchema)
+    .array(z.enum(IDENTIFIED_STYLES))
     .refine(
       (styles) => new Set(styles).size === styles.length,
       'Estilos favoritos não podem se repetir.',
