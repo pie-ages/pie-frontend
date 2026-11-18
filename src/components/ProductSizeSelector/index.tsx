@@ -10,7 +10,7 @@ export function ProductSizeSelector({ sizes }: ProductSizeSelectorProps) {
   return (
     <View style={styles.container}>
       {sizes.map((size) => (
-        <View key={size} style={styles.circle}>
+        <View key={size} style={styles.chip}>
           <Text allowFontScaling={false} style={styles.label}>
             {size === 'Único' ? 'U' : size}
           </Text>

@@ -9,6 +9,10 @@ export const styles = StyleSheet.create({
   image: {
     aspectRatio: 3 / 4,
     borderRadius: Spacing.three,
+    overflow: 'hidden',
+  },
+  imageContent: {
+    flex: 1,
   },
   dotsContainer: {
     flexDirection: 'row',

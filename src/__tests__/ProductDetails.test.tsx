@@ -65,6 +65,43 @@ beforeEach(() => {
   >);
 });
 
+describe('ProductDetails — photos', () => {
+  async function layoutCarousel() {
+    await fireEvent(screen.getByTestId('product-image-carousel'), 'layout', {
+      nativeEvent: { layout: { width: 393 } },
+    });
+  }
+
+  it('shows the primary photo followed by distinct photos in display order', async () => {
+    const primary = 'https://cdn.pie.com.br/frente.png';
+    const back = 'https://cdn.pie.com.br/costas.png';
+    const detail = 'https://cdn.pie.com.br/detalhe.png';
+    mockFetchDetail.mockResolvedValue({
+      ...product,
+      imageUrl: null,
+      images: [
+        { id: 'detail', url: detail, isPrimary: false, displayOrder: 2 },
+        { id: 'back', url: back, isPrimary: false, displayOrder: 1 },
+        { id: 'primary', url: primary, isPrimary: true, displayOrder: 3 },
+        { id: 'duplicate', url: back, isPrimary: false, displayOrder: 4 },
+      ],
+    });
+    await renderScreen();
+    await layoutCarousel();
+
+    expect(screen.getByLabelText('Foto 1 de 3')).toHaveProp('source', [{ uri: primary }]);
+    expect(screen.getByLabelText('Foto 2 de 3')).toHaveProp('source', [{ uri: back }]);
+    expect(screen.getByLabelText('Foto 3 de 3')).toHaveProp('source', [{ uri: detail }]);
+  });
+
+  it('uses the product cover when there are no gallery photos', async () => {
+    await renderScreen();
+    await layoutCarousel();
+
+    expect(screen.getByLabelText('Foto 1 de 1')).toHaveProp('source', [{ uri: product.imageUrl }]);
+  });
+});
+
 describe('ProductDetails — wardrobe action', () => {
   it('adds the product, closes the modal and goes back to the storefront', async () => {
     await renderScreen();
