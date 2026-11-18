@@ -30,6 +30,7 @@ type LookFocusCarouselProps = {
   activeIndex: number;
   onChangeIndex: (index: number) => void;
   onAddPhoto?: (lookId: string) => void;
+  uploadingPhotoFor?: string | null;
   maxHeight: number;
 };
 
@@ -38,6 +39,7 @@ export function LookFocusCarousel({
   activeIndex,
   onChangeIndex,
   onAddPhoto,
+  uploadingPhotoFor,
   maxHeight,
 }: LookFocusCarouselProps) {
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -173,6 +175,7 @@ export function LookFocusCarousel({
                   interactive={index === activeIndex}
                   onSelect={() => onChangeIndex(index)}
                   onAddPhoto={onAddPhoto}
+                  isUploadingPhoto={uploadingPhotoFor === look.id}
                 />
               </Animated.View>
             );

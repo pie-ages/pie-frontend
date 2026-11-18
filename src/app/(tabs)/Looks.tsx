@@ -34,6 +34,9 @@ export default function LooksScreen() {
   const { height: windowHeight } = useWindowDimensions();
   const params = useLocalSearchParams<{ lookId?: string; viewMode?: string }>();
   const [carouselAreaHeight, setCarouselAreaHeight] = useState(0);
+  const [uploadingPhotoFor, setUploadingPhotoFor] = useState<string | null>(null);
+  const [photoErrorFor, setPhotoErrorFor] = useState<string | null>(null);
+  const uploadingPhoto = useRef(false);
   const [viewMode, setViewMode] = useState<LooksViewMode>(
     params.viewMode === 'grid' ? 'grid' : 'focus',
   );
@@ -75,22 +78,34 @@ export default function LooksScreen() {
   };
 
   const handleAddPhoto = async (lookId: string) => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.8,
-    });
-    if (result.canceled) return;
-    const asset = result.assets[0];
+    if (uploadingPhoto.current) return;
+    setPhotoErrorFor(null);
+
     try {
-      const result = await uploadLookImage(lookId, {
-        uri: asset.uri,
-        mimeType: asset.mimeType,
-        fileName: asset.fileName,
+      const selection = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
       });
-      updateLookPhoto(lookId, result.photoUrl);
-    } catch {}
+      const asset = selection.assets?.[0];
+      if (!asset || uploadingPhoto.current) return;
+
+      uploadingPhoto.current = true;
+      setUploadingPhotoFor(lookId);
+      try {
+        const updatedLook = await uploadLookImage(lookId, {
+          uri: asset.uri,
+          mimeType: asset.mimeType,
+          fileName: asset.fileName,
+        });
+        if (!updatedLook.photoUrl) throw new Error('A API não retornou a foto do look.');
+        updateLookPhoto(lookId, updatedLook.photoUrl);
+      } finally {
+        uploadingPhoto.current = false;
+        setUploadingPhotoFor(null);
+      }
+    } catch {
+      setPhotoErrorFor(lookId);
+    }
   };
 
   const handleLookPress = (id: string) => {
@@ -158,6 +173,7 @@ export default function LooksScreen() {
                       activeIndex={activeIndex}
                       onChangeIndex={goTo}
                       onAddPhoto={handleAddPhoto}
+                      uploadingPhotoFor={uploadingPhotoFor}
                       maxHeight={carouselAreaHeight}
                     />
                   </View>
@@ -165,6 +181,11 @@ export default function LooksScreen() {
                     <View style={styles.focusFooter}>
                       <LookFocusInfo look={activeLook} />
                       <LookFocusPagination count={looks.length} activeIndex={activeIndex} />
+                      {photoErrorFor === activeLook.id && (
+                        <Text accessibilityRole="alert" style={styles.photoError}>
+                          Não foi possível adicionar a foto. Tente novamente.
+                        </Text>
+                      )}
                       {loadingMore && <ActivityIndicator color={Colors.brand.primary} />}
                       {pageError && (
                         <Pressable onPress={() => loadMore(true)} accessibilityRole="button">
@@ -234,6 +255,10 @@ const styles = StyleSheet.create({
   },
   retryText: {
     color: Colors.brand.primary,
+    textAlign: 'center',
+  },
+  photoError: {
+    color: Colors.error,
     textAlign: 'center',
   },
 });
