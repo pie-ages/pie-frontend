@@ -23,15 +23,12 @@ export async function fetchCatalog(params: CatalogParams = {}): Promise<CatalogP
   qs.set('size', String(params.size ?? 20));
   qs.set('sort', params.sort ?? 'name,ASC');
 
-  const needsProfile = Boolean(params.colorimetry || params.matchesProfile);
-  if (needsProfile) {
-    try {
-      const data = await apiGetAuth(`/api/products?${qs.toString()}`);
-      return parseResponse(catalogPageSchema, data);
-    } catch (error) {
-      if (!(error instanceof ApiError && error.status === 401)) {
-        throw error;
-      }
+  try {
+    const data = await apiGetAuth(`/api/products?${qs.toString()}`);
+    return parseResponse(catalogPageSchema, data);
+  } catch (error) {
+    if (!(error instanceof ApiError && error.status === 401)) {
+      throw error;
     }
   }
   return parseResponse(catalogPageSchema, await apiFetch('/api/products', qs));
