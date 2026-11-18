@@ -1,5 +1,5 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BrandColors } from '@/constants/Theme';
 
@@ -18,7 +18,6 @@ export function InClosetBadge({ style }: InClosetBadgeProps) {
       accessibilityLabel="Esta peça já está no seu closet"
     >
       <MaterialCommunityIcons name="wardrobe-outline" size={14} color={BrandColors.primary} />
-      <Text style={styles.label}>No closet</Text>
     </View>
   );
 }

@@ -34,19 +34,19 @@ describe('StorefrontProductCard — closet indicator', () => {
   it('shows the indicator for a product that is in the closet', async () => {
     await renderCard(true);
 
-    expect(screen.getByText('No closet')).toBeTruthy();
+    expect(screen.getByLabelText('Esta peça já está no seu closet')).toBeTruthy();
   });
 
   it('does not show the indicator for a product that is not in the closet', async () => {
     await renderCard(false);
 
-    expect(screen.queryByText('No closet')).toBeNull();
+    expect(screen.queryByLabelText('Esta peça já está no seu closet')).toBeNull();
   });
 
   it('does not show the indicator by default', async () => {
     await renderCard();
 
-    expect(screen.queryByText('No closet')).toBeNull();
+    expect(screen.queryByLabelText('Esta peça já está no seu closet')).toBeNull();
   });
 
   it('keeps showing the product data when it is in the closet', async () => {

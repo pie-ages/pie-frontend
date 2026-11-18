@@ -6,10 +6,10 @@ import { InClosetBadge } from '@/components/InClosetBadge';
 jest.mock('@/global.css', () => ({}));
 
 describe('InClosetBadge', () => {
-  it('shows the "No closet" text, not only a color', async () => {
+  it('omits the visible label', async () => {
     await render(<InClosetBadge />);
 
-    expect(screen.getByText('No closet')).toBeTruthy();
+    expect(screen.queryByText('No closet')).toBeNull();
   });
 
   it('describes the state for screen readers', async () => {
