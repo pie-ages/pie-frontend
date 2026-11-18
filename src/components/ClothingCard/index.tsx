@@ -27,7 +27,10 @@ export function ClothingCard({ item, onRemove }: ClothingCardProps) {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <View style={styles.hangerHook} />
+      <View style={styles.hanger} accessible={false}>
+        <View style={styles.hangerHook} />
+        <View style={styles.hangerStem} />
+      </View>
 
       <View style={styles.imageContainer}>
         {isLoading && !hasError && <ActivityIndicator style={styles.loader} color="#661414" />}

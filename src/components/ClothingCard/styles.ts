@@ -1,15 +1,36 @@
 import { StyleSheet } from 'react-native';
 
+const HANGER_COLOR = '#E5E7EB';
+
 export const styles = StyleSheet.create({
   container: {
     width: 110,
     marginRight: 16,
     alignItems: 'center',
   },
-  hangerHook: {
-    width: 2,
+  hanger: {
     height: 12,
-    backgroundColor: '#E5E7EB',
+    width: 14,
+    alignItems: 'center',
+  },
+  hangerHook: {
+    position: 'absolute',
+    top: 0,
+    left: 1,
+    width: 8,
+    height: 8,
+    borderWidth: 2,
+    borderColor: HANGER_COLOR,
+    borderLeftColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderRadius: 4,
+  },
+  hangerStem: {
+    position: 'absolute',
+    top: 5,
+    bottom: 0,
+    width: 2,
+    backgroundColor: HANGER_COLOR,
   },
   imageContainer: {
     width: 100,
