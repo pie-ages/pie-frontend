@@ -16,6 +16,7 @@ import { StorefrontSearchBar } from '@/components/StorefrontSearchBar';
 import { BottomTabInset, Colors, Spacing } from '@/constants/Theme';
 import { useOnboardingTarget } from '@/hooks/UseOnboardingTarget';
 import { useStorefrontCatalog } from '@/hooks/UseStorefrontCatalog';
+import { useStorefrontFavoriteColors } from '@/hooks/UseStorefrontFavoriteColors';
 import { useStorefrontFilters } from '@/hooks/UseStorefrontFilters';
 import { useStorefrontNotice } from '@/hooks/UseStorefrontNotice';
 import { useTaxonomy } from '@/hooks/UseTaxonomy';
@@ -36,6 +37,7 @@ export default function StorefrontScreen() {
   const { height: windowHeight } = useWindowDimensions();
   const [isSheetVisible, setSheetVisible] = useState(false);
   const { filterGroups } = useTaxonomy();
+  const favoriteColors = useStorefrontFavoriteColors();
   const {
     searchInput,
     setSearchInput,
@@ -182,6 +184,7 @@ export default function StorefrontScreen() {
       <StorefrontFilterSheet
         visible={isSheetVisible}
         groups={filterGroups}
+        favoriteColors={favoriteColors}
         pendingFiltersByGroup={pendingFiltersByGroup}
         onTogglePending={togglePendingFilter}
         onApply={handleApplySheet}

@@ -68,11 +68,16 @@ export const styles = StyleSheet.create({
     height: 36,
     paddingHorizontal: Spacing.three,
     borderRadius: 18,
+    flexDirection: 'row',
+    gap: Spacing.one,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chipDefault: {
     backgroundColor: Colors.brand.tertiary,
+  },
+  chipFavorite: {
+    backgroundColor: '#F8EAF0',
   },
   chipSelected: {
     backgroundColor: Colors.brand.primary,

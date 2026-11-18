@@ -1,4 +1,4 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Animated as RNAnimated,
@@ -14,12 +14,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Colors, Spacing } from '@/constants/Theme';
 import type { FilterGroup, FilterGroupId } from '@/types/Filter';
+import { getFavoriteColorIds } from '@/utils/storefront-favorite-colors';
 
 import { styles } from './styles';
 
 type StorefrontFilterSheetProps = {
   visible: boolean;
   groups: FilterGroup[];
+  favoriteColors: readonly string[];
   pendingFiltersByGroup: Record<FilterGroupId, Set<string>>;
   onTogglePending: (groupId: FilterGroupId, optionId: string) => void;
   onApply: () => void;
@@ -30,6 +32,7 @@ type StorefrontFilterSheetProps = {
 export function StorefrontFilterSheet({
   visible,
   groups,
+  favoriteColors,
   pendingFiltersByGroup,
   onTogglePending,
   onApply,
@@ -39,6 +42,12 @@ export function StorefrontFilterSheet({
   const insets = useSafeAreaInsets();
   const [translateY] = useState(() => new RNAnimated.Value(300));
   const reduceMotion = useReducedMotion();
+
+  const favoriteColorIds = useMemo(
+    () =>
+      getFavoriteColorIds(groups.find(({ id }) => id === 'cores')?.options ?? [], favoriteColors),
+    [groups, favoriteColors],
+  );
 
   const selectedCount = Object.values(pendingFiltersByGroup).reduce(
     (sum, set) => sum + set.size,
@@ -138,24 +147,48 @@ export function StorefrontFilterSheet({
             >
               {groups.map((group) => {
                 const selected = pendingFiltersByGroup[group.id];
+                const isColorGroup = group.id === 'cores';
+                const options =
+                  isColorGroup && favoriteColorIds.size > 0
+                    ? [...group.options].sort(
+                        (a, b) =>
+                          Number(favoriteColorIds.has(b.id)) - Number(favoriteColorIds.has(a.id)),
+                      )
+                    : group.options;
 
                 return (
                   <View key={group.id} style={styles.group}>
                     <Text style={styles.groupLabel}>{group.label}</Text>
                     <View style={styles.chipsWrap}>
-                      {group.options.map((option) => {
+                      {options.map((option) => {
                         const isSelected = selected.has(option.id);
+                        const isFavorite = isColorGroup && favoriteColorIds.has(option.id);
 
                         return (
                           <Pressable
                             key={option.id}
                             onPress={() => onTogglePending(group.id, option.id)}
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                              isFavorite ? `${option.label}, cor favorita` : option.label
+                            }
+                            accessibilityState={{ selected: isSelected }}
                             style={({ pressed }) => [
                               styles.chip,
-                              isSelected ? styles.chipSelected : styles.chipDefault,
+                              styles.chipDefault,
+                              isFavorite && styles.chipFavorite,
+                              isSelected && styles.chipSelected,
                               pressed && styles.chipPressed,
                             ]}
                           >
+                            {isFavorite && (
+                              <MaterialCommunityIcons
+                                name="star"
+                                size={16}
+                                color={isSelected ? Colors.white : Colors.brand.primary}
+                                accessible={false}
+                              />
+                            )}
                             <Text
                               style={[
                                 styles.chipLabel,
