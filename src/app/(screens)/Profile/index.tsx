@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useRef } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,6 +14,7 @@ import { useCurrentUser } from '@/hooks/UseCurrentUser';
 import { useFavoriteStyles } from '@/hooks/UseFavoriteStyles';
 import { useProfilePreferences } from '@/hooks/UseProfilePreferences';
 import { useSessionExpiredRedirect } from '@/hooks/UseSessionExpiredRedirect';
+import type { ProfileUpdatedSection } from '@/types/Profile';
 
 export default function ProfileScreen() {
   const { signOut } = useAuth();
@@ -23,20 +24,18 @@ export default function ProfileScreen() {
   const favoriteStyles = useFavoriteStyles(true);
 
   const { retry: reloadUser } = currentUser;
-  const { retry: reloadPreferences } = preferences;
+  const { refresh: reloadPreferences } = preferences;
   const { retry: reloadStyles } = favoriteStyles;
-  const hasFocusedBefore = useRef(false);
+  const { updatedSection } = useLocalSearchParams<{ updatedSection?: ProfileUpdatedSection }>();
 
-  useFocusEffect(
-    useCallback(() => {
-      if (hasFocusedBefore.current) {
-        reloadUser();
-        reloadPreferences();
-        reloadStyles();
-      }
-      hasFocusedBefore.current = true;
-    }, [reloadUser, reloadPreferences, reloadStyles]),
-  );
+  useEffect(() => {
+    if (!updatedSection) return;
+
+    if (updatedSection === 'user') reloadUser();
+    if (updatedSection === 'colors') reloadPreferences();
+    if (updatedSection === 'styles') reloadStyles();
+    router.setParams({ updatedSection: undefined });
+  }, [updatedSection, reloadUser, reloadPreferences, reloadStyles]);
 
   useSessionExpiredRedirect(
     currentUser.sessionExpired || preferences.sessionExpired || favoriteStyles.sessionExpired,

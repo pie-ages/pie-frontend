@@ -9,6 +9,7 @@ const SAVE_ERROR = 'Não foi possível salvar seus estilos. Tente novamente.';
 
 export function useEditFavoriteStyles() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [initialStyles, setInitialStyles] = useState<Set<string> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -24,7 +25,10 @@ export function useEditFavoriteStyles() {
 
     getFavoriteStyles(controller.signal)
       .then((styles) => {
-        if (!controller.signal.aborted) setSelected(new Set(styles));
+        if (controller.signal.aborted) return;
+        const savedStyles = new Set(styles);
+        setInitialStyles(savedStyles);
+        setSelected(savedStyles);
       })
       .catch((loadError: unknown) => {
         if (controller.signal.aborted) return;
@@ -47,22 +51,29 @@ export function useEditFavoriteStyles() {
     });
   }, []);
 
-  const canSave = !isLoading && !isSaving && selected.size > 0;
+  const canSave = initialStyles !== null && !isLoading && !isSaving && selected.size > 0;
 
   const save = useCallback(async () => {
-    if (!canSave) return;
+    if (!canSave || !initialStyles) return;
+    if (
+      selected.size === initialStyles.size &&
+      [...selected].every((id) => initialStyles.has(id))
+    ) {
+      router.back();
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
       await updateFavoriteStyles(IDENTIFIED_STYLES.filter((id) => selected.has(id)));
-      router.back();
+      router.dismissTo({ pathname: '/(screens)/Profile', params: { updatedSection: 'styles' } });
     } catch (saveError) {
       if (saveError instanceof StyleSessionError) setSessionExpired(true);
       else setError(SAVE_ERROR);
     } finally {
       setIsSaving(false);
     }
-  }, [canSave, selected]);
+  }, [canSave, initialStyles, selected]);
 
   return {
     styleOptions,

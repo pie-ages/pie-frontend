@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { useEditFavoriteStyles } from '@/hooks/UseEditFavoriteStyles';
 import { getFavoriteStyles, updateFavoriteStyles } from '@/services/style';
 
-jest.mock('expo-router', () => ({ router: { back: jest.fn() } }));
+jest.mock('expo-router', () => ({ router: { back: jest.fn(), dismissTo: jest.fn() } }));
 jest.mock('@/services/style', () => ({
   StyleSessionError: class StyleSessionError extends Error {},
   getFavoriteStyles: jest.fn(),
@@ -42,7 +42,19 @@ describe('useEditFavoriteStyles', () => {
     await act(async () => result.current.save());
 
     expect(mockUpdateFavoriteStyles).toHaveBeenCalledWith(['CASUAL', 'ELEGANTE']);
+    expect(router.dismissTo).toHaveBeenCalledWith({
+      pathname: '/(screens)/Profile',
+      params: { updatedSection: 'styles' },
+    });
+  });
+
+  it('volta sem gravar quando os estilos continuam iguais', async () => {
+    const { result } = await renderLoadedHook();
+    await act(async () => result.current.save());
+
+    expect(mockUpdateFavoriteStyles).not.toHaveBeenCalled();
     expect(router.back).toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 
   it('não permite salvar sem nenhum estilo', async () => {
@@ -59,9 +71,11 @@ describe('useEditFavoriteStyles', () => {
     mockUpdateFavoriteStyles.mockRejectedValue(new Error('falhou'));
     const { result } = await renderLoadedHook();
 
+    await act(async () => result.current.toggle('CASUAL'));
     await act(async () => result.current.save());
 
     expect(result.current.error).toBe('Não foi possível salvar seus estilos. Tente novamente.');
     expect(router.back).not.toHaveBeenCalled();
+    expect(router.dismissTo).not.toHaveBeenCalled();
   });
 });

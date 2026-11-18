@@ -4,3 +4,5 @@ export enum ProfileStatus {
   Error = 'error',
   Empty = 'empty',
 }
+
+export type ProfileUpdatedSection = 'user' | 'colors' | 'styles';

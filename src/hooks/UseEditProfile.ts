@@ -23,15 +23,21 @@ export function useEditProfile() {
 
   const save = useCallback(async () => {
     if (!user || !canSave) return;
+    const trimmedName = name.trim();
+    if (trimmedName === user.name && sexChoice === toAccountSexChoice(user.sex)) {
+      router.back();
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
     try {
       await updateCurrentUser(user.id, {
-        name: name.trim(),
+        name: trimmedName,
         photoUrl: user.photoUrl ?? null,
         ...(sexChoice !== '' ? { sex: toAccountSex(sexChoice) } : {}),
       });
-      router.back();
+      router.dismissTo({ pathname: '/(screens)/Profile', params: { updatedSection: 'user' } });
     } catch (saveError) {
       if (isSessionExpiredError(saveError)) setSaveSessionExpired(true);
       else {
